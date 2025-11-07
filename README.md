@@ -79,7 +79,9 @@ The [CLAUDE.md](CLAUDE.md) file is automatically loaded by Claude Code and conta
 /winforms-coding-standards
 ├── CLAUDE.md                  # Auto-loaded by Claude Code
 ├── README.md                  # This file
+├── LICENSE                    # MIT License
 ├── USAGE_GUIDE.md             # ⭐ Practical step-by-step examples
+├── TROUBLESHOOTING.md         # 🔧 Common issues & solutions (30+ problems)
 │
 ├── /snippets/                 # ⚡ Code snippets for rapid development
 │   ├── /visual-studio/        # VS .snippet files
@@ -284,11 +286,39 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## 📞 Support & Getting Help
+
+### Having Issues?
+
+1. **Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)** first - 30+ common problems solved
+   - Setup & Configuration
+   - Dependency Injection errors
+   - Threading issues
+   - Entity Framework problems
+   - Performance optimization
+   - Claude Code specific issues
+
+2. **Search Documentation**:
+   - [Complete Overview](docs/00-overview.md)
+   - [Usage Guide with Examples](USAGE_GUIDE.md)
+   - [Example Project](example-project/)
+
+3. **Ask Claude Code**:
+   ```
+   /review-code YourFile.cs     # Check for issues
+   /check-standards YourFile.cs # Validate against standards
+   ```
+
+4. **Still Stuck?**
+   - Open a GitHub Issue with error details
+   - Include what you've tried
+   - Provide minimal code to reproduce
+
+### Other Resources
 
 - **Documentation Issues**: Open an issue on GitHub
-- **Questions**: Check [docs/00-overview.md](docs/00-overview.md) first
-- **AI Assistant Help**: See [CLAUDE.md](CLAUDE.md)
+- **AI Assistant Guide**: See [CLAUDE.md](CLAUDE.md)
+- **Contributing**: See guidelines above
 
 ---
 
