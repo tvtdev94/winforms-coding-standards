@@ -22,12 +22,23 @@ This repository contains **coding standards, architectural guidelines, and best 
 
 ## 🚀 Quick Start
 
+### 📘 **[USAGE GUIDE - Start Here!](USAGE_GUIDE.md)** ⭐
+
+**New to this repository?** Check out the [**Usage Guide**](USAGE_GUIDE.md) with **practical, step-by-step examples**:
+- 📝 Creating a Login Form from scratch
+- 📝 Creating a Customer Management Form
+- 📝 Adding validation to existing forms
+- 📝 Refactoring to MVP pattern
+- 📝 Setting up Dependency Injection
+- 📝 And more real-world scenarios!
+
 ### For Developers
 
-1. **Read the overview**: [docs/00-overview.md](docs/00-overview.md)
-2. **Understand architecture**: [MVP Pattern](docs/architecture/mvp-pattern.md)
-3. **Follow conventions**: [Naming Conventions](docs/conventions/naming-conventions.md)
-4. **Review examples**: [Code Examples](docs/examples/)
+1. **Start with practical examples**: [**USAGE_GUIDE.md**](USAGE_GUIDE.md) ⭐
+2. **Read the overview**: [docs/00-overview.md](docs/00-overview.md)
+3. **Understand architecture**: [MVP Pattern](docs/architecture/mvp-pattern.md)
+4. **Follow conventions**: [Naming Conventions](docs/conventions/naming-conventions.md)
+5. **Review examples**: [Code Examples](docs/examples/) and [Example Project](example-project/)
 
 ### For AI Assistants (Claude Code)
 
@@ -45,6 +56,7 @@ The [CLAUDE.md](CLAUDE.md) file is automatically loaded by Claude Code and conta
 /winforms-coding-standards
 ├── CLAUDE.md                  # Auto-loaded by Claude Code
 ├── README.md                  # This file
+├── USAGE_GUIDE.md             # ⭐ Practical step-by-step examples
 │
 ├── /docs/
 │   ├── 00-overview.md         # Complete documentation index

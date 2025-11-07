@@ -412,6 +412,7 @@ Before committing code, verify:
 
 ## 🔗 Quick Links
 
+- **[📘 USAGE GUIDE](USAGE_GUIDE.md)** - ⭐ **Start here!** Practical step-by-step examples
 - **[Full Overview](docs/00-overview.md)** - Complete documentation index
 - **[MVP Pattern Guide](docs/architecture/mvp-pattern.md)** - Recommended architecture
 - **[Testing Guide](docs/testing/testing-overview.md)** - How to test WinForms apps
@@ -422,10 +423,11 @@ Before committing code, verify:
 
 ## 📞 Need Help?
 
-1. Check **[docs/00-overview.md](docs/00-overview.md)** for full documentation
-2. Search for specific topic in `/docs/` folders
-3. Review **[examples](docs/examples/)** for working code
-4. Use slash commands (type `/` in Claude Code) for common tasks
+1. **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - ⭐ Practical examples (Login form, Customer form, etc.)
+2. Check **[docs/00-overview.md](docs/00-overview.md)** for full documentation
+3. Search for specific topic in `/docs/` folders
+4. Review **[examples](docs/examples/)** and **[example-project](example-project/)** for working code
+5. Use slash commands (type `/` in Claude Code) for common tasks
 
 ---
 
