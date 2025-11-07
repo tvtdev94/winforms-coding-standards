@@ -13,7 +13,13 @@ param(
     [switch]$IncludeTests = $true,
 
     [Parameter(Mandatory=$false)]
-    [switch]$IncludeExampleCode = $false
+    [switch]$IncludeExampleCode = $false,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$IntegrateStandards = $true,
+
+    [Parameter(Mandatory=$false)]
+    [string]$StandardsRepo = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,6 +32,7 @@ Write-Host "Project Name: $ProjectName"
 Write-Host "Framework: $Framework"
 Write-Host "Include Tests: $IncludeTests"
 Write-Host "Include Example Code: $IncludeExampleCode"
+Write-Host "Integrate Standards: $IntegrateStandards"
 Write-Host ""
 
 # ============================================================================
@@ -286,11 +293,67 @@ git commit -m "Initial commit: Project structure created by init-project.ps1" | 
 Write-Host "  ✓ Git repository initialized" -ForegroundColor Green
 
 # ============================================================================
-# Step 10: Install Git Hooks (if available)
+# Step 10: Integrate Coding Standards (if requested)
+# ============================================================================
+if ($IntegrateStandards) {
+    Write-Host ""
+    Write-Host "🔟 Integrating coding standards..." -ForegroundColor Cyan
+
+    # Auto-detect standards repo URL
+    if (-not $StandardsRepo) {
+        Push-Location $repoRoot
+        $StandardsRepo = git remote get-url origin 2>$null
+        Pop-Location
+    }
+
+    if ($StandardsRepo) {
+        Write-Host "  Using standards repo: $StandardsRepo"
+
+        # Add as submodule
+        git submodule add $StandardsRepo .standards 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            git submodule update --init --recursive | Out-Null
+            Write-Host "  ✓ Standards added as submodule" -ForegroundColor Green
+
+            # Try to create symlinks (requires Admin on Windows)
+            $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+            if ($isAdmin) {
+                try {
+                    New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude" -ErrorAction Stop | Out-Null
+                    Write-Host "  ✓ Symlink created: .claude" -ForegroundColor Green
+                } catch {
+                    Write-Host "  ⚠️  Could not create .claude symlink (not critical)" -ForegroundColor Yellow
+                }
+
+                try {
+                    New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates" -ErrorAction Stop | Out-Null
+                    Write-Host "  ✓ Symlink created: templates" -ForegroundColor Green
+                } catch {
+                    Write-Host "  ⚠️  Could not create templates symlink (not critical)" -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host "  ⚠️  Run as Admin to create symlinks (optional)" -ForegroundColor Yellow
+            }
+
+            # Commit submodule
+            git add .gitmodules .standards
+            git commit -m "Add coding standards as submodule" | Out-Null
+            Write-Host "  ✓ Standards integration complete" -ForegroundColor Green
+        } else {
+            Write-Host "  ⚠️  Could not add standards submodule" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "  ⚠️  Standards repo URL not detected, skipping" -ForegroundColor Yellow
+    }
+}
+
+# ============================================================================
+# Step 11: Install Git Hooks (if available)
 # ============================================================================
 if (Test-Path "$repoRoot/.githooks") {
     Write-Host ""
-    Write-Host "🔟 Installing git hooks..." -ForegroundColor Cyan
+    Write-Host "1️⃣1️⃣  Installing git hooks..." -ForegroundColor Cyan
 
     Copy-Item "$repoRoot/.githooks" -Destination ".githooks" -Recurse -Force
     git config core.hooksPath .githooks
@@ -320,7 +383,23 @@ if ($IncludeTests) {
     Write-Host "  dotnet test               # Run all tests"
 }
 Write-Host ""
-Write-Host "📚 Documentation:" -ForegroundColor Yellow
-Write-Host "  See USAGE_GUIDE.md for practical examples"
-Write-Host "  See docs/ folder for detailed guidelines"
+
+if ($IntegrateStandards -and (Test-Path ".standards")) {
+    Write-Host "📚 Coding Standards:" -ForegroundColor Yellow
+    Write-Host "  .standards/USAGE_GUIDE.md     # Practical examples"
+    Write-Host "  .standards/CLAUDE.md          # AI assistant guide"
+    Write-Host "  .standards/docs/              # Full documentation"
+    if (Test-Path ".claude") {
+        Write-Host "  Type '/' in Claude Code       # See slash commands"
+    } else {
+        Write-Host "  .standards/.claude/commands/  # Slash commands"
+    }
+    Write-Host ""
+    Write-Host "🔄 Update standards:" -ForegroundColor Yellow
+    Write-Host "  cd .standards && git pull && cd .."
+} else {
+    Write-Host "📚 Documentation:" -ForegroundColor Yellow
+    Write-Host "  See USAGE_GUIDE.md for practical examples"
+    Write-Host "  See docs/ folder for detailed guidelines"
+}
 Write-Host ""
