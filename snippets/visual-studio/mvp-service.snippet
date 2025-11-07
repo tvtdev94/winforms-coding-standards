@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Service Class with DI</Title>
+      <Shortcut>mvpservice</Shortcut>
+      <Description>Creates a service class with dependency injection, async methods, and error handling</Description>
+      <Author>WinForms Coding Standards</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>ServiceName</ID>
+          <ToolTip>Name of the service (e.g., "Customer")</ToolTip>
+          <Default>Customer</Default>
+        </Literal>
+        <Literal>
+          <ID>EntityName</ID>
+          <ToolTip>Name of the entity (e.g., "Customer")</ToolTip>
+          <Default>Customer</Default>
+        </Literal>
+        <Literal>
+          <ID>Namespace</ID>
+          <ToolTip>Namespace for the service</ToolTip>
+          <Default>MyApp.Services</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+
+namespace $Namespace$
+{
+    /// <summary>
+    /// Service interface for $EntityName$ business logic.
+    /// </summary>
+    public interface I$ServiceName$Service
+    {
+        Task<List<$EntityName$>> GetAllAsync(CancellationToken ct = default);
+        Task<$EntityName$?> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<$EntityName$> CreateAsync($EntityName$ entity, CancellationToken ct = default);
+        Task UpdateAsync($EntityName$ entity, CancellationToken ct = default);
+        Task DeleteAsync(int id, CancellationToken ct = default);
+    }
+
+    /// <summary>
+    /// Service implementation for $EntityName$ business logic.
+    /// </summary>
+    public class $ServiceName$Service : I$ServiceName$Service
+    {
+        private readonly I$ServiceName$Repository _repository;
+        private readonly ILogger<$ServiceName$Service> _logger;
+
+        public $ServiceName$Service(
+            I$ServiceName$Repository repository,
+            ILogger<$ServiceName$Service> logger)
+        {
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        /// <summary>
+        /// Gets all $EntityName$ entities.
+        /// </summary>
+        public async Task<List<$EntityName$>> GetAllAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                _logger.LogInformation("Retrieving all $EntityName$ entities");
+                var result = await _repository.GetAllAsync(ct);
+                _logger.LogInformation("Retrieved {Count} $EntityName$ entities", result.Count);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving $EntityName$ entities");
+                throw new InvalidOperationException("Failed to retrieve $EntityName$ entities", ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets a $EntityName$ entity by ID.
+        /// </summary>
+        public async Task<$EntityName$?> GetByIdAsync(int id, CancellationToken ct = default)
+        {
+            if (id <= 0)
+                throw new ArgumentException("ID must be greater than 0", nameof(id));
+
+            try
+            {
+                _logger.LogInformation("Retrieving $EntityName$ with ID {Id}", id);
+                var result = await _repository.GetByIdAsync(id, ct);
+
+                if (result == null)
+                    _logger.LogWarning("$EntityName$ with ID {Id} not found", id);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving $EntityName$ with ID {Id}", id);
+                throw new InvalidOperationException($"Failed to retrieve $EntityName$ with ID {id}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new $EntityName$ entity.
+        /// </summary>
+        public async Task<$EntityName$> CreateAsync($EntityName$ entity, CancellationToken ct = default)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            try
+            {
+                _logger.LogInformation("Creating new $EntityName$");
+
+                // TODO: Add business validation here
+                $end$
+
+                var result = await _repository.AddAsync(entity, ct);
+                _logger.LogInformation("$EntityName$ created successfully with ID {Id}", result.Id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating $EntityName$");
+                throw new InvalidOperationException("Failed to create $EntityName$", ex);
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing $EntityName$ entity.
+        /// </summary>
+        public async Task UpdateAsync($EntityName$ entity, CancellationToken ct = default)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            try
+            {
+                _logger.LogInformation("Updating $EntityName$ with ID {Id}", entity.Id);
+
+                // TODO: Add business validation here
+
+                await _repository.UpdateAsync(entity, ct);
+                _logger.LogInformation("$EntityName$ updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating $EntityName$ with ID {Id}", entity.Id);
+                throw new InvalidOperationException($"Failed to update $EntityName$ with ID {entity.Id}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a $EntityName$ entity by ID.
+        /// </summary>
+        public async Task DeleteAsync(int id, CancellationToken ct = default)
+        {
+            if (id <= 0)
+                throw new ArgumentException("ID must be greater than 0", nameof(id));
+
+            try
+            {
+                _logger.LogInformation("Deleting $EntityName$ with ID {Id}", id);
+
+                var entity = await _repository.GetByIdAsync(id, ct);
+                if (entity == null)
+                    throw new InvalidOperationException($"$EntityName$ with ID {id} not found");
+
+                await _repository.DeleteAsync(entity, ct);
+                _logger.LogInformation("$EntityName$ deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting $EntityName$ with ID {Id}", id);
+                throw new InvalidOperationException($"Failed to delete $EntityName$ with ID {id}", ex);
+            }
+        }
+    }
+}]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

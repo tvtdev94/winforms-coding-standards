@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>MVP Pattern Form</Title>
+      <Shortcut>mvpform</Shortcut>
+      <Description>Creates a complete MVP pattern form with View interface and Form implementation</Description>
+      <Author>WinForms Coding Standards</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>FormName</ID>
+          <ToolTip>Name of the form (without "Form" suffix, e.g., "Customer")</ToolTip>
+          <Default>Customer</Default>
+        </Literal>
+        <Literal>
+          <ID>Namespace</ID>
+          <ToolTip>Namespace for the form</ToolTip>
+          <Default>MyApp.Forms</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[using System;
+using System.Windows.Forms;
+
+namespace $Namespace$
+{
+    /// <summary>
+    /// View interface for $FormName$ form following MVP pattern.
+    /// </summary>
+    public interface I$FormName$View
+    {
+        // Events
+        event EventHandler? LoadRequested;
+        event EventHandler? SaveRequested;
+        event EventHandler? CancelRequested;
+
+        // Properties
+        bool IsLoading { get; set; }
+
+        // Methods
+        void ShowError(string message);
+        void ShowSuccess(string message);
+        void CloseView();
+    }
+
+    /// <summary>
+    /// $FormName$ form implementing MVP pattern.
+    /// </summary>
+    public partial class $FormName$Form : Form, I$FormName$View
+    {
+        private readonly $FormName$Presenter _presenter;
+
+        #region IView Events
+
+        public event EventHandler? LoadRequested;
+        public event EventHandler? SaveRequested;
+        public event EventHandler? CancelRequested;
+
+        #endregion
+
+        #region IView Properties
+
+        public bool IsLoading
+        {
+            get => !btnSave.Enabled;
+            set
+            {
+                btnSave.Enabled = !value;
+                btnCancel.Enabled = !value;
+                Cursor = value ? Cursors.WaitCursor : Cursors.Default;
+            }
+        }
+
+        #endregion
+
+        public $FormName$Form($FormName$Presenter presenter)
+        {
+            InitializeComponent();
+            _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
+
+            // Wire UI events to View events
+            Load += (s, e) => LoadRequested?.Invoke(this, EventArgs.Empty);
+            btnSave.Click += (s, e) => SaveRequested?.Invoke(this, EventArgs.Empty);
+            btnCancel.Click += (s, e) => CancelRequested?.Invoke(this, EventArgs.Empty);
+        }
+
+        #region IView Methods
+
+        public void ShowError(string message)
+        {
+            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public void ShowSuccess(string message)
+        {
+            MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        public void CloseView()
+        {
+            Close();
+        }
+
+        #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _presenter?.DetachView();
+                components?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+}
+$end$]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

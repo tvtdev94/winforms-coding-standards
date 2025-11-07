@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>MVP Presenter</Title>
+      <Shortcut>mvppresenter</Shortcut>
+      <Description>Creates an MVP pattern presenter with view and service dependencies</Description>
+      <Author>WinForms Coding Standards</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>PresenterName</ID>
+          <ToolTip>Name of the presenter (e.g., "Customer")</ToolTip>
+          <Default>Customer</Default>
+        </Literal>
+        <Literal>
+          <ID>ServiceName</ID>
+          <ToolTip>Name of the service (e.g., "CustomerService")</ToolTip>
+          <Default>CustomerService</Default>
+        </Literal>
+        <Literal>
+          <ID>Namespace</ID>
+          <ToolTip>Namespace for the presenter</ToolTip>
+          <Default>MyApp.Presenters</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+
+namespace $Namespace$
+{
+    /// <summary>
+    /// Presenter for $PresenterName$ view, handling business logic and view coordination.
+    /// </summary>
+    public class $PresenterName$Presenter
+    {
+        private I$PresenterName$View? _view;
+        private readonly I$ServiceName$ _service;
+        private readonly ILogger<$PresenterName$Presenter> _logger;
+
+        public $PresenterName$Presenter(
+            I$PresenterName$View view,
+            I$ServiceName$ service,
+            ILogger<$PresenterName$Presenter> logger)
+        {
+            _view = view ?? throw new ArgumentNullException(nameof(view));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            AttachView();
+        }
+
+        private void AttachView()
+        {
+            if (_view != null)
+            {
+                _view.LoadRequested += OnLoadRequested;
+                _view.SaveRequested += OnSaveRequested;
+                _view.CancelRequested += OnCancelRequested;
+            }
+        }
+
+        public void DetachView()
+        {
+            if (_view != null)
+            {
+                _view.LoadRequested -= OnLoadRequested;
+                _view.SaveRequested -= OnSaveRequested;
+                _view.CancelRequested -= OnCancelRequested;
+                _view = null;
+            }
+        }
+
+        private async void OnLoadRequested(object? sender, EventArgs e)
+        {
+            if (_view == null) return;
+
+            try
+            {
+                _view.IsLoading = true;
+                _logger.LogInformation("Loading data...");
+
+                // TODO: Implement load logic
+                // var data = await _service.GetAllAsync();
+                // _view.Data = data;
+
+                $end$
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading data");
+                _view.ShowError($"Failed to load: {ex.Message}");
+            }
+            finally
+            {
+                _view.IsLoading = false;
+            }
+        }
+
+        private async void OnSaveRequested(object? sender, EventArgs e)
+        {
+            if (_view == null) return;
+
+            try
+            {
+                _view.IsLoading = true;
+                _logger.LogInformation("Saving data...");
+
+                // TODO: Validate and save
+                // await _service.SaveAsync(data);
+                _view.ShowSuccess("Saved successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving data");
+                _view.ShowError($"Failed to save: {ex.Message}");
+            }
+            finally
+            {
+                _view.IsLoading = false;
+            }
+        }
+
+        private void OnCancelRequested(object? sender, EventArgs e)
+        {
+            _logger.LogInformation("Operation cancelled");
+            _view?.CloseView();
+        }
+    }
+}]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

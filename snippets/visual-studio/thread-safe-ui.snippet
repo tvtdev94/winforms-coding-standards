@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Thread-Safe UI Update</Title>
+      <Shortcut>invokeui</Shortcut>
+      <Description>Creates a thread-safe method for updating UI controls using InvokeRequired pattern</Description>
+      <Author>WinForms Coding Standards</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>MethodName</ID>
+          <ToolTip>Name of the method (e.g., "UpdateStatus")</ToolTip>
+          <Default>UpdateStatus</Default>
+        </Literal>
+        <Literal>
+          <ID>ParameterType</ID>
+          <ToolTip>Type of the parameter (e.g., "string")</ToolTip>
+          <Default>string</Default>
+        </Literal>
+        <Literal>
+          <ID>ParameterName</ID>
+          <ToolTip>Name of the parameter (e.g., "message")</ToolTip>
+          <Default>message</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[/// <summary>
+/// Updates UI in a thread-safe manner.
+/// </summary>
+private void $MethodName$($ParameterType$ $ParameterName$)
+{
+    if (InvokeRequired)
+    {
+        Invoke(new Action<$ParameterType$>($MethodName$), $ParameterName$);
+        return;
+    }
+
+    // Safe to update UI here
+    $end$
+}]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
