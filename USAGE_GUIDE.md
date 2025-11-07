@@ -1021,23 +1021,408 @@ private async void OnLoadRequested(object? sender, EventArgs e)
 
 ---
 
+## 📝 Scenario 8: Creating a Service Layer
+
+**Goal**: Create a CustomerService to handle business logic.
+
+### Using Claude Code
+
+**Command**:
+```
+/create-service
+```
+
+Claude Code will ask:
+- Service name? → `CustomerService`
+- What entity? → `Customer`
+- Operations needed? → CRUD + business logic
+
+Claude Code will generate:
+1. `ICustomerService.cs` (interface)
+2. `CustomerService.cs` (implementation with full error handling, logging, validation)
+3. DI registration instructions
+
+### Manual Approach
+
+**Step 1**: Create interface
+
+```csharp
+public interface ICustomerService
+{
+    Task<List<Customer>> GetAllAsync(CancellationToken ct = default);
+    Task<Customer?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<Customer> CreateAsync(Customer customer, CancellationToken ct = default);
+    Task UpdateAsync(Customer customer, CancellationToken ct = default);
+    Task DeleteAsync(int id, CancellationToken ct = default);
+}
+```
+
+**Step 2**: Create implementation (use `/create-service` or copy from template)
+
+**Step 3**: Register in DI:
+```csharp
+services.AddScoped<ICustomerService, CustomerService>();
+```
+
+---
+
+## 📝 Scenario 9: Creating a Repository Layer
+
+**Goal**: Create repository for database access.
+
+### Using Claude Code
+
+**Command**:
+```
+/create-repository
+```
+
+Claude Code will ask:
+- Entity name? → `Customer`
+- Generic or specific? → `Both` (recommended)
+- Special queries? → `SearchByName`, `GetActive`
+
+Claude Code will generate:
+1. `IRepository<T>.cs` (generic interface)
+2. `ICustomerRepository.cs` (specific interface)
+3. `CustomerRepository.cs` (implementation with EF Core)
+4. Entity model (if needed)
+5. DbContext updates
+
+### Example Result
+
+```csharp
+public class CustomerRepository : ICustomerRepository
+{
+    private readonly AppDbContext _context;
+    private readonly ILogger<CustomerRepository> _logger;
+
+    public async Task<List<Customer>> GetAllAsync(CancellationToken ct = default)
+    {
+        return await _context.Customers
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<Customer>> SearchByNameAsync(string name, CancellationToken ct = default)
+    {
+        return await _context.Customers
+            .AsNoTracking()
+            .Where(c => c.Name.Contains(name))
+            .ToListAsync(ct);
+    }
+
+    // ... other methods
+}
+```
+
+**Register in DI**:
+```csharp
+services.AddScoped<ICustomerRepository, CustomerRepository>();
+```
+
+---
+
+## 📝 Scenario 10: Creating Dialog Forms
+
+**Goal**: Create a dialog to get user input.
+
+### Using Claude Code
+
+**Command**:
+```
+/create-dialog
+```
+
+Claude Code will ask:
+- Dialog purpose? → `Input` (get customer name)
+- Data to collect? → `Name` (string)
+- Validation needed? → `Yes` (required, 3-100 chars)
+
+Claude Code will generate complete dialog with:
+- Validation using ErrorProvider
+- OK/Cancel buttons with proper DialogResult
+- Static helper method for easy usage
+
+### Usage Example
+
+```csharp
+// Show the dialog
+var customerName = CustomerNameDialog.ShowDialog(
+    this,
+    "Enter Customer Name",
+    "Please enter the customer name:",
+    initialValue: "");
+
+if (customerName != null)
+{
+    // User clicked OK
+    var customer = new Customer { Name = customerName };
+    await _service.CreateAsync(customer);
+}
+// User clicked Cancel - do nothing
+```
+
+### Common Dialog Types Created
+
+1. **Input Dialog**: Text, numbers, dates
+2. **Confirmation Dialog**: Yes/No/Cancel
+3. **Selection Dialog**: Choose from list
+4. **Progress Dialog**: Show progress with cancel
+5. **About Dialog**: Show app info
+
+---
+
+## 📝 Scenario 11: Creating Custom UserControls
+
+**Goal**: Create reusable address entry control.
+
+### Using Claude Code
+
+**Command**:
+```
+/create-custom-control
+```
+
+Claude Code will ask:
+- Control name? → `AddressControl`
+- Purpose? → `Collect address information`
+- Properties? → `Street, City, State, ZipCode`
+- Events? → `DataChanged`
+
+Claude Code will generate:
+- Complete UserControl with all fields
+- Properties with change events
+- Validation method
+- Clear() and Reset() methods
+- Designer support with attributes
+
+### Usage
+
+```csharp
+// In your form
+var addressControl = new AddressControl
+{
+    Location = new Point(20, 100),
+    Size = new Size(400, 150)
+};
+
+// Subscribe to events
+addressControl.DataChanged += (s, e) =>
+{
+    _hasUnsavedChanges = true;
+};
+
+// Get data
+var address = new Address
+{
+    Street = addressControl.Street,
+    City = addressControl.City,
+    State = addressControl.State,
+    ZipCode = addressControl.ZipCode
+};
+
+// Validate
+if (!addressControl.ValidateData())
+{
+    MessageBox.Show("Please check address fields");
+    return;
+}
+```
+
+---
+
+## 📝 Scenario 12: Adding Logging to Application
+
+**Goal**: Setup comprehensive logging with Serilog.
+
+### Using Claude Code
+
+**Command**:
+```
+/add-logging
+```
+
+Claude Code will ask:
+- Framework? → `Serilog` (recommended)
+- Log to? → `File` (rolling daily)
+- Production log level? → `Information`
+- Log location? → `Default` (LocalApplicationData)
+
+Claude Code will:
+1. Add NuGet packages
+2. Configure Serilog in Program.cs
+3. Create appsettings.json with log config
+4. Add logging to existing services
+5. Setup global exception handler with logging
+
+### Result
+
+**Program.cs** with complete Serilog setup:
+```csharp
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.File("logs/app-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+try
+{
+    Log.Information("=== Application Starting ===");
+    // ... app code
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+```
+
+**Service with logging**:
+```csharp
+public class CustomerService
+{
+    private readonly ILogger<CustomerService> _logger;
+
+    public async Task<Customer> CreateAsync(Customer customer)
+    {
+        _logger.LogInformation("Creating customer: {Email}", customer.Email);
+
+        try
+        {
+            var result = await _repository.AddAsync(customer);
+            _logger.LogInformation("Customer created with ID: {Id}", result.Id);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating customer");
+            throw;
+        }
+    }
+}
+```
+
+**Logs location**:
+- Development: `%LOCALAPPDATA%\YourCompany\YourApp\logs\app-2025-11-07.log`
+- Production: Same location, auto-rotates daily
+
+---
+
+## 📝 Scenario 13: Setting Up Application Configuration
+
+**Goal**: Setup configuration management with appsettings.json.
+
+### Using Claude Code
+
+**Command**:
+```
+/add-settings
+```
+
+Claude Code will ask:
+- Config format? → `appsettings.json` (modern)
+- Settings needed? → `App settings, Email, Features, Connection strings`
+- Environment configs? → `Yes` (Development, Production)
+- Encryption needed? → `Yes` (for passwords)
+
+Claude Code will:
+1. Create `appsettings.json`, `appsettings.Development.json`, `appsettings.Production.json`
+2. Create strongly-typed settings classes
+3. Configure in Program.cs with IOptions<T>
+4. Show how to use in services/forms
+5. Setup user settings for preferences
+
+### Result
+
+**appsettings.json**:
+```json
+{
+  "AppSettings": {
+    "AppName": "Customer Management",
+    "Version": "1.0.0",
+    "Theme": "Light",
+    "AutoSaveInterval": 300
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=app.db"
+  },
+  "EmailSettings": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "EnableSsl": true
+  }
+}
+```
+
+**Strongly-typed class**:
+```csharp
+public class AppSettings
+{
+    public string AppName { get; set; }
+    public string Version { get; set; }
+    public string Theme { get; set; }
+    public int AutoSaveInterval { get; set; }
+}
+```
+
+**Usage in Form**:
+```csharp
+public class MainForm : Form
+{
+    private readonly AppSettings _settings;
+
+    public MainForm(IOptions<AppSettings> settings)
+    {
+        InitializeComponent();
+        _settings = settings.Value;
+
+        // Use settings
+        Text = $"{_settings.AppName} v{_settings.Version}";
+        ApplyTheme(_settings.Theme);
+    }
+}
+```
+
+**Register in DI**:
+```csharp
+services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
+```
+
+---
+
 ## 📚 Quick Reference
 
 ### All Available Slash Commands (Claude Code)
 
 | Command | Description | When to Use |
 |---------|-------------|-------------|
+| **Creating Code** | | |
 | `/create-form` | Generate new form with MVP | Starting a new form from scratch |
-| `/review-code` | Review code against standards | Before committing changes |
-| `/add-test` | Generate unit tests | After creating service/presenter |
-| `/check-standards` | Quick compliance check | Quick validation |
+| `/create-service` | Create service class | 🆕 Need business logic layer |
+| `/create-repository` | Create repository class | 🆕 Need data access layer |
+| `/create-dialog` | Create dialog form | 🆕 Need user input/confirmation |
+| `/create-custom-control` | Create UserControl | 🆕 Need reusable UI component |
+| **Adding Features** | | |
 | `/add-validation` | Add comprehensive validation | Form lacks validation |
 | `/add-data-binding` | Setup data binding | Want to use BindingSource |
+| `/add-error-handling` | Add error handling | Service lacks error handling |
+| `/add-logging` | Setup Serilog/NLog | 🆕 Need logging infrastructure |
+| `/add-settings` | Setup configuration | 🆕 Need app settings management |
+| **Improving Code** | | |
 | `/fix-threading` | Fix cross-thread UI issues | Getting threading errors |
 | `/refactor-to-mvp` | Refactor to MVP pattern | Legacy code needs refactoring |
 | `/optimize-performance` | Optimize performance | Form is slow or laggy |
-| `/add-error-handling` | Add error handling | Service lacks error handling |
+| **Testing & Review** | | |
+| `/add-test` | Generate unit tests | After creating service/presenter |
+| `/review-code` | Review code against standards | Before committing changes |
+| `/check-standards` | Quick compliance check | Quick validation |
+| **Project Setup** | | |
 | `/setup-di` | Setup Dependency Injection | New project needs DI |
+
+**Total Commands**: 17 (6 new ones marked with 🆕)
 
 ### Documentation Quick Links
 
