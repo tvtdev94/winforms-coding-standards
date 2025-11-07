@@ -32,6 +32,16 @@ This repository contains **coding standards, architectural guidelines, and best 
 - 📝 Setting up Dependency Injection
 - 📝 And more real-world scenarios!
 
+### 🔧 **[TROUBLESHOOTING - Running into Issues?](TROUBLESHOOTING.md)**
+
+**Stuck with an error?** Check the [**Troubleshooting Guide**](TROUBLESHOOTING.md) for solutions to 30+ common issues:
+- ⚡ Setup & Configuration problems
+- 💉 Dependency Injection errors
+- 🧵 Threading & cross-thread issues
+- 💾 Entity Framework problems
+- ⚡ Performance optimization tips
+- 🤖 Claude Code specific troubleshooting
+
 ### For Developers
 
 1. **Start with practical examples**: [**USAGE_GUIDE.md**](USAGE_GUIDE.md) ⭐
@@ -39,6 +49,7 @@ This repository contains **coding standards, architectural guidelines, and best 
 3. **Understand architecture**: [MVP Pattern](docs/architecture/mvp-pattern.md)
 4. **Follow conventions**: [Naming Conventions](docs/conventions/naming-conventions.md)
 5. **Review examples**: [Code Examples](docs/examples/) and [Example Project](example-project/)
+6. **When stuck**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md) 🔧
 
 ### For AI Assistants (Claude Code)
 
@@ -56,7 +67,9 @@ The [CLAUDE.md](CLAUDE.md) file is automatically loaded by Claude Code and conta
 /winforms-coding-standards
 ├── CLAUDE.md                  # Auto-loaded by Claude Code
 ├── README.md                  # This file
+├── LICENSE                    # MIT License
 ├── USAGE_GUIDE.md             # ⭐ Practical step-by-step examples
+├── TROUBLESHOOTING.md         # 🔧 Common issues & solutions (30+ problems)
 │
 ├── /docs/
 │   ├── 00-overview.md         # Complete documentation index
@@ -246,11 +259,39 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## 📞 Support & Getting Help
+
+### Having Issues?
+
+1. **Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)** first - 30+ common problems solved
+   - Setup & Configuration
+   - Dependency Injection errors
+   - Threading issues
+   - Entity Framework problems
+   - Performance optimization
+   - Claude Code specific issues
+
+2. **Search Documentation**:
+   - [Complete Overview](docs/00-overview.md)
+   - [Usage Guide with Examples](USAGE_GUIDE.md)
+   - [Example Project](example-project/)
+
+3. **Ask Claude Code**:
+   ```
+   /review-code YourFile.cs     # Check for issues
+   /check-standards YourFile.cs # Validate against standards
+   ```
+
+4. **Still Stuck?**
+   - Open a GitHub Issue with error details
+   - Include what you've tried
+   - Provide minimal code to reproduce
+
+### Other Resources
 
 - **Documentation Issues**: Open an issue on GitHub
-- **Questions**: Check [docs/00-overview.md](docs/00-overview.md) first
-- **AI Assistant Help**: See [CLAUDE.md](CLAUDE.md)
+- **AI Assistant Guide**: See [CLAUDE.md](CLAUDE.md)
+- **Contributing**: See guidelines above
 
 ---
 
