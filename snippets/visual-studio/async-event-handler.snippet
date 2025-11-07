@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Async Event Handler</Title>
+      <Shortcut>asyncevent</Shortcut>
+      <Description>Creates an async button click event handler with proper error handling and UI state management</Description>
+      <Author>WinForms Coding Standards</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>ControlName</ID>
+          <ToolTip>Name of the control (e.g., "btnLoad")</ToolTip>
+          <Default>btnLoad</Default>
+        </Literal>
+        <Literal>
+          <ID>ActionName</ID>
+          <ToolTip>Name of the action (e.g., "Load")</ToolTip>
+          <Default>Load</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[private async void $ControlName$_Click(object sender, EventArgs e)
+{
+    try
+    {
+        // Disable UI during operation
+        $ControlName$.Enabled = false;
+        Cursor = Cursors.WaitCursor;
+
+        // TODO: Perform async operation
+        $end$
+    }
+    catch (Exception ex)
+    {
+        _logger?.LogError(ex, "$ActionName$ operation failed");
+        MessageBox.Show(
+            $"Error during $ActionName$: {ex.Message}",
+            "Error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
+    }
+    finally
+    {
+        // Re-enable UI
+        $ControlName$.Enabled = true;
+        Cursor = Cursors.Default;
+    }
+}]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

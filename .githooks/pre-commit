@@ -1,0 +1,270 @@
+#!/bin/bash
+# Pre-commit hook for WinForms Coding Standards
+# Ensures code quality before commits reach repository
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+echo ""
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Track if any check failed
+CHECKS_FAILED=0
+
+# Helper function for check status
+print_check() {
+    local status=$1
+    local message=$2
+
+    if [ "$status" = "OK" ]; then
+        echo -e "  ${GREEN}✓${NC} $message"
+    elif [ "$status" = "WARN" ]; then
+        echo -e "  ${YELLOW}⚠${NC} $message"
+    else
+        echo -e "  ${RED}✗${NC} $message"
+        CHECKS_FAILED=1
+    fi
+}
+
+# ============================================================================
+# CHECK 1: Code Formatting
+# ============================================================================
+echo "1️⃣  Checking code formatting..."
+
+# Check if dotnet format is available
+if command -v dotnet &> /dev/null; then
+    # Get list of staged C# files
+    STAGED_CS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
+
+    if [ -n "$STAGED_CS_FILES" ]; then
+        # Only format staged files
+        if dotnet format --verify-no-changes --include $STAGED_CS_FILES &> /dev/null; then
+            print_check "OK" "Code formatting compliant"
+        else
+            print_check "FAIL" "Code formatting issues found"
+            echo ""
+            echo "    Run 'dotnet format' to fix formatting issues"
+            echo ""
+        fi
+    else
+        print_check "OK" "No C# files to check"
+    fi
+else
+    print_check "WARN" "dotnet CLI not found, skipping format check"
+fi
+
+# ============================================================================
+# CHECK 2: Build Verification
+# ============================================================================
+echo ""
+echo "2️⃣  Verifying build..."
+
+# Check if we're in a C# project directory
+if [ -f "*.csproj" ] || [ -f "*.sln" ]; then
+    if command -v dotnet &> /dev/null; then
+        if dotnet build --no-restore -v quiet > /dev/null 2>&1; then
+            print_check "OK" "Build successful"
+        else
+            print_check "FAIL" "Build failed"
+            echo ""
+            echo "    Fix compilation errors before committing"
+            echo "    Run 'dotnet build' to see details"
+            echo ""
+        fi
+    else
+        print_check "WARN" "dotnet CLI not found, skipping build check"
+    fi
+else
+    print_check "OK" "No C# project found, skipping build check"
+fi
+
+# ============================================================================
+# CHECK 3: Unit Tests
+# ============================================================================
+echo ""
+echo "3️⃣  Running unit tests..."
+
+# Check if test projects exist
+if find . -name "*.Tests.csproj" -o -name "*Tests.csproj" | grep -q .; then
+    if command -v dotnet &> /dev/null; then
+        if dotnet test --no-build --verbosity quiet --filter "Category!=Integration" > /dev/null 2>&1; then
+            print_check "OK" "All tests passed"
+        else
+            print_check "FAIL" "Tests failed"
+            echo ""
+            echo "    Fix failing tests before committing"
+            echo "    Run 'dotnet test' to see details"
+            echo ""
+        fi
+    else
+        print_check "WARN" "dotnet CLI not found, skipping tests"
+    fi
+else
+    print_check "OK" "No test projects found"
+fi
+
+# ============================================================================
+# CHECK 4: Debug Code Detection
+# ============================================================================
+echo ""
+echo "4️⃣  Checking for debug code..."
+
+# Get staged C# files
+STAGED_CS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
+
+if [ -n "$STAGED_CS_FILES" ]; then
+    # Check for Console.WriteLine
+    if echo "$STAGED_CS_FILES" | xargs grep -n "Console\.WriteLine" > /dev/null 2>&1; then
+        print_check "FAIL" "Found Console.WriteLine in staged files"
+        echo ""
+        echo "    Remove debug Console.WriteLine before committing:"
+        echo "$STAGED_CS_FILES" | xargs grep -n "Console\.WriteLine" | sed 's/^/    /'
+        echo ""
+    else
+        # Check for Debug.WriteLine
+        if echo "$STAGED_CS_FILES" | xargs grep -n "Debug\.WriteLine" > /dev/null 2>&1; then
+            print_check "WARN" "Found Debug.WriteLine in staged files"
+            echo ""
+            echo "    Consider removing Debug.WriteLine:"
+            echo "$STAGED_CS_FILES" | xargs grep -n "Debug\.WriteLine" | sed 's/^/    /'
+            echo ""
+        else
+            print_check "OK" "No debug code found"
+        fi
+    fi
+else
+    print_check "OK" "No C# files to check"
+fi
+
+# ============================================================================
+# CHECK 5: TODO Comments (Warning Only)
+# ============================================================================
+echo ""
+echo "5️⃣  Checking for TODO comments..."
+
+if [ -n "$STAGED_CS_FILES" ]; then
+    TODO_COUNT=$(echo "$STAGED_CS_FILES" | xargs grep -n "// TODO" | wc -l || echo "0")
+
+    if [ "$TODO_COUNT" -gt 0 ]; then
+        print_check "WARN" "Found $TODO_COUNT TODO comment(s)"
+        echo ""
+        echo "    Consider completing TODOs or creating issues:"
+        echo "$STAGED_CS_FILES" | xargs grep -n "// TODO" | sed 's/^/    /' || true
+        echo ""
+    else
+        print_check "OK" "No TODO comments"
+    fi
+fi
+
+# ============================================================================
+# CHECK 6: File Size Limit
+# ============================================================================
+echo ""
+echo "6️⃣  Checking file sizes..."
+
+MAX_SIZE=1048576 # 1MB in bytes
+LARGE_FILES=$(git diff --cached --name-only --diff-filter=ACM | while read file; do
+    if [ -f "$file" ]; then
+        size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+        if [ "$size" -gt "$MAX_SIZE" ]; then
+            echo "$file ($(($size/1024))KB)"
+        fi
+    fi
+done)
+
+if [ -n "$LARGE_FILES" ]; then
+    print_check "FAIL" "Large files detected (>1MB)"
+    echo ""
+    echo "    Consider using Git LFS for large files:"
+    echo "$LARGE_FILES" | sed 's/^/    /'
+    echo ""
+else
+    print_check "OK" "All files within size limit"
+fi
+
+# ============================================================================
+# CHECK 7: Secrets Detection (Simple)
+# ============================================================================
+echo ""
+echo "7️⃣  Checking for potential secrets..."
+
+# Simple pattern matching for common secrets
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
+
+if [ -n "$STAGED_FILES" ]; then
+    # Check for common secret patterns
+    SECRETS_FOUND=0
+
+    # Check for API keys
+    if echo "$STAGED_FILES" | xargs grep -i "api[_-]key\s*=\s*['\"][^'\"]\+" > /dev/null 2>&1; then
+        print_check "FAIL" "Found potential API key"
+        SECRETS_FOUND=1
+    fi
+
+    # Check for passwords (excluding test/example files)
+    if echo "$STAGED_FILES" | grep -v -i "test\|example" | xargs grep -i "password\s*=\s*['\"][^'\"]\+" > /dev/null 2>&1; then
+        print_check "WARN" "Found potential password"
+        echo "    (Excluding test files. Verify this is not a real password)"
+    fi
+
+    # Check for private keys
+    if echo "$STAGED_FILES" | xargs grep -i "BEGIN.*PRIVATE KEY" > /dev/null 2>&1; then
+        print_check "FAIL" "Found private key"
+        SECRETS_FOUND=1
+    fi
+
+    if [ "$SECRETS_FOUND" -eq 0 ]; then
+        print_check "OK" "No obvious secrets detected"
+    fi
+fi
+
+# ============================================================================
+# CHECK 8: Whitespace Issues
+# ============================================================================
+echo ""
+echo "8️⃣  Checking whitespace..."
+
+# Check for trailing whitespace
+if git diff --cached --check 2>&1 | grep -q "trailing whitespace"; then
+    print_check "WARN" "Trailing whitespace found"
+    echo ""
+    echo "    Run 'git diff --cached --check' to see details"
+    echo ""
+else
+    print_check "OK" "No whitespace issues"
+fi
+
+# ============================================================================
+# CHECK 9: Commit Message Requirements (Future)
+# ============================================================================
+echo ""
+echo "9️⃣  Commit message requirements..."
+print_check "OK" "Skipped (checked by commit-msg hook)"
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if [ "$CHECKS_FAILED" -eq 0 ]; then
+    echo -e "${GREEN}✓ All pre-commit checks passed!${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    exit 0
+else
+    echo -e "${RED}✗ Some pre-commit checks failed${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Fix the issues above and try again."
+    echo ""
+    echo "To bypass these checks (NOT RECOMMENDED):"
+    echo "  git commit --no-verify -m \"your message\""
+    echo ""
+    exit 1
+fi

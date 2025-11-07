@@ -32,13 +32,36 @@ This repository contains **coding standards, architectural guidelines, and best 
 - 📝 Setting up Dependency Injection
 - 📝 And more real-world scenarios!
 
+### ⚡ **Productivity Tools** - Speed Up Development
+
+Boost your productivity with our automation tools:
+
+- **[Code Snippets](snippets/)** 🎨
+  - 7 ready-to-use snippets for Visual Studio & VS Code
+  - Generate complete MVP forms in 10 seconds
+  - Shortcuts: `mvpform`, `mvpservice`, `asyncevent`, `invokeui`
+  - [Installation Guide](snippets/README.md)
+
+- **[Pre-commit Hooks](.githooks/)** 🔒
+  - Automatic quality checks before commits
+  - Prevents broken builds, failing tests, debug code
+  - 9 automated validations
+  - [Setup Instructions](.githooks/README.md)
+
+- **[Project Init Scripts](scripts/)** 🚀
+  - Create new projects in 2 minutes (vs 30-60 min manual)
+  - Pre-configured with DI, EF Core, Serilog, tests
+  - Command: `.\scripts\init-project.ps1 -ProjectName "MyApp"`
+  - [Usage Guide](scripts/README.md)
+
 ### For Developers
 
 1. **Start with practical examples**: [**USAGE_GUIDE.md**](USAGE_GUIDE.md) ⭐
-2. **Read the overview**: [docs/00-overview.md](docs/00-overview.md)
-3. **Understand architecture**: [MVP Pattern](docs/architecture/mvp-pattern.md)
-4. **Follow conventions**: [Naming Conventions](docs/conventions/naming-conventions.md)
-5. **Review examples**: [Code Examples](docs/examples/) and [Example Project](example-project/)
+2. **Install productivity tools**: [Snippets](snippets/) + [Hooks](.githooks/) + [Scripts](scripts/)
+3. **Read the overview**: [docs/00-overview.md](docs/00-overview.md)
+4. **Understand architecture**: [MVP Pattern](docs/architecture/mvp-pattern.md)
+5. **Follow conventions**: [Naming Conventions](docs/conventions/naming-conventions.md)
+6. **Review examples**: [Code Examples](docs/examples/) and [Example Project](example-project/)
 
 ### For AI Assistants (Claude Code)
 
@@ -57,6 +80,21 @@ The [CLAUDE.md](CLAUDE.md) file is automatically loaded by Claude Code and conta
 ├── CLAUDE.md                  # Auto-loaded by Claude Code
 ├── README.md                  # This file
 ├── USAGE_GUIDE.md             # ⭐ Practical step-by-step examples
+│
+├── /snippets/                 # ⚡ Code snippets for rapid development
+│   ├── /visual-studio/        # VS .snippet files
+│   ├── /vscode/               # VS Code JSON snippets
+│   └── README.md              # Installation guide
+│
+├── /.githooks/                # 🔒 Pre-commit quality checks
+│   ├── pre-commit             # Main hook script
+│   ├── install.sh             # Installation script
+│   └── README.md              # Hook documentation
+│
+├── /scripts/                  # 🚀 Project automation scripts
+│   ├── init-project.ps1       # PowerShell (Windows)
+│   ├── init-project.sh        # Bash (Linux/Mac)
+│   └── README.md              # Usage guide
 │
 ├── /docs/
 │   ├── 00-overview.md         # Complete documentation index
