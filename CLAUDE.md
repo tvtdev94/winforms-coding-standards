@@ -5,6 +5,35 @@
 
 ---
 
+## 📊 Project Status
+
+**Repository Completion**: 34% (16/47 files)
+**Last Updated**: 2025-11-07
+**Version**: 2.0 (Modular structure)
+
+### What's Complete ✅
+- ✅ Architecture documentation (MVP, MVVM, DI, project structure)
+- ✅ Coding conventions (naming, style, comments)
+- ✅ Templates (form, service, repository, test)
+- ✅ Configuration files (.gitignore, .editorconfig)
+- ✅ Async/await and error handling best practices
+
+### What's In Progress 🟡
+- 🟡 Best practices documentation (2/8 files complete)
+- 🟡 Code examples (1/4 files complete)
+
+### What's Missing ⚠️
+- ⚠️ UI/UX documentation (0/6 files) - **CRITICAL for WinForms!**
+- ⚠️ Testing documentation (0/5 files) - **Essential for quality!**
+- ⚠️ Data access documentation (0/3 files)
+- ⚠️ Advanced topics (0/5 files)
+- ⚠️ Working example project (planned)
+
+📋 **Full details**: [MISSING_DOCS.md](MISSING_DOCS.md)
+📝 **Review report**: [CODE_REVIEW_REPORT.md](CODE_REVIEW_REPORT.md)
+
+---
+
 ## 📦 Tech Stack
 
 - **.NET**: 8.0 (recommended) / .NET Framework 4.8
@@ -122,6 +151,184 @@ When writing code, **ALWAYS follow these rules**:
 
 ---
 
+## 🧠 Claude Code Context Loading
+
+When starting a new coding task, follow this context loading strategy:
+
+### 1. **This File is Auto-Loaded**
+CLAUDE.md is automatically loaded at the start of every session. You already have the core guidelines.
+
+### 2. **Load Context Based on Task Type**
+
+| Task Type | Files to Read |
+|-----------|--------------|
+| **Creating a new Form** | `templates/form-template.cs`, `docs/architecture/mvp-pattern.md` |
+| **Creating a Service** | `templates/service-template.cs`, `docs/best-practices/async-await.md` |
+| **Creating a Repository** | `templates/repository-template.cs`, *(data-access docs when available)* |
+| **Writing Tests** | `templates/test-template.cs`, *(testing docs when available)* |
+| **Data Binding** | *(UI/UX docs when available - see MISSING_DOCS.md)* |
+| **Form Communication** | *(UI/UX docs when available - see MISSING_DOCS.md)* |
+| **Error Handling** | `docs/best-practices/error-handling.md` |
+| **General Questions** | `CODE_REVIEW_REPORT.md` for repository overview |
+
+### 3. **Documentation Status Check**
+
+⚠️ **IMPORTANT**: Many referenced docs don't exist yet (see [MISSING_DOCS.md](MISSING_DOCS.md))
+
+**If a doc is missing**:
+- Use the corresponding template file as reference
+- Follow patterns from existing complete documentation
+- Refer to the DO/DON'T rules above
+- Ask user if clarification is needed
+
+### 4. **Always Use Templates**
+
+Templates are **production-ready** and follow all standards:
+- `/templates/form-template.cs` - MVP pattern form
+- `/templates/service-template.cs` - Business logic service
+- `/templates/repository-template.cs` - Data access repository
+- `/templates/test-template.cs` - Unit test structure
+
+**Never generate code from scratch** - always start with templates!
+
+---
+
+## 🎨 Code Generation Patterns
+
+### Pattern 1: Creating a New Form
+
+**User Request**: "Create a CustomerForm to manage customers"
+
+**Your Workflow**:
+```
+1. Read: templates/form-template.cs
+2. Read: docs/architecture/mvp-pattern.md (if complex logic)
+3. Generate:
+   - CustomerForm.cs (Form implementation)
+   - ICustomerView.cs (View interface)
+   - CustomerPresenter.cs (Presentation logic)
+4. Ensure:
+   - MVP pattern properly implemented
+   - Async/await for data loading
+   - Proper error handling
+   - Input validation
+   - Resource disposal
+5. Offer: Generate unit tests for the presenter
+```
+
+### Pattern 2: Creating a Service
+
+**User Request**: "Create a service to handle customer operations"
+
+**Your Workflow**:
+```
+1. Read: templates/service-template.cs
+2. Generate: CustomerService.cs with:
+   - Constructor injection for dependencies (ICustomerRepository, ILogger)
+   - Async methods (LoadCustomersAsync, SaveCustomerAsync, etc.)
+   - Input validation with ArgumentNullException
+   - Try-catch with logging
+   - XML documentation comments
+3. Generate: ICustomerService interface
+4. Offer: Generate unit tests with mocked dependencies
+```
+
+### Pattern 3: Creating a Repository
+
+**User Request**: "Create a repository for customers"
+
+**Your Workflow**:
+```
+1. Read: templates/repository-template.cs
+2. Generate:
+   - CustomerRepository.cs implementing ICustomerRepository
+   - Use EF Core DbContext
+   - Async CRUD operations
+   - Proper using/disposal
+   - Error handling
+3. Note: Remind user about DbContext configuration
+4. Offer: Generate integration tests
+```
+
+### Pattern 4: Writing Tests
+
+**User Request**: "Write tests for CustomerService"
+
+**Your Workflow**:
+```
+1. Read: templates/test-template.cs
+2. Read: The service class to test
+3. Generate: CustomerServiceTests.cs with:
+   - xUnit [Fact] attributes
+   - Moq for mocking dependencies
+   - Arrange-Act-Assert pattern
+   - Test naming: MethodName_Scenario_ExpectedResult
+   - Tests for success paths, error cases, edge cases
+4. Run: dotnet test to verify
+5. Report: Test results and coverage
+```
+
+### Pattern 5: Code Review
+
+**User Request**: "Review this form code"
+
+**Your Workflow**:
+```
+1. Read: The code file
+2. Check against:
+   - Pre-Commit Checklist (see below)
+   - DO/DON'T rules (see above)
+   - Relevant templates
+   - Architecture patterns (MVP/MVVM)
+3. Identify:
+   - ✅ What's good
+   - ⚠️ What needs improvement
+   - ❌ What's wrong and must be fixed
+4. Suggest: Specific code improvements
+5. Offer: Refactor the code following standards
+```
+
+---
+
+## 🎯 Code Generation Rules Summary
+
+### When generating Forms:
+1. ✅ Start with `form-template.cs`
+2. ✅ Implement MVP pattern (Form + IView + Presenter)
+3. ✅ Async event handlers for data operations
+4. ✅ Try-catch with user-friendly error messages
+5. ✅ Dispose resources in Dispose() method
+6. ✅ Set TabIndex for proper keyboard navigation
+7. ✅ Use meaningful control names (not button1, textBox1)
+
+### When generating Services:
+1. ✅ Start with `service-template.cs`
+2. ✅ Constructor injection for all dependencies
+3. ✅ Validate all inputs (ArgumentNullException, ArgumentException)
+4. ✅ Async methods with proper cancellation token support
+5. ✅ Log all operations (info, errors, warnings)
+6. ✅ Wrap exceptions with meaningful messages
+7. ✅ XML documentation on all public methods
+
+### When generating Repositories:
+1. ✅ Start with `repository-template.cs`
+2. ✅ Implement generic repository pattern
+3. ✅ Use EF Core async methods (ToListAsync, FirstOrDefaultAsync, etc.)
+4. ✅ Proper disposal of DbContext
+5. ✅ Include soft-delete support if applicable
+6. ✅ Error handling with data access exceptions
+
+### When generating Tests:
+1. ✅ Start with `test-template.cs`
+2. ✅ One test class per class under test
+3. ✅ Use Moq for mocking dependencies
+4. ✅ Arrange-Act-Assert structure
+5. ✅ Test naming: `MethodName_Scenario_ExpectedResult`
+6. ✅ Test both success and failure scenarios
+7. ✅ Use Assert.Throws for exception testing
+
+---
+
 ## 📚 Documentation Structure
 
 ### Core Documentation
@@ -230,12 +437,77 @@ Before committing code, verify:
 
 **For AI assistants**:
 1. Load this file first (automatic)
-2. Reference specific docs as needed for deep dives
-3. Follow checklist before suggesting commits
-4. Use templates for consistent code generation
-5. Always validate against standards before responding
+2. **Check project status** - Know what docs exist vs missing
+3. Reference specific docs as needed for deep dives
+4. **Always use templates** - Never generate code from scratch
+5. Follow code generation patterns above
+6. Follow pre-commit checklist before suggesting commits
+7. Validate against DO/DON'T rules before responding
+
+---
+
+## 📝 Common Code Snippets
+
+### Async Button Click Handler
+```csharp
+private async void btnLoad_Click(object sender, EventArgs e)
+{
+    try
+    {
+        btnLoad.Enabled = false;
+        Cursor = Cursors.WaitCursor;
+
+        var data = await _presenter.LoadDataAsync();
+        // Update UI with data
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Error: {ex.Message}", "Error",
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+    finally
+    {
+        btnLoad.Enabled = true;
+        Cursor = Cursors.Default;
+    }
+}
+```
+
+### Thread-Safe UI Update
+```csharp
+private void UpdateUIFromBackgroundThread(string message)
+{
+    if (InvokeRequired)
+    {
+        Invoke(new Action(() => UpdateUIFromBackgroundThread(message)));
+        return;
+    }
+
+    // Safe to update UI here
+    lblStatus.Text = message;
+}
+```
+
+### Proper Resource Disposal
+```csharp
+protected override void Dispose(bool disposing)
+{
+    if (disposing)
+    {
+        // Dispose managed resources
+        _timer?.Dispose();
+        _backgroundWorker?.Dispose();
+        components?.Dispose();
+
+        // Unsubscribe from events
+        _service.DataChanged -= OnDataChanged;
+    }
+    base.Dispose(disposing);
+}
+```
 
 ---
 
 **Last Updated**: 2025-11-07
-**Version**: 2.0 (Modular structure)
+**Version**: 2.1 (Enhanced for Claude Code optimization)
+**Changes**: Added project status, context loading, code generation patterns
