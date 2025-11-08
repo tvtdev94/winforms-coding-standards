@@ -35,10 +35,10 @@ param(
 )
 
 # Colors for output
-function Write-Success { Write-Host "✅ $args" -ForegroundColor Green }
-function Write-Info { Write-Host "ℹ️  $args" -ForegroundColor Cyan }
-function Write-Warning { Write-Host "⚠️  $args" -ForegroundColor Yellow }
-function Write-Error-Custom { Write-Host "❌ $args" -ForegroundColor Red }
+function Write-Success { Write-Host "[OK] $args" -ForegroundColor Green }
+function Write-Info { Write-Host "[INFO] $args" -ForegroundColor Cyan }
+function Write-Warning { Write-Host "[WARN] $args" -ForegroundColor Yellow }
+function Write-Error-Custom { Write-Host "[ERROR] $args" -ForegroundColor Red }
 
 # Banner
 Write-Host ""
@@ -201,51 +201,51 @@ if (Test-Path ".gitignore") {
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════════╗" -ForegroundColor Green
 Write-Host "║                                                           ║" -ForegroundColor Green
-Write-Host "║                   ✅ Setup Complete!                      ║" -ForegroundColor Green
+Write-Host "║                   Setup Complete!                         ║" -ForegroundColor Green
 Write-Host "║                                                           ║" -ForegroundColor Green
 Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
 
 # Summary
-Write-Host "📂 Standards Location:" -ForegroundColor Cyan
+Write-Host "[Standards Location]" -ForegroundColor Cyan
 Write-Host "   $ProjectPath\.standards" -ForegroundColor White
 Write-Host ""
 
-Write-Host "📚 Documentation:" -ForegroundColor Cyan
+Write-Host "[Documentation]" -ForegroundColor Cyan
 Write-Host "   .standards\README.md          - Overview"
 Write-Host "   .standards\USAGE_GUIDE.md     - Practical examples"
 Write-Host "   .standards\CLAUDE.md          - AI assistant guide"
 Write-Host "   .standards\docs\              - Full documentation"
 Write-Host ""
 
-Write-Host "🛠️  Available Resources:" -ForegroundColor Cyan
+Write-Host "[Available Resources]" -ForegroundColor Cyan
 if (Test-Path ".claude") {
-    Write-Host "   ✅ .claude\commands\          - Slash commands (symlinked)"
+    Write-Host "   [OK] .claude\commands\          - Slash commands (symlinked)"
 } else {
-    Write-Host "   📁 .standards\.claude\commands\ - Slash commands"
+    Write-Host "   [DIR] .standards\.claude\commands\ - Slash commands"
 }
 
 if (Test-Path "templates") {
-    Write-Host "   ✅ templates\                 - Code templates (symlinked)"
+    Write-Host "   [OK] templates\                 - Code templates (symlinked)"
 } else {
-    Write-Host "   📁 .standards\templates\      - Code templates"
+    Write-Host "   [DIR] .standards\templates\      - Code templates"
 }
 Write-Host ""
 
-Write-Host "🚀 Quick Start:" -ForegroundColor Cyan
+Write-Host "[Quick Start]" -ForegroundColor Cyan
 Write-Host "   1. Read: .standards\USAGE_GUIDE.md"
 Write-Host "   2. Use Claude Code slash commands (type / to see list)"
 Write-Host "   3. Copy templates from .standards\templates\"
 Write-Host "   4. Follow conventions in .standards\docs\"
 Write-Host ""
 
-Write-Host "🔄 Update Standards:" -ForegroundColor Cyan
+Write-Host "[Update Standards]" -ForegroundColor Cyan
 Write-Host "   cd .standards"
 Write-Host "   git pull origin main"
 Write-Host "   cd .."
 Write-Host ""
 
-Write-Host "💡 Pro Tips:" -ForegroundColor Yellow
+Write-Host "[Pro Tips]" -ForegroundColor Yellow
 Write-Host "   - Commit .gitmodules and .standards to your repo"
 Write-Host "   - Team members: run 'git submodule update --init' after clone"
 Write-Host "   - Standards update automatically when you pull latest"
@@ -253,4 +253,4 @@ Write-Host ""
 
 Pop-Location
 
-Write-Success "Ready to code! 🎉"
+Write-Success "Ready to code!"

@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🔍 Running pre-commit checks..."
+echo "[Running pre-commit checks...]"
 echo ""
 
 # Color codes for output
@@ -22,11 +22,11 @@ print_check() {
     local message=$2
 
     if [ "$status" = "OK" ]; then
-        echo -e "  ${GREEN}✓${NC} $message"
+        echo -e "  ${GREEN}[OK]${NC} $message"
     elif [ "$status" = "WARN" ]; then
-        echo -e "  ${YELLOW}⚠${NC} $message"
+        echo -e "  ${YELLOW}[WARN]${NC} $message"
     else
-        echo -e "  ${RED}✗${NC} $message"
+        echo -e "  ${RED}[FAIL]${NC} $message"
         CHECKS_FAILED=1
     fi
 }
@@ -34,7 +34,7 @@ print_check() {
 # ============================================================================
 # CHECK 1: Code Formatting
 # ============================================================================
-echo "1️⃣  Checking code formatting..."
+echo "[1]  Checking code formatting..."
 
 # Check if dotnet format is available
 if command -v dotnet &> /dev/null; then
@@ -62,7 +62,7 @@ fi
 # CHECK 2: Build Verification
 # ============================================================================
 echo ""
-echo "2️⃣  Verifying build..."
+echo "[2]  Verifying build..."
 
 # Check if we're in a C# project directory
 if [ -f "*.csproj" ] || [ -f "*.sln" ]; then
@@ -87,7 +87,7 @@ fi
 # CHECK 3: Unit Tests
 # ============================================================================
 echo ""
-echo "3️⃣  Running unit tests..."
+echo "[3]  Running unit tests..."
 
 # Check if test projects exist
 if find . -name "*.Tests.csproj" -o -name "*Tests.csproj" | grep -q .; then
@@ -112,7 +112,7 @@ fi
 # CHECK 4: Debug Code Detection
 # ============================================================================
 echo ""
-echo "4️⃣  Checking for debug code..."
+echo "[4]  Checking for debug code..."
 
 # Get staged C# files
 STAGED_CS_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
@@ -145,7 +145,7 @@ fi
 # CHECK 5: TODO Comments (Warning Only)
 # ============================================================================
 echo ""
-echo "5️⃣  Checking for TODO comments..."
+echo "[5]  Checking for TODO comments..."
 
 if [ -n "$STAGED_CS_FILES" ]; then
     TODO_COUNT=$(echo "$STAGED_CS_FILES" | xargs grep -n "// TODO" | wc -l || echo "0")
@@ -165,7 +165,7 @@ fi
 # CHECK 6: File Size Limit
 # ============================================================================
 echo ""
-echo "6️⃣  Checking file sizes..."
+echo "[6]  Checking file sizes..."
 
 MAX_SIZE=1048576 # 1MB in bytes
 LARGE_FILES=$(git diff --cached --name-only --diff-filter=ACM | while read file; do
@@ -191,7 +191,7 @@ fi
 # CHECK 7: Secrets Detection (Simple)
 # ============================================================================
 echo ""
-echo "7️⃣  Checking for potential secrets..."
+echo "[7]  Checking for potential secrets..."
 
 # Simple pattern matching for common secrets
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
@@ -227,7 +227,7 @@ fi
 # CHECK 8: Whitespace Issues
 # ============================================================================
 echo ""
-echo "8️⃣  Checking whitespace..."
+echo "[8]  Checking whitespace..."
 
 # Check for trailing whitespace
 if git diff --cached --check 2>&1 | grep -q "trailing whitespace"; then
@@ -243,7 +243,7 @@ fi
 # CHECK 9: Commit Message Requirements (Future)
 # ============================================================================
 echo ""
-echo "9️⃣  Commit message requirements..."
+echo "[9]  Commit message requirements..."
 print_check "OK" "Skipped (checked by commit-msg hook)"
 
 # ============================================================================
@@ -253,12 +253,12 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ "$CHECKS_FAILED" -eq 0 ]; then
-    echo -e "${GREEN}✓ All pre-commit checks passed!${NC}"
+    echo -e "${GREEN}[OK] All pre-commit checks passed!${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     exit 0
 else
-    echo -e "${RED}✗ Some pre-commit checks failed${NC}"
+    echo -e "${RED}[FAIL] Some pre-commit checks failed${NC}"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "Fix the issues above and try again."

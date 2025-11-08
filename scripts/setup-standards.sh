@@ -25,10 +25,10 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Print functions
-print_success() { echo -e "${GREEN}✅ $1${NC}"; }
-print_info() { echo -e "${CYAN}ℹ️  $1${NC}"; }
-print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
-print_error() { echo -e "${RED}❌ $1${NC}"; }
+print_success() { echo -e "${GREEN}[OK] $1${NC}"; }
+print_info() { echo -e "${CYAN}[INFO] $1${NC}"; }
+print_warning() { echo -e "${YELLOW}[WARN] $1${NC}"; }
+print_error() { echo -e "${RED}[ERROR] $1${NC}"; }
 
 # Banner
 echo ""
@@ -158,54 +158,54 @@ fi
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                                                           ║${NC}"
-echo -e "${GREEN}║                   ✅ Setup Complete!                      ║${NC}"
+echo -e "${GREEN}║                   Setup Complete!                      ║${NC}"
 echo -e "${GREEN}║                                                           ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 # Summary
-echo -e "${CYAN}📂 Standards Location:${NC}"
+echo -e "${CYAN}[Standards Location]${NC}"
 echo "   $PROJECT_PATH/.standards"
 echo ""
 
-echo -e "${CYAN}📚 Documentation:${NC}"
+echo -e "${CYAN}[Documentation]${NC}"
 echo "   .standards/README.md          - Overview"
 echo "   .standards/USAGE_GUIDE.md     - Practical examples"
 echo "   .standards/CLAUDE.md          - AI assistant guide"
 echo "   .standards/docs/              - Full documentation"
 echo ""
 
-echo -e "${CYAN}🛠️  Available Resources:${NC}"
+echo -e "${CYAN}[Available Resources]${NC}"
 if [ -L ".claude" ]; then
-    echo "   ✅ .claude/commands/          - Slash commands (symlinked)"
+    echo "   [OK] .claude/commands/          - Slash commands (symlinked)"
 else
-    echo "   📁 .standards/.claude/commands/ - Slash commands"
+    echo "   [DIR] .standards/.claude/commands/ - Slash commands"
 fi
 
 if [ -L "templates" ]; then
-    echo "   ✅ templates/                 - Code templates (symlinked)"
+    echo "   [OK] templates/                 - Code templates (symlinked)"
 else
-    echo "   📁 .standards/templates/      - Code templates"
+    echo "   [DIR] .standards/templates/      - Code templates"
 fi
 echo ""
 
-echo -e "${CYAN}🚀 Quick Start:${NC}"
+echo -e "${CYAN}[Quick Start]${NC}"
 echo "   1. Read: .standards/USAGE_GUIDE.md"
 echo "   2. Use Claude Code slash commands (type / to see list)"
 echo "   3. Copy templates from .standards/templates/"
 echo "   4. Follow conventions in .standards/docs/"
 echo ""
 
-echo -e "${CYAN}🔄 Update Standards:${NC}"
+echo -e "${CYAN}[Update Standards]${NC}"
 echo "   cd .standards"
 echo "   git pull origin main"
 echo "   cd .."
 echo ""
 
-echo -e "${YELLOW}💡 Pro Tips:${NC}"
+echo -e "${YELLOW}[Pro Tips]${NC}"
 echo "   - Commit .gitmodules and .standards to your repo"
 echo "   - Team members: run 'git submodule update --init' after clone"
 echo "   - Standards update automatically when you pull latest"
 echo ""
 
-print_success "Ready to code! 🎉"
+print_success "Ready to code!"
