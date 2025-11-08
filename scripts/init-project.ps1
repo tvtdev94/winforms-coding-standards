@@ -58,15 +58,78 @@ Write-Host ""
 
 # Question 4: Architecture Pattern
 Write-Host "4. Architecture Pattern" -ForegroundColor Yellow
-Write-Host "   [1] MVP (Model-View-Presenter) - recommended" -ForegroundColor Gray
-Write-Host "   [2] MVVM (Model-View-ViewModel) - .NET 8+ only" -ForegroundColor Gray
-Write-Host "   [3] Simple (no pattern)" -ForegroundColor Gray
+Write-Host ""
+
+# Smart recommendation based on previous choices
+$recommendedPattern = "MVP"  # Default safe choice
+$patternRecommendation = ""
+
+if ($Database -eq "None" -and ($Framework -eq "net48" -or $Framework -eq "net6.0")) {
+    $recommendedPattern = "Simple"
+    $patternRecommendation = "💡 Recommended: Simple (no database, lightweight app)"
+}
+elseif ($Framework -eq "net8.0" -and $Database -ne "None") {
+    $recommendedPattern = "MVP"
+    $patternRecommendation = "💡 Recommended: MVP (best balance of testability and simplicity)"
+}
+elseif ($Framework -eq "net48") {
+    $recommendedPattern = "MVP"
+    $patternRecommendation = "💡 Recommended: MVP (.NET Framework works best with MVP)"
+}
+else {
+    $recommendedPattern = "MVP"
+    $patternRecommendation = "💡 Recommended: MVP (works well in most scenarios)"
+}
+
+# Display options with descriptions
+Write-Host "   [1] MVP (Model-View-Presenter)" -ForegroundColor $(if ($recommendedPattern -eq "MVP") { "Green" } else { "Gray" })
+Write-Host "       ✅ Best for: Most WinForms apps" -ForegroundColor DarkGray
+Write-Host "       ✅ Easy to test, clear separation" -ForegroundColor DarkGray
+Write-Host "       ✅ Works with all .NET versions" -ForegroundColor DarkGray
+Write-Host ""
+
+# MVVM availability based on framework
+$mvvmAvailable = $Framework -eq "net8.0" -or $Framework -eq "net6.0"
+$mvvmColor = if ($mvvmAvailable) {
+    if ($recommendedPattern -eq "MVVM") { "Green" } else { "Gray" }
+} else {
+    "DarkGray"
+}
+
+Write-Host "   [2] MVVM (Model-View-ViewModel)" -ForegroundColor $mvvmColor
+if ($mvvmAvailable) {
+    Write-Host "       ✅ Best for: Complex UI with data binding" -ForegroundColor DarkGray
+    Write-Host "       ✅ Two-way binding, INotifyPropertyChanged" -ForegroundColor DarkGray
+    Write-Host "       ⚠️  More complex than MVP" -ForegroundColor DarkGray
+} else {
+    Write-Host "       ❌ Not recommended for $Framework" -ForegroundColor DarkGray
+    Write-Host "       ℹ️  Use .NET 6+ for better MVVM support" -ForegroundColor DarkGray
+}
+Write-Host ""
+
+Write-Host "   [3] Simple (no pattern)" -ForegroundColor $(if ($recommendedPattern -eq "Simple") { "Green" } else { "Gray" })
+Write-Host "       ✅ Best for: Quick prototypes, demos" -ForegroundColor DarkGray
+Write-Host "       ⚠️  All code in Forms (harder to test)" -ForegroundColor DarkGray
+Write-Host "       ⚠️  Not recommended for production" -ForegroundColor DarkGray
+Write-Host ""
+
+# Show recommendation
+Write-Host "   $patternRecommendation" -ForegroundColor Cyan
+Write-Host ""
+
 $patternChoice = Read-Host "   Select pattern (1-3)"
 $Pattern = switch ($patternChoice) {
     "1" { "MVP" }
-    "2" { "MVVM" }
+    "2" {
+        if (-not $mvvmAvailable) {
+            Write-Host "   [WARN] MVVM not recommended for $Framework, using MVP instead" -ForegroundColor Yellow
+            "MVP"
+        } else {
+            "MVVM"
+        }
+    }
     "3" { "Simple" }
-    default { "MVP" }
+    default { $recommendedPattern }  # Use smart default
 }
 Write-Host "   Selected: $Pattern" -ForegroundColor Green
 Write-Host ""

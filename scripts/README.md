@@ -34,12 +34,19 @@ Simply run the interactive script - it guides you through setup step-by-step:
 1. **Project name?** → e.g., CustomerManagement
 2. **Framework?** → .NET 8.0 / 6.0 / Framework 4.8
 3. **Database?** → SQLite / SQL Server / PostgreSQL / MySQL / None
-4. **Pattern?** → MVP / MVVM / Simple
+4. **Pattern?** → MVP / MVVM / Simple (**with smart recommendations** 💡)
 5. **Include tests?** → Y/n
 6. **Include example code?** → y/N
 7. **Integrate standards?** → Y/n
 
 **Then shows confirmation** with all your choices before creating the project!
+
+**Smart Recommendations 💡**:
+The script analyzes your Framework and Database choices to suggest the best pattern:
+- **No database + simple app** → Recommends Simple
+- **.NET 8 + database** → Recommends MVP (best balance)
+- **.NET Framework 4.8** → Recommends MVP (MVVM not well-supported)
+- **MVVM** only available on .NET 6/8 (automatically blocked on Framework 4.8)
 
 ### Linux/Mac (Bash)
 
@@ -158,9 +165,24 @@ PS> .\scripts\init-project.ps1
    Selected: SQLServer
 
 4. Architecture Pattern
-   [1] MVP (Model-View-Presenter) - recommended
-   [2] MVVM (Model-View-ViewModel) - .NET 8+ only
+
+   [1] MVP (Model-View-Presenter)
+       ✅ Best for: Most WinForms apps
+       ✅ Easy to test, clear separation
+       ✅ Works with all .NET versions
+
+   [2] MVVM (Model-View-ViewModel)
+       ✅ Best for: Complex UI with data binding
+       ✅ Two-way binding, INotifyPropertyChanged
+       ⚠️  More complex than MVP
+
    [3] Simple (no pattern)
+       ✅ Best for: Quick prototypes, demos
+       ⚠️  All code in Forms (harder to test)
+       ⚠️  Not recommended for production
+
+   💡 Recommended: MVP (best balance of testability and simplicity)
+
    Select pattern (1-3): 1
    Selected: MVP
 
