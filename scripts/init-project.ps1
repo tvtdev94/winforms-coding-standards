@@ -550,6 +550,85 @@ if ($IntegrateStandards) {
             git add .gitmodules .standards
             git commit -m "Add coding standards as submodule" | Out-Null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
+
+            # Create .claude/settings.local.json with pre-approved permissions
+            Write-Host ""
+            Write-Host "  Creating .claude/settings.local.json with permissions..." -ForegroundColor Cyan
+
+            # Get current directory path for permissions
+            $currentPath = (Get-Location).Path -replace '\\', '/'
+
+            $settingsJson = @"
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet publish:*)",
+      "Bash(dotnet pack:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git submodule:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(pwsh:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(wc:*)",
+      "Read($currentPath/**)",
+      "Edit($currentPath/**)",
+      "Write($currentPath/**)",
+      "Glob($currentPath/**)",
+      "Grep($currentPath/**)",
+      "SlashCommand(/create-form)",
+      "SlashCommand(/create-service)",
+      "SlashCommand(/create-repository)",
+      "SlashCommand(/create-dialog)",
+      "SlashCommand(/create-custom-control)",
+      "SlashCommand(/add-validation)",
+      "SlashCommand(/add-error-handling)",
+      "SlashCommand(/add-logging)",
+      "SlashCommand(/add-settings)",
+      "SlashCommand(/add-data-binding)",
+      "SlashCommand(/setup-di)",
+      "SlashCommand(/refactor-to-mvp)",
+      "SlashCommand(/fix-threading)",
+      "SlashCommand(/optimize-performance)",
+      "SlashCommand(/check-standards)",
+      "SlashCommand(/add-test)",
+      "SlashCommand(/auto-implement)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Bash(chmod:*)"
+    ],
+    "ask": []
+  }
+}
+"@
+
+            New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
+            $settingsJson | Out-File -FilePath ".claude/settings.local.json" -Encoding UTF8 -Force
+            Write-Host "  [OK] Claude permissions configured" -ForegroundColor Green
         } else {
             Write-Host "  [WARN]  Could not add standards submodule" -ForegroundColor Yellow
         }
