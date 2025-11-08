@@ -348,10 +348,127 @@ foreach ($file in $configFiles) {
 }
 
 # ============================================================================
-# Step 9: Initialize Git
+# Step 9: Create VS Code configuration
 # ============================================================================
 Write-Host ""
-Write-Host "[9] Initializing git repository..." -ForegroundColor Cyan
+Write-Host "[9] Creating VS Code tasks and launch config..." -ForegroundColor Cyan
+
+New-Item -ItemType Directory -Path ".vscode" -Force | Out-Null
+
+# Create tasks.json (using string template to preserve ${workspaceFolder})
+$tasksJson = @"
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "`${workspaceFolder}/$ProjectName.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "`$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "clean",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["clean", "`${workspaceFolder}/$ProjectName.sln"],
+      "problemMatcher": "`$msCompile"
+    },
+    {
+      "label": "rebuild",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "`${workspaceFolder}/$ProjectName.sln",
+        "--no-incremental",
+        "/property:GenerateFullPaths=true"
+      ],
+      "problemMatcher": "`$msCompile",
+      "dependsOn": "clean"
+    },
+    {
+      "label": "run",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["run", "--project", "`${workspaceFolder}/$ProjectName/$ProjectName.csproj"],
+      "problemMatcher": "`$msCompile",
+      "dependsOn": "build"
+    },
+    {
+      "label": "test",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["test", "`${workspaceFolder}/$ProjectName.sln"],
+      "problemMatcher": "`$msCompile",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "test-verbose",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["test", "`${workspaceFolder}/$ProjectName.sln", "--verbosity", "normal"],
+      "problemMatcher": "`$msCompile"
+    },
+    {
+      "label": "watch",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["watch", "run", "--project", "`${workspaceFolder}/$ProjectName/$ProjectName.csproj"],
+      "problemMatcher": "`$msCompile"
+    }
+  ]
+}
+"@
+
+$tasksJson | Out-File -FilePath ".vscode/tasks.json" -Encoding UTF8 -Force
+Write-Host "  [OK] .vscode/tasks.json created" -ForegroundColor Green
+
+# Create launch.json (using string template to preserve ${workspaceFolder})
+$launchJson = @"
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Launch (WinForms)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "`${workspaceFolder}/$ProjectName/bin/Debug/$Framework-windows/$ProjectName.dll",
+      "args": [],
+      "cwd": "`${workspaceFolder}/$ProjectName",
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": ".NET Attach",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ]
+}
+"@
+
+$launchJson | Out-File -FilePath ".vscode/launch.json" -Encoding UTF8 -Force
+Write-Host "  [OK] .vscode/launch.json created" -ForegroundColor Green
+
+# ============================================================================
+# Step 10: Initialize Git
+# ============================================================================
+Write-Host ""
+Write-Host "[10] Initializing git repository..." -ForegroundColor Cyan
 
 git init | Out-Null
 git add . | Out-Null
@@ -360,11 +477,11 @@ git commit -m "Initial commit: Project structure created by init-project.ps1" | 
 Write-Host "  [OK] Git repository initialized" -ForegroundColor Green
 
 # ============================================================================
-# Step 10: Integrate Coding Standards (if requested)
+# Step 11: Integrate Coding Standards (if requested)
 # ============================================================================
 if ($IntegrateStandards) {
     Write-Host ""
-    Write-Host "[10] Integrating coding standards..." -ForegroundColor Cyan
+    Write-Host "[11] Integrating coding standards..." -ForegroundColor Cyan
 
     # Auto-detect standards repo URL
     if (-not $StandardsRepo) {
@@ -442,11 +559,11 @@ if ($IntegrateStandards) {
 }
 
 # ============================================================================
-# Step 11: Install Git Hooks (if available)
+# Step 12: Install Git Hooks (if available)
 # ============================================================================
 if (Test-Path "$repoRoot/.githooks") {
     Write-Host ""
-    Write-Host "[11]  Installing git hooks..." -ForegroundColor Cyan
+    Write-Host "[12] Installing git hooks..." -ForegroundColor Cyan
 
     Copy-Item "$repoRoot/.githooks" -Destination ".githooks" -Recurse -Force
     git config core.hooksPath .githooks
