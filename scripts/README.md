@@ -22,55 +22,28 @@ Automated scripts to create new WinForms projects with all best practices pre-co
 
 ## 🚀 Quick Start
 
-### Option 1: Interactive Mode (Recommended for Beginners) ⭐
+### Windows (PowerShell) ⭐
 
-**New!** Interactive prompts guide you through the setup:
-
-```powershell
-# Windows (PowerShell)
-.\scripts\init-project-interactive.ps1
-
-# Linux/Mac (Bash) - Coming soon
-# ./scripts/init-project-interactive.sh
-```
-
-**You will be asked**:
-1. Project name? (e.g., CustomerManagement)
-2. Framework? (.NET 8.0 / 6.0 / Framework 4.8)
-3. Database? (SQLite / SQL Server / PostgreSQL / MySQL / None)
-4. Pattern? (MVP / MVVM / Simple)
-5. Include tests? (Y/n)
-6. Include example code? (y/N)
-7. Integrate standards? (Y/n)
-
-**Then confirms** your choices before creating the project!
-
----
-
-### Option 2: Command-Line Mode (For Automation/Scripts)
-
-Quick project creation with command-line parameters:
+Simply run the interactive script - it guides you through setup step-by-step:
 
 ```powershell
-# Windows (PowerShell) - Basic
-.\scripts\init-project.ps1 -ProjectName "MyWinFormsApp"
-
-# With options
-.\scripts\init-project.ps1 -ProjectName "MyApp" -Framework "net8.0" -IncludeTests
-
-# Advanced
-.\scripts\init-project.ps1 `
-    -ProjectName "CustomerManagement" `
-    -Framework "net8.0" `
-    -IncludeTests `
-    -IncludeExampleCode
+.\scripts\init-project.ps1
 ```
 
-```bash
-# Linux/Mac (Bash)
-chmod +x scripts/init-project.sh
-./scripts/init-project.sh MyWinFormsApp net8.0
-```
+**The script will ask you 7 questions**:
+1. **Project name?** → e.g., CustomerManagement
+2. **Framework?** → .NET 8.0 / 6.0 / Framework 4.8
+3. **Database?** → SQLite / SQL Server / PostgreSQL / MySQL / None
+4. **Pattern?** → MVP / MVVM / Simple
+5. **Include tests?** → Y/n
+6. **Include example code?** → y/N
+7. **Integrate standards?** → Y/n
+
+**Then shows confirmation** with all your choices before creating the project!
+
+### Linux/Mac (Bash)
+
+Bash version coming soon - use PowerShell on macOS for now (`brew install powershell`)
 
 ---
 
@@ -91,38 +64,6 @@ The interactive script supports multiple databases out of the box:
 - ✅ Generates appropriate connection string
 - ✅ Adds DbContext registration to Program.cs
 - ✅ Creates Data folder for EF Core code
-
----
-
-## 📋 Parameters (Command-Line Mode)
-
-### PowerShell Script
-
-| Parameter | Required | Default | Description |
-|-----------|----------|---------|-------------|
-| `-ProjectName` | ✅ Yes | - | Name of the project |
-| `-Framework` | ❌ No | `net8.0` | Target framework (net8.0, net6.0, net48) |
-| `-IncludeTests` | ❌ No | `$true` | Include test projects |
-| `-IncludeExampleCode` | ❌ No | `$false` | Include example MVP code |
-| `-IntegrateStandards` | ❌ No | `$true` | Integrate coding standards as submodule |
-
-### Examples
-
-```powershell
-# Basic project
-.\scripts\init-project.ps1 -ProjectName "SimpleApp"
-
-# .NET 6.0 project
-.\scripts\init-project.ps1 -ProjectName "LegacyApp" -Framework "net6.0"
-
-# Without tests
-.\scripts\init-project.ps1 -ProjectName "QuickPrototype" -IncludeTests:$false
-
-# With example code
-.\scripts\init-project.ps1 -ProjectName "LearningProject" -IncludeExampleCode
-```
-
-**Note**: Command-line mode uses SQLite by default. For other databases, use interactive mode.
 
 ---
 
@@ -191,80 +132,149 @@ MyWinFormsApp/
 ## 🎬 Example Session
 
 ```powershell
-PS> .\scripts\init-project.ps1 -ProjectName "CustomerApp"
+PS> .\scripts\init-project.ps1
 
-🚀 WinForms Project Initialization
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+========================================
+  WinForms Project Initialization
+========================================
 
-Project Name: CustomerApp
-Framework: net8.0
-Include Tests: True
-Include Example Code: False
+1. Project Name
+   Enter project name (e.g., CustomerManagement): CustomerApp
 
-1️⃣  Creating solution...
-  ✓ Solution created
+2. Target Framework
+   [1] .NET 8.0 (recommended)
+   [2] .NET 6.0
+   [3] .NET Framework 4.8
+   Select framework (1-3): 1
+   Selected: net8.0
 
-2️⃣  Creating WinForms project...
-  ✓ WinForms project created
+3. Database Provider
+   [1] SQLite (recommended for dev/testing)
+   [2] SQL Server
+   [3] PostgreSQL
+   [4] MySQL
+   [5] None (no database)
+   Select database (1-5): 2
+   Selected: SQLServer
 
-3️⃣  Creating folder structure...
-  ✓ Created Models/
-  ✓ Created Services/
-  ✓ Created Repositories/
-  ✓ Created Forms/
-  ✓ Created Views/
-  ✓ Created Presenters/
-  ✓ Created Data/
-  ✓ Created Utils/
-  ✓ Created Resources/
+4. Architecture Pattern
+   [1] MVP (Model-View-Presenter) - recommended
+   [2] MVVM (Model-View-ViewModel) - .NET 8+ only
+   [3] Simple (no pattern)
+   Select pattern (1-3): 1
+   Selected: MVP
 
-4️⃣  Adding NuGet packages...
-  Adding Microsoft.Extensions.DependencyInjection... ✓
-  Adding Microsoft.Extensions.Configuration.Json... ✓
-  Adding Serilog.Extensions.Logging... ✓
-  [... more packages ...]
-  Restoring packages... ✓
+5. Unit & Integration Tests
+   Include test projects? (Y/n): Y
+   Tests: Yes
 
-5️⃣  Creating appsettings.json...
-  ✓ appsettings.json created
+6. Example Code
+   Include example code? (y/N): N
+   Example code: No
 
-6️⃣  Creating Program.cs with DI...
-  ✓ Program.cs created with DI
+7. Coding Standards Integration
+   Integrate coding standards? (Y/n): Y
+   Standards: Yes
 
-7️⃣  Creating test projects...
-  ✓ Unit test project created
-  ✓ Integration test project created
-  Restoring test packages... ✓
+========================================
+Configuration Summary
+========================================
+Project Name    : CustomerApp
+Framework       : net8.0
+Database        : SQLServer
+Pattern         : MVP
+Tests           : Yes
+Example Code    : No
+Standards       : Yes
 
-8️⃣  Copying configuration files...
-  ✓ .editorconfig copied
-  ✓ .gitignore copied
+Proceed with these settings? (Y/n): Y
 
-9️⃣  Initializing git repository...
-  ✓ Git repository initialized
+[1] Creating solution...
+  [OK] Solution created
 
-🔟 Installing git hooks...
-  ✓ Git hooks installed
+[2] Creating WinForms project...
+  [OK] WinForms project created
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Project created successfully!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[3] Creating folder structure...
+  [OK] Created Models/
+  [OK] Created Services/
+  [OK] Created Repositories/
+  [OK] Created Forms/
+  [OK] Created Views/
+  [OK] Created Presenters/
+  [OK] Created Data/
+  [OK] Created Utils/
+  [OK] Created Resources/
 
-📂 Location: C:\Projects\CustomerApp
+[4] Adding NuGet packages...
+  Adding Microsoft.Extensions.DependencyInjection... [OK]
+  Adding Microsoft.EntityFrameworkCore.SqlServer... [OK]
+  Restoring packages... [OK]
 
-📋 Next steps:
+[5] Creating appsettings.json...
+  [OK] appsettings.json created
+  [INFO] Database: SQLServer
+  [INFO] Connection string: Server=localhost;Database=CustomerApp;...
+
+[6] Creating Program.cs with DI...
+  [OK] Program.cs created with DI
+
+[7] Creating test projects...
+  [OK] Unit test project created
+  [OK] Integration test project created
+
+[8] Setting up configuration files...
+  [OK] .editorconfig copied
+  [OK] .gitignore copied
+
+[9] Creating VS Code tasks and launch config...
+  [OK] .vscode/tasks.json created
+  [OK] .vscode/launch.json created
+
+[10] Initializing git repository...
+  [OK] Git repository initialized
+
+[11] Integrating coding standards...
+  [OK] Standards added as submodule
+  [OK] Standards integration complete
+
+========================================
+Project created successfully!
+========================================
+
+[Location] C:\Projects\CustomerApp
+
+[Configuration]
+  Project Name : CustomerApp
+  Framework    : net8.0
+  Database     : SQLServer
+  Pattern      : MVP
+  Tests        : Yes
+  Standards    : Yes
+
+[Next steps]
   1. cd CustomerApp
   2. Open CustomerApp.sln in Visual Studio
-  3. Start coding with MVP pattern!
+  3. Update connection string in appsettings.json
+  4. Create your DbContext and models
+  5. Run: dotnet ef migrations add InitialCreate
+  6. Run: dotnet ef database update
+  7. Start coding with MVP pattern!
 
-💡 Useful commands:
+[Useful commands]
   dotnet build              # Build project
   dotnet run --project CustomerApp  # Run application
   dotnet test               # Run all tests
+  dotnet ef migrations add <name>   # Create migration
+  dotnet ef database update         # Apply migrations
 
-📚 Documentation:
-  See USAGE_GUIDE.md for practical examples
-  See docs/ folder for detailed guidelines
+[Coding Standards]
+  .standards/USAGE_GUIDE.md     # Practical examples
+  .standards/CLAUDE.md          # AI assistant guide
+  .standards/docs/              # Full documentation
+  Type / in Claude Code         # See slash commands
+
+Happy coding! 🚀
 ```
 
 ---
@@ -408,35 +418,41 @@ $baseFormContent | Out-File "$ProjectName/Forms/BaseForm.cs" -Encoding UTF8
 
 ## 💡 Tips & Tricks
 
-### 1. Create Multiple Projects Quickly
+### 1. Quick Setup for Different Project Types
 
+**Simple CRUD app**:
+- Choose SQLite for database
+- Choose MVP pattern
+- Include tests: Yes
+
+**Enterprise app**:
+- Choose SQL Server for database
+- Choose MVP pattern
+- Include tests: Yes
+- Integrate standards: Yes
+
+**Prototype/Demo**:
+- Choose None for database
+- Choose Simple pattern
+- Include tests: No
+
+### 2. After Creation
+
+Always verify the setup works:
 ```powershell
-# Create batch of projects
-$projects = @("CustomerApp", "OrderApp", "InventoryApp")
-foreach ($proj in $projects) {
-    .\scripts\init-project.ps1 -ProjectName $proj
-}
+cd YourProject
+dotnet build
+dotnet test
 ```
 
-### 2. Use Templates for Different Project Types
+### 3. Team Collaboration
 
+The standards submodule ensures everyone uses the same coding standards:
 ```powershell
-# Simple CRUD app
-.\scripts\init-project.ps1 -ProjectName "SimpleCRUD" -IncludeExampleCode
-
-# Complex enterprise app
-.\scripts\init-project.ps1 -ProjectName "EnterpriseApp" -Framework "net8.0" -IncludeTests
-```
-
-### 3. Integrate with CI/CD
-
-```yaml
-# GitHub Actions example
-- name: Create test project
-  run: |
-    ./scripts/init-project.ps1 -ProjectName "TestApp" -IncludeTests
-    dotnet build TestApp
-    dotnet test TestApp
+# Update standards in existing project
+cd .standards
+git pull
+cd ..
 ```
 
 ---
@@ -453,7 +469,7 @@ foreach ($proj in $projects) {
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Or run with bypass
-powershell -ExecutionPolicy Bypass -File .\scripts\init-project.ps1 -ProjectName "MyApp"
+powershell -ExecutionPolicy Bypass -File .\scripts\init-project.ps1
 ```
 
 ### "dotnet: command not found"
@@ -517,5 +533,5 @@ git --version
 
 ---
 
-**Last Updated**: 2025-11-07
-**Version**: 1.0
+**Last Updated**: 2025-11-08
+**Version**: 2.0 - Interactive mode with multi-database support

@@ -1,38 +1,116 @@
-# WinForms Project Initialization Script
-# Creates a new WinForms project following coding standards
-
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$ProjectName,
-
-    [Parameter(Mandatory=$false)]
-    [ValidateSet('net8.0', 'net6.0', 'net48')]
-    [string]$Framework = 'net8.0',
-
-    [Parameter(Mandatory=$false)]
-    [switch]$IncludeTests = $true,
-
-    [Parameter(Mandatory=$false)]
-    [switch]$IncludeExampleCode = $false,
-
-    [Parameter(Mandatory=$false)]
-    [switch]$IntegrateStandards = $true,
-
-    [Parameter(Mandatory=$false)]
-    [string]$StandardsRepo = ""
-)
+# WinForms Project Initialization Script (Interactive)
+# Creates a new WinForms project following coding standards with interactive prompts
 
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
-Write-Host "WinForms Project Initialization" -ForegroundColor Green
-Write-Host "================================================" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  WinForms Project Initialization" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Project Name: $ProjectName"
-Write-Host "Framework: $Framework"
-Write-Host "Include Tests: $IncludeTests"
-Write-Host "Include Example Code: $IncludeExampleCode"
-Write-Host "Integrate Standards: $IntegrateStandards"
+
+# ============================================================================
+# Interactive Questions
+# ============================================================================
+
+# Question 1: Project Name
+Write-Host "1. Project Name" -ForegroundColor Yellow
+$ProjectName = Read-Host "   Enter project name (e.g., CustomerManagement)"
+if ([string]::IsNullOrWhiteSpace($ProjectName)) {
+    Write-Host "[ERROR] Project name cannot be empty!" -ForegroundColor Red
+    exit 1
+}
+Write-Host ""
+
+# Question 2: Framework
+Write-Host "2. Target Framework" -ForegroundColor Yellow
+Write-Host "   [1] .NET 8.0 (recommended)" -ForegroundColor Gray
+Write-Host "   [2] .NET 6.0" -ForegroundColor Gray
+Write-Host "   [3] .NET Framework 4.8" -ForegroundColor Gray
+$frameworkChoice = Read-Host "   Select framework (1-3)"
+$Framework = switch ($frameworkChoice) {
+    "1" { "net8.0" }
+    "2" { "net6.0" }
+    "3" { "net48" }
+    default { "net8.0" }
+}
+Write-Host "   Selected: $Framework" -ForegroundColor Green
+Write-Host ""
+
+# Question 3: Database
+Write-Host "3. Database Provider" -ForegroundColor Yellow
+Write-Host "   [1] SQLite (recommended for dev/testing)" -ForegroundColor Gray
+Write-Host "   [2] SQL Server" -ForegroundColor Gray
+Write-Host "   [3] PostgreSQL" -ForegroundColor Gray
+Write-Host "   [4] MySQL" -ForegroundColor Gray
+Write-Host "   [5] None (no database)" -ForegroundColor Gray
+$dbChoice = Read-Host "   Select database (1-5)"
+$Database = switch ($dbChoice) {
+    "1" { "SQLite" }
+    "2" { "SQLServer" }
+    "3" { "PostgreSQL" }
+    "4" { "MySQL" }
+    "5" { "None" }
+    default { "SQLite" }
+}
+Write-Host "   Selected: $Database" -ForegroundColor Green
+Write-Host ""
+
+# Question 4: Architecture Pattern
+Write-Host "4. Architecture Pattern" -ForegroundColor Yellow
+Write-Host "   [1] MVP (Model-View-Presenter) - recommended" -ForegroundColor Gray
+Write-Host "   [2] MVVM (Model-View-ViewModel) - .NET 8+ only" -ForegroundColor Gray
+Write-Host "   [3] Simple (no pattern)" -ForegroundColor Gray
+$patternChoice = Read-Host "   Select pattern (1-3)"
+$Pattern = switch ($patternChoice) {
+    "1" { "MVP" }
+    "2" { "MVVM" }
+    "3" { "Simple" }
+    default { "MVP" }
+}
+Write-Host "   Selected: $Pattern" -ForegroundColor Green
+Write-Host ""
+
+# Question 5: Include Tests
+Write-Host "5. Unit & Integration Tests" -ForegroundColor Yellow
+$includeTestsInput = Read-Host "   Include test projects? (Y/n)"
+$IncludeTests = $includeTestsInput -ne "n" -and $includeTestsInput -ne "N"
+Write-Host "   Tests: $(if ($IncludeTests) { 'Yes' } else { 'No' })" -ForegroundColor Green
+Write-Host ""
+
+# Question 6: Include Example Code
+Write-Host "6. Example Code" -ForegroundColor Yellow
+$includeExampleInput = Read-Host "   Include example code? (y/N)"
+$IncludeExampleCode = $includeExampleInput -eq "y" -or $includeExampleInput -eq "Y"
+Write-Host "   Example code: $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })" -ForegroundColor Green
+Write-Host ""
+
+# Question 7: Integrate Standards
+Write-Host "7. Coding Standards Integration" -ForegroundColor Yellow
+$integrateStandardsInput = Read-Host "   Integrate coding standards? (Y/n)"
+$IntegrateStandards = $integrateStandardsInput -ne "n" -and $integrateStandardsInput -ne "N"
+Write-Host "   Standards: $(if ($IntegrateStandards) { 'Yes' } else { 'No' })" -ForegroundColor Green
+Write-Host ""
+
+# ============================================================================
+# Confirmation
+# ============================================================================
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "Configuration Summary" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "Project Name    : $ProjectName"
+Write-Host "Framework       : $Framework"
+Write-Host "Database        : $Database"
+Write-Host "Pattern         : $Pattern"
+Write-Host "Tests           : $(if ($IncludeTests) { 'Yes' } else { 'No' })"
+Write-Host "Example Code    : $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })"
+Write-Host "Standards       : $(if ($IntegrateStandards) { 'Yes' } else { 'No' })"
+Write-Host ""
+$confirm = Read-Host "Proceed with these settings? (Y/n)"
+if ($confirm -eq "n" -or $confirm -eq "N") {
+    Write-Host "[CANCELLED] Project initialization cancelled" -ForegroundColor Yellow
+    exit 0
+}
 Write-Host ""
 
 # ============================================================================
@@ -72,12 +150,23 @@ $folders = @(
     @{Name="Services"; Template="// Place your business logic services here`n// Example: CustomerService.cs, OrderService.cs`n"},
     @{Name="Repositories"; Template="// Place your data access repositories here`n// Example: CustomerRepository.cs, OrderRepository.cs`n"},
     @{Name="Forms"; Template=$null},  # MainForm will be moved here
-    @{Name="Views"; Template="// Place your view interfaces here (for MVP pattern)`n// Example: ICustomerView.cs, IOrderView.cs`n"},
-    @{Name="Presenters"; Template="// Place your presenters here (for MVP pattern)`n// Example: CustomerPresenter.cs, OrderPresenter.cs`n"},
-    @{Name="Data"; Template="// Place your DbContext and configurations here`n// Example: AppDbContext.cs, EntityConfigurations/`n"},
     @{Name="Utils"; Template="// Place your utility classes and extensions here`n// Example: StringExtensions.cs, DateHelper.cs`n"},
     @{Name="Resources"; Template="// Place your resources here`n// Example: Icons/, Images/, Strings.resx`n"}
 )
+
+# Add pattern-specific folders
+if ($Pattern -eq "MVP") {
+    $folders += @{Name="Views"; Template="// Place your view interfaces here (for MVP pattern)`n// Example: ICustomerView.cs, IOrderView.cs`n"}
+    $folders += @{Name="Presenters"; Template="// Place your presenters here (for MVP pattern)`n// Example: CustomerPresenter.cs, OrderPresenter.cs`n"}
+}
+elseif ($Pattern -eq "MVVM") {
+    $folders += @{Name="ViewModels"; Template="// Place your view models here (for MVVM pattern)`n// Example: CustomerViewModel.cs, OrderViewModel.cs`n"}
+}
+
+# Add Data folder if database is selected
+if ($Database -ne "None") {
+    $folders += @{Name="Data"; Template="// Place your DbContext and configurations here`n// Example: AppDbContext.cs, EntityConfigurations/`n"}
+}
 
 foreach ($folder in $folders) {
     New-Item -ItemType Directory -Path "$ProjectName/$($folder.Name)" -Force | Out-Null
@@ -125,10 +214,26 @@ $packages = @(
     "Microsoft.Extensions.Configuration.Json",
     "Microsoft.Extensions.Logging",
     "Serilog.Extensions.Logging",
-    "Serilog.Sinks.File",
-    "Microsoft.EntityFrameworkCore.Sqlite",
-    "Microsoft.EntityFrameworkCore.Design"
+    "Serilog.Sinks.File"
 )
+
+# Add database-specific packages
+if ($Database -eq "SQLite") {
+    $packages += "Microsoft.EntityFrameworkCore.Sqlite"
+    $packages += "Microsoft.EntityFrameworkCore.Design"
+}
+elseif ($Database -eq "SQLServer") {
+    $packages += "Microsoft.EntityFrameworkCore.SqlServer"
+    $packages += "Microsoft.EntityFrameworkCore.Design"
+}
+elseif ($Database -eq "PostgreSQL") {
+    $packages += "Npgsql.EntityFrameworkCore.PostgreSQL"
+    $packages += "Microsoft.EntityFrameworkCore.Design"
+}
+elseif ($Database -eq "MySQL") {
+    $packages += "Pomelo.EntityFrameworkCore.MySql"
+    $packages += "Microsoft.EntityFrameworkCore.Design"
+}
 
 foreach ($package in $packages) {
     Write-Host "  Adding $package..." -NoNewline
@@ -146,19 +251,12 @@ $csprojContent = Get-Content $csprojPath -Raw
 
 # Add ItemGroup for README files if not already present
 if (-not $csprojContent.Contains("<None Include=")) {
-    $readmeItemGroup = @"
+    $readmeFiles = Get-ChildItem -Path "$ProjectName" -Recurse -Filter "README.md" | ForEach-Object {
+        $relativePath = $_.FullName.Replace("$((Get-Location).Path)\$ProjectName\", "").Replace("\", "/")
+        "    <None Include=`"$relativePath`" />"
+    }
 
-  <ItemGroup>
-    <None Include="Models\README.md" />
-    <None Include="Services\README.md" />
-    <None Include="Repositories\README.md" />
-    <None Include="Views\README.md" />
-    <None Include="Presenters\README.md" />
-    <None Include="Data\README.md" />
-    <None Include="Utils\README.md" />
-    <None Include="Resources\README.md" />
-  </ItemGroup>
-"@
+    $readmeItemGroup = "`n  <ItemGroup>`n" + ($readmeFiles -join "`n") + "`n  </ItemGroup>"
     $endProjectTag = '</Project>'
     $csprojContent = $csprojContent.Replace($endProjectTag, $readmeItemGroup + [Environment]::NewLine + $endProjectTag)
     $csprojContent | Out-File -FilePath $csprojPath -Encoding UTF8 -Force
@@ -170,16 +268,30 @@ if (-not $csprojContent.Contains("<None Include=")) {
 Write-Host ""
 Write-Host "[5] Creating appsettings.json..." -ForegroundColor Cyan
 
+# Generate connection string based on database choice
+$connectionString = switch ($Database) {
+    "SQLite" { "Data Source=$ProjectName.db" }
+    "SQLServer" { "Server=localhost;Database=$ProjectName;Integrated Security=true;TrustServerCertificate=true;" }
+    "PostgreSQL" { "Host=localhost;Database=$ProjectName;Username=postgres;Password=your_password" }
+    "MySQL" { "Server=localhost;Database=$ProjectName;User=root;Password=your_password;" }
+    "None" { "" }
+    default { "Data Source=$ProjectName.db" }
+}
+
 $appsettingsHash = @{
-    ConnectionStrings = @{
-        DefaultConnection = "Data Source=$ProjectName.db"
-    }
     Logging = @{
         LogLevel = @{
             Default = "Information"
             Microsoft = "Warning"
             "Microsoft.EntityFrameworkCore" = "Information"
         }
+    }
+}
+
+# Add connection string if database is selected
+if ($Database -ne "None") {
+    $appsettingsHash["ConnectionStrings"] = @{
+        DefaultConnection = $connectionString
     }
 }
 
@@ -201,6 +313,10 @@ $csprojContent = $csprojContent.Replace($endProjectTag, $itemGroupXml + [Environ
 $csprojContent | Out-File -FilePath $csprojPath -Encoding UTF8
 
 Write-Host "  [OK] appsettings.json created" -ForegroundColor Green
+if ($Database -ne "None") {
+    Write-Host "  [INFO] Database: $Database" -ForegroundColor Cyan
+    Write-Host "  [INFO] Connection string: $connectionString" -ForegroundColor Gray
+}
 
 # ============================================================================
 # Step 6: Create Program.cs with DI
@@ -208,23 +324,61 @@ Write-Host "  [OK] appsettings.json created" -ForegroundColor Green
 Write-Host ""
 Write-Host "[6] Creating Program.cs with DI..." -ForegroundColor Cyan
 
-$programCs = @'
+# Generate DbContext registration code based on database
+$dbContextCode = if ($Database -ne "None") {
+    switch ($Database) {
+        "SQLite" {
+            @"
+            // Database
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+"@
+        }
+        "SQLServer" {
+            @"
+            // Database
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+"@
+        }
+        "PostgreSQL" {
+            @"
+            // Database
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+"@
+        }
+        "MySQL" {
+            @"
+            // Database
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseMySql(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    ServerVersion.AutoDetect(configuration.GetConnectionString("DefaultConnection"))));
+"@
+        }
+    }
+} else {
+    "            // No database configured"
+}
+
+$programCs = @"
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using {0}.Forms;
+using $ProjectName.Forms;
 
-namespace {0}
-{{
+namespace $ProjectName
+{
     internal static class Program
-    {{
+    {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
-        {{
+        {
             // Configure Serilog
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
@@ -232,7 +386,7 @@ namespace {0}
                 .CreateLogger();
 
             try
-            {{
+            {
                 ApplicationConfiguration.Initialize();
 
                 // Build configuration
@@ -249,50 +403,48 @@ namespace {0}
                 // Run application
                 var mainForm = serviceProvider.GetRequiredService<MainForm>();
                 Application.Run(mainForm);
-            }}
+            }
             catch (Exception ex)
-            {{
+            {
                 Log.Fatal(ex, "Application terminated unexpectedly");
                 MessageBox.Show(
-                    $"Fatal error: {{ex.Message}}",
+                    `$"Fatal error: {ex.Message}",
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
-            }}
+            }
             finally
-            {{
+            {
                 Log.CloseAndFlush();
-            }}
-        }}
+            }
+        }
 
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-        {{
+        {
             // Configuration
             services.AddSingleton(configuration);
 
             // Logging
             services.AddLogging(builder =>
-            {{
+            {
                 builder.ClearProviders();
                 builder.AddSerilog();
-            }});
+            });
+
+$dbContextCode
 
             // TODO: Add your services here
-            // services.AddDbContext<AppDbContext>(options =>
-            //     options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
-
             // services.AddScoped<IYourRepository, YourRepository>();
             // services.AddScoped<IYourService, YourService>();
 
             // Forms
             services.AddTransient<MainForm>();
-        }}
-    }}
-}}
-'@
+        }
+    }
+}
+"@
 
-$programCsFinal = $programCs -f $ProjectName
-$programCsFinal | Out-File -FilePath "$ProjectName/Program.cs" -Encoding UTF8 -Force
+$programCs | Out-File -FilePath "$ProjectName/Program.cs" -Encoding UTF8 -Force
 
 Write-Host "  [OK] Program.cs created with DI" -ForegroundColor Green
 
@@ -312,13 +464,28 @@ if ($IncludeTests) {
 
     Write-Host "  [OK] Unit test project created" -ForegroundColor Green
 
-    # Integration tests
-    dotnet new xunit -n "$ProjectName.IntegrationTests" -f $Framework
-    dotnet sln add "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
-    dotnet add "$ProjectName.IntegrationTests" reference $ProjectName
-    dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.Sqlite --no-restore
+    # Integration tests (only if database is selected)
+    if ($Database -ne "None") {
+        dotnet new xunit -n "$ProjectName.IntegrationTests" -f $Framework
+        dotnet sln add "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
+        dotnet add "$ProjectName.IntegrationTests" reference $ProjectName
 
-    Write-Host "  [OK] Integration test project created" -ForegroundColor Green
+        # Add database package to integration tests
+        if ($Database -eq "SQLite") {
+            dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.Sqlite --no-restore
+        }
+        elseif ($Database -eq "SQLServer") {
+            dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.SqlServer --no-restore
+        }
+        elseif ($Database -eq "PostgreSQL") {
+            dotnet add "$ProjectName.IntegrationTests" package Npgsql.EntityFrameworkCore.PostgreSQL --no-restore
+        }
+        elseif ($Database -eq "MySQL") {
+            dotnet add "$ProjectName.IntegrationTests" package Pomelo.EntityFrameworkCore.MySql --no-restore
+        }
+
+        Write-Host "  [OK] Integration test project created" -ForegroundColor Green
+    }
 
     # Restore packages
     Write-Host "  Restoring test packages..." -NoNewline
@@ -355,7 +522,7 @@ Write-Host "[9] Creating VS Code tasks and launch config..." -ForegroundColor Cy
 
 New-Item -ItemType Directory -Path ".vscode" -Force | Out-Null
 
-# Create tasks.json (using string template to preserve ${workspaceFolder})
+# Create tasks.json
 $tasksJson = @"
 {
   "version": "2.0.0",
@@ -377,34 +544,6 @@ $tasksJson = @"
       }
     },
     {
-      "label": "clean",
-      "command": "dotnet",
-      "type": "process",
-      "args": ["clean", "`${workspaceFolder}/$ProjectName.sln"],
-      "problemMatcher": "`$msCompile"
-    },
-    {
-      "label": "rebuild",
-      "command": "dotnet",
-      "type": "process",
-      "args": [
-        "build",
-        "`${workspaceFolder}/$ProjectName.sln",
-        "--no-incremental",
-        "/property:GenerateFullPaths=true"
-      ],
-      "problemMatcher": "`$msCompile",
-      "dependsOn": "clean"
-    },
-    {
-      "label": "run",
-      "command": "dotnet",
-      "type": "process",
-      "args": ["run", "--project", "`${workspaceFolder}/$ProjectName/$ProjectName.csproj"],
-      "problemMatcher": "`$msCompile",
-      "dependsOn": "build"
-    },
-    {
       "label": "test",
       "command": "dotnet",
       "type": "process",
@@ -414,20 +553,6 @@ $tasksJson = @"
         "kind": "test",
         "isDefault": true
       }
-    },
-    {
-      "label": "test-verbose",
-      "command": "dotnet",
-      "type": "process",
-      "args": ["test", "`${workspaceFolder}/$ProjectName.sln", "--verbosity", "normal"],
-      "problemMatcher": "`$msCompile"
-    },
-    {
-      "label": "watch",
-      "command": "dotnet",
-      "type": "process",
-      "args": ["watch", "run", "--project", "`${workspaceFolder}/$ProjectName/$ProjectName.csproj"],
-      "problemMatcher": "`$msCompile"
     }
   ]
 }
@@ -436,7 +561,7 @@ $tasksJson = @"
 $tasksJson | Out-File -FilePath ".vscode/tasks.json" -Encoding UTF8 -Force
 Write-Host "  [OK] .vscode/tasks.json created" -ForegroundColor Green
 
-# Create launch.json (using string template to preserve ${workspaceFolder})
+# Create launch.json
 $launchJson = @"
 {
   "version": "0.2.0",
@@ -451,11 +576,6 @@ $launchJson = @"
       "cwd": "`${workspaceFolder}/$ProjectName",
       "console": "internalConsole",
       "stopAtEntry": false
-    },
-    {
-      "name": ".NET Attach",
-      "type": "coreclr",
-      "request": "attach"
     }
   ]
 }
@@ -472,7 +592,7 @@ Write-Host "[10] Initializing git repository..." -ForegroundColor Cyan
 
 git init | Out-Null
 git add . | Out-Null
-git commit -m "Initial commit: Project structure created by init-project.ps1" | Out-Null
+git commit -m "Initial commit: Project structure created by init-project-interactive.ps1" | Out-Null
 
 Write-Host "  [OK] Git repository initialized" -ForegroundColor Green
 
@@ -484,16 +604,15 @@ if ($IntegrateStandards) {
     Write-Host "[11] Integrating coding standards..." -ForegroundColor Cyan
 
     # Auto-detect standards repo URL
-    if (-not $StandardsRepo) {
-        Push-Location $repoRoot
-        $StandardsRepo = git remote get-url origin 2>$null
-        Pop-Location
-    }
+    $StandardsRepo = ""
+    Push-Location $repoRoot
+    $StandardsRepo = git remote get-url origin 2>$null
+    Pop-Location
 
     if ($StandardsRepo) {
         Write-Host "  Using standards repo: $StandardsRepo"
 
-        # Add as submodule (suppress all output)
+        # Add as submodule
         Start-Process git -ArgumentList "submodule","add",$StandardsRepo,".standards" -NoNewWindow -Wait -RedirectStandardError "$env:TEMP\git_stderr.txt" -RedirectStandardOutput "$env:TEMP\git_stdout.txt"
 
         # Check if submodule was actually added
@@ -501,121 +620,10 @@ if ($IntegrateStandards) {
             git submodule update --init --recursive *>&1 | Out-Null
             Write-Host "  [OK] Standards added as submodule" -ForegroundColor Green
 
-            # Try to create symlinks (requires Admin on Windows)
-            $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-            if ($isAdmin) {
-                # Symlink for .claude (slash commands)
-                try {
-                    New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude" -ErrorAction Stop | Out-Null
-                    Write-Host "  [OK] Symlink created: .claude" -ForegroundColor Green
-                } catch {
-                    Write-Host "  [WARN]  Could not create .claude symlink" -ForegroundColor Yellow
-                }
-
-                # Symlink for templates
-                try {
-                    New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates" -ErrorAction Stop | Out-Null
-                    Write-Host "  [OK] Symlink created: templates" -ForegroundColor Green
-                } catch {
-                    Write-Host "  [WARN]  Could not create templates symlink" -ForegroundColor Yellow
-                }
-
-                # Symlink for config files (auto-update when standards update)
-                $configFiles = @(".editorconfig", ".gitignore")
-                foreach ($file in $configFiles) {
-                    if (Test-Path ".standards/$file") {
-                        try {
-                            # Remove copied file first
-                            if (Test-Path $file) {
-                                Remove-Item $file -Force
-                            }
-                            # Create symlink
-                            New-Item -ItemType SymbolicLink -Path $file -Target ".standards\$file" -ErrorAction Stop | Out-Null
-                            Write-Host "  [OK] Symlink created: $file (auto-updates)" -ForegroundColor Green
-                        } catch {
-                            Write-Host "  [WARN]  Could not create $file symlink, using copy" -ForegroundColor Yellow
-                            # Restore copied version if symlink fails
-                            Copy-Item ".standards/$file" -Destination "." -Force
-                        }
-                    }
-                }
-            } else {
-                Write-Host "  [WARN]  Run as Admin to create symlinks for auto-update" -ForegroundColor Yellow
-                Write-Host "         Config files (.editorconfig, .gitignore) were copied" -ForegroundColor Yellow
-                Write-Host "         Use update-standards.ps1 script to sync them manually" -ForegroundColor Yellow
-            }
-
             # Commit submodule
             git add .gitmodules .standards
             git commit -m "Add coding standards as submodule" | Out-Null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
-
-            # Create .claude/settings.local.json with pre-approved permissions
-            Write-Host ""
-            Write-Host "  Creating .claude/settings.local.json with permissions..." -ForegroundColor Cyan
-
-            # Get current directory path for permissions
-            $currentPath = (Get-Location).Path -replace '\\', '/'
-
-            $settingsJson = @"
-{
-  "permissions": {
-    "allow": [
-      "Bash(dotnet build:*)",
-      "Bash(dotnet run:*)",
-      "Bash(dotnet test:*)",
-      "Bash(dotnet clean:*)",
-      "Bash(dotnet restore:*)",
-      "Bash(dotnet add:*)",
-      "Bash(dotnet new:*)",
-      "Bash(dotnet publish:*)",
-      "Bash(dotnet pack:*)",
-      "Bash(dotnet ef migrations:*)",
-      "Bash(dotnet ef database:*)",
-      "Bash(dotnet ef dbcontext:*)",
-      "Bash(git status:*)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git submodule:*)",
-      "Bash(powershell.exe:*)",
-      "Bash(pwsh:*)",
-      "Bash(cat:*)",
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(grep:*)",
-      "Bash(tree:*)",
-      "Bash(tail:*)",
-      "Bash(head:*)",
-      "Bash(wc:*)",
-      "Read($currentPath/**)",
-      "Edit($currentPath/**)",
-      "Write($currentPath/**)",
-      "Glob($currentPath/**)",
-      "Grep($currentPath/**)",
-      "SlashCommand(*)"
-    ],
-    "deny": [
-      "Bash(git push:*)",
-      "Bash(git pull:*)",
-      "Bash(git checkout:*)",
-      "Bash(git branch -D:*)",
-      "Bash(git merge:*)",
-      "Bash(git rebase:*)",
-      "Bash(git reset --hard:*)",
-      "Bash(rm -rf:*)",
-      "Bash(chmod:*)"
-    ],
-    "ask": []
-  }
-}
-"@
-
-            New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
-            $settingsJson | Out-File -FilePath ".claude/settings.local.json" -Encoding UTF8 -Force
-            Write-Host "  [OK] Claude permissions configured" -ForegroundColor Green
         } else {
             Write-Host "  [WARN]  Could not add standards submodule" -ForegroundColor Yellow
         }
@@ -625,38 +633,45 @@ if ($IntegrateStandards) {
 }
 
 # ============================================================================
-# Step 12: Install Git Hooks (if available)
-# ============================================================================
-if (Test-Path "$repoRoot/.githooks") {
-    Write-Host ""
-    Write-Host "[12] Installing git hooks..." -ForegroundColor Cyan
-
-    Copy-Item "$repoRoot/.githooks" -Destination ".githooks" -Recurse -Force
-    git config core.hooksPath .githooks
-
-    Write-Host "  [OK] Git hooks installed" -ForegroundColor Green
-}
-
-# ============================================================================
 # Summary
 # ============================================================================
 Write-Host ""
-Write-Host "================================================" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
 Write-Host "Project created successfully!" -ForegroundColor Green
-Write-Host "================================================" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "[Location] $(Get-Location)" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "[Configuration]" -ForegroundColor Yellow
+Write-Host "  Project Name : $ProjectName"
+Write-Host "  Framework    : $Framework"
+Write-Host "  Database     : $Database"
+Write-Host "  Pattern      : $Pattern"
+Write-Host "  Tests        : $(if ($IncludeTests) { 'Yes' } else { 'No' })"
+Write-Host "  Standards    : $(if ($IntegrateStandards) { 'Yes' } else { 'No' })"
 Write-Host ""
 Write-Host "[Next steps]" -ForegroundColor Yellow
 Write-Host "  1. cd $ProjectName"
 Write-Host "  2. Open $ProjectName.sln in Visual Studio"
-Write-Host "  3. Start coding with MVP pattern!"
+if ($Database -ne "None") {
+    Write-Host "  3. Update connection string in appsettings.json"
+    Write-Host "  4. Create your DbContext and models"
+    Write-Host "  5. Run: dotnet ef migrations add InitialCreate"
+    Write-Host "  6. Run: dotnet ef database update"
+    Write-Host "  7. Start coding with $Pattern pattern!"
+} else {
+    Write-Host "  3. Start coding with $Pattern pattern!"
+}
 Write-Host ""
 Write-Host "[Useful commands]" -ForegroundColor Yellow
 Write-Host "  dotnet build              # Build project"
 Write-Host "  dotnet run --project $ProjectName  # Run application"
 if ($IncludeTests) {
     Write-Host "  dotnet test               # Run all tests"
+}
+if ($Database -ne "None") {
+    Write-Host "  dotnet ef migrations add <name>   # Create migration"
+    Write-Host "  dotnet ef database update         # Apply migrations"
 }
 Write-Host ""
 
@@ -665,17 +680,11 @@ if ($IntegrateStandards -and (Test-Path ".standards")) {
     Write-Host "  .standards/USAGE_GUIDE.md     # Practical examples"
     Write-Host "  .standards/CLAUDE.md          # AI assistant guide"
     Write-Host "  .standards/docs/              # Full documentation"
-    if (Test-Path ".claude") {
-        Write-Host "  Type / in Claude Code         # See slash commands"
-    } else {
-        Write-Host "  .standards/.claude/commands/  # Slash commands"
-    }
+    Write-Host "  Type / in Claude Code         # See slash commands"
     Write-Host ""
     Write-Host "[Update standards]" -ForegroundColor Yellow
     Write-Host "  cd .standards && git pull && cd .."
-} else {
-    Write-Host "[Documentation]" -ForegroundColor Yellow
-    Write-Host "  See USAGE_GUIDE.md for practical examples"
-    Write-Host "  See docs/ folder for detailed guidelines"
 }
+Write-Host ""
+Write-Host "Happy coding! 🚀" -ForegroundColor Green
 Write-Host ""
