@@ -333,7 +333,7 @@ if ($IntegrateStandards) {
         Write-Host "  Using standards repo: $StandardsRepo"
 
         # Add as submodule
-        git submodule add $StandardsRepo .standards 2>$null
+        git submodule add $StandardsRepo .standards 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) {
             git submodule update --init --recursive | Out-Null
             Write-Host "  [OK] Standards added as submodule" -ForegroundColor Green
