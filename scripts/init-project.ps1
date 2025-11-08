@@ -285,22 +285,24 @@ if ($IncludeTests) {
 }
 
 # ============================================================================
-# Step 8: Copy .editorconfig and .gitignore
+# Step 8: Setup configuration files (.editorconfig and .gitignore)
 # ============================================================================
 Write-Host ""
-Write-Host "[8] Copying configuration files..." -ForegroundColor Cyan
+Write-Host "[8] Setting up configuration files..." -ForegroundColor Cyan
 
 $scriptPath = Split-Path -Parent $PSCommandPath
 $repoRoot = Split-Path -Parent $scriptPath
 
-if (Test-Path "$repoRoot/.editorconfig") {
-    Copy-Item "$repoRoot/.editorconfig" -Destination "." -Force
-    Write-Host "  [OK] .editorconfig copied" -ForegroundColor Green
-}
+# These files will be symlinked if standards are integrated (auto-update)
+# Otherwise they will be copied (one-time)
+$configFiles = @(".editorconfig", ".gitignore")
 
-if (Test-Path "$repoRoot/.gitignore") {
-    Copy-Item "$repoRoot/.gitignore" -Destination "." -Force
-    Write-Host "  [OK] .gitignore copied" -ForegroundColor Green
+foreach ($file in $configFiles) {
+    if (Test-Path "$repoRoot/$file") {
+        # Just copy for now - will be converted to symlink in step 10 if integrating standards
+        Copy-Item "$repoRoot/$file" -Destination "." -Force
+        Write-Host "  [OK] $file copied" -ForegroundColor Green
+    }
 }
 
 # ============================================================================
@@ -344,21 +346,45 @@ if ($IntegrateStandards) {
             $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
             if ($isAdmin) {
+                # Symlink for .claude (slash commands)
                 try {
                     New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude" -ErrorAction Stop | Out-Null
                     Write-Host "  [OK] Symlink created: .claude" -ForegroundColor Green
                 } catch {
-                    Write-Host "  [WARN]  Could not create .claude symlink (not critical)" -ForegroundColor Yellow
+                    Write-Host "  [WARN]  Could not create .claude symlink" -ForegroundColor Yellow
                 }
 
+                # Symlink for templates
                 try {
                     New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates" -ErrorAction Stop | Out-Null
                     Write-Host "  [OK] Symlink created: templates" -ForegroundColor Green
                 } catch {
-                    Write-Host "  [WARN]  Could not create templates symlink (not critical)" -ForegroundColor Yellow
+                    Write-Host "  [WARN]  Could not create templates symlink" -ForegroundColor Yellow
+                }
+
+                # Symlink for config files (auto-update when standards update)
+                $configFiles = @(".editorconfig", ".gitignore")
+                foreach ($file in $configFiles) {
+                    if (Test-Path ".standards/$file") {
+                        try {
+                            # Remove copied file first
+                            if (Test-Path $file) {
+                                Remove-Item $file -Force
+                            }
+                            # Create symlink
+                            New-Item -ItemType SymbolicLink -Path $file -Target ".standards\$file" -ErrorAction Stop | Out-Null
+                            Write-Host "  [OK] Symlink created: $file (auto-updates)" -ForegroundColor Green
+                        } catch {
+                            Write-Host "  [WARN]  Could not create $file symlink, using copy" -ForegroundColor Yellow
+                            # Restore copied version if symlink fails
+                            Copy-Item ".standards/$file" -Destination "." -Force
+                        }
+                    }
                 }
             } else {
-                Write-Host "  [WARN]  Run as Admin to create symlinks (optional)" -ForegroundColor Yellow
+                Write-Host "  [WARN]  Run as Admin to create symlinks for auto-update" -ForegroundColor Yellow
+                Write-Host "         Config files (.editorconfig, .gitignore) were copied" -ForegroundColor Yellow
+                Write-Host "         Use update-standards.ps1 script to sync them manually" -ForegroundColor Yellow
             }
 
             # Commit submodule
