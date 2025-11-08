@@ -416,3 +416,7 @@ $RECYCLE.BIN/
 *.bak
 *.old
 *.backup
+
+# Plans reports (generated files, except .gitkeep)
+plans/reports/*
+!plans/reports/.gitkeep

@@ -1,0 +1,64 @@
+{
+  "version": "4.1.0",
+  "name": "WinForms Coding Standards",
+  "description": "C# WinForms coding standards, documentation, and project templates for building maintainable, scalable applications",
+  "type": "coding-standards-kit",
+  "lastUpdated": "2025-11-08",
+  "phase": "Phase 1 - Restructure Complete",
+  "stats": {
+    "documentationFiles": 38,
+    "codeTemplates": 4,
+    "slashCommands": 18,
+    "workflows": 4,
+    "agents": 0,
+    "skills": 0,
+    "exampleProjects": 1,
+    "totalLines": 37000,
+    "completionStatus": "100%"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/winforms-coding-standards",
+    "branch": "main"
+  },
+  "targets": {
+    "dotnetVersion": "8.0",
+    "dotnetFrameworkVersion": "4.8",
+    "csharpVersion": "12.0",
+    "efCoreVersion": "8.0"
+  },
+  "technologies": {
+    "uiFramework": "Windows Forms",
+    "orm": "Entity Framework Core 8.0",
+    "testing": ["xUnit", "NUnit"],
+    "diContainer": "Microsoft.Extensions.DependencyInjection",
+    "logging": ["Serilog", "NLog"]
+  },
+  "roadmap": {
+    "phase1": {
+      "name": "Restructure Project",
+      "status": "Complete",
+      "completedDate": "2025-11-08"
+    },
+    "phase2": {
+      "name": "WinForms-Specific Agents",
+      "status": "Planned",
+      "estimatedDuration": "1-2 days"
+    },
+    "phase3": {
+      "name": "Plan Templates & Scaffolding",
+      "status": "Planned",
+      "estimatedDuration": "4-6 hours"
+    },
+    "phase4": {
+      "name": "Enhance init-project.ps1",
+      "status": "Planned",
+      "estimatedDuration": "1 day"
+    },
+    "phase5": {
+      "name": "Skills & Auto-Documentation",
+      "status": "Planned",
+      "estimatedDuration": "2-3 days"
+    }
+  }
+}
