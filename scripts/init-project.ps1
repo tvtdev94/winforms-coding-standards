@@ -416,9 +416,9 @@ if (Test-Path "$repoRoot/.githooks") {
 # Summary
 # ============================================================================
 Write-Host ""
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Green
+Write-Host "================================================" -ForegroundColor Green
 Write-Host "Project created successfully!" -ForegroundColor Green
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Green
+Write-Host "================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "[Location] $(Get-Location)" -ForegroundColor Cyan
 Write-Host ""
