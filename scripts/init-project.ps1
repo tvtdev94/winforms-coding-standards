@@ -332,10 +332,12 @@ if ($IntegrateStandards) {
     if ($StandardsRepo) {
         Write-Host "  Using standards repo: $StandardsRepo"
 
-        # Add as submodule
-        git submodule add $StandardsRepo .standards 2>&1 | Out-Null
-        if ($LASTEXITCODE -eq 0) {
-            git submodule update --init --recursive | Out-Null
+        # Add as submodule (suppress all output)
+        Start-Process git -ArgumentList "submodule","add",$StandardsRepo,".standards" -NoNewWindow -Wait -RedirectStandardError "$env:TEMP\git_stderr.txt" -RedirectStandardOutput "$env:TEMP\git_stdout.txt"
+
+        # Check if submodule was actually added
+        if (Test-Path ".standards/.git") {
+            git submodule update --init --recursive *>&1 | Out-Null
             Write-Host "  [OK] Standards added as submodule" -ForegroundColor Green
 
             # Try to create symlinks (requires Admin on Windows)
