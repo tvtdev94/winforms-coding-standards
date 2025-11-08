@@ -10,7 +10,7 @@ Quick reference for all documentation files in the `future/` directory.
    - Master overview of all enhancements
    - Why this project exists
    - What problems it solves
-   - All 5 phases explained
+   - All 3 phases explained (Phases 4-5 moved to implementation guide)
 
 2. **[TOM_TAT_TIENG_VIET.md](TOM_TAT_TIENG_VIET.md)** 🇻🇳
    - Vietnamese summary (Tóm tắt tiếng Việt)
@@ -20,7 +20,7 @@ Quick reference for all documentation files in the `future/` directory.
 3. **[SUMMARY.md](SUMMARY.md)** 📊
    - Quick summary of entire plan
    - What was created (3,377 lines!)
-   - The 5 phases at a glance
+   - The 3 core phases at a glance
    - Recommended paths
    - FAQ
 
@@ -107,41 +107,15 @@ Quick reference for all documentation files in the `future/` directory.
 
 ---
 
-## 📋 Phase 4: Enhanced init-project.ps1
+## 📋 Optional Enhancements (Phases 4-5)
 
-**Status**: 📋 High-Level Plan (Detail after Phases 1-3)
+**Status**: ✅ Documented in [PHASE_4_5_IMPLEMENTATION_GUIDE.md](../PHASE_4_5_IMPLEMENTATION_GUIDE.md)
 
-10. **[phase-4/OVERVIEW.md](phase-4/OVERVIEW.md)**
-    - High-level overview
-    - Current vs enhanced features
-    - Integration with Phases 1-3
-    - One-command setup vision
+Phases 4 and 5 have been evaluated and documented as **optional enhancements**:
+- **Phase 4**: Enhanced init-project.ps1 (Git Submodule provides similar functionality)
+- **Phase 5**: Skills & Advanced Features (current docs already comprehensive)
 
-**Enhancements in Phase 4**:
-- Auto-install agents
-- Auto-install workflows
-- Auto-install plan templates
-- Scaffolding wizard
-- Auto-configure Claude Code
-
----
-
-## 📋 Phase 5: Skills & Advanced Features
-
-**Status**: 📋 High-Level Plan (Detail after Phase 2)
-
-11. **[phase-5/OVERVIEW.md](phase-5/OVERVIEW.md)**
-    - High-level overview
-    - Skills system explanation
-    - Auto-documentation features
-    - Advanced features for power users
-
-**Deliverables in Phase 5**:
-- 6 WinForms skills
-- Auto-generated codebase-summary.md
-- Project roadmap with progress
-- Custom statusline
-- Release automation
+Refer to the implementation guide for details if you decide to implement these in the future.
 
 ---
 
@@ -191,10 +165,10 @@ Quick reference for all documentation files in the `future/` directory.
 | phase-1/files-to-create.md | ~1,300 | Phase 1 file contents | Phase 1 required |
 | phase-2/OVERVIEW.md | ~200 | Phase 2 overview | After Phase 1 |
 | phase-3/OVERVIEW.md | ~250 | Phase 3 overview | After Phase 1 |
-| phase-4/OVERVIEW.md | ~400 | Phase 4 overview | After Phases 1-3 |
-| phase-5/OVERVIEW.md | ~400 | Phase 5 overview | After Phase 2 |
 
-**Total**: 10 files, ~3,500 lines
+**Total**: 9 files, ~2,650 lines
+
+**Note**: Phase 4 & 5 details moved to [PHASE_4_5_IMPLEMENTATION_GUIDE.md](../PHASE_4_5_IMPLEMENTATION_GUIDE.md)
 
 ---
 
@@ -219,7 +193,10 @@ Quick reference for all documentation files in the `future/` directory.
 → [phase-1/files-to-create.md](phase-1/files-to-create.md)
 
 **Curious about future phases?**
-→ [phase-2/OVERVIEW.md](phase-2/OVERVIEW.md), [phase-3/OVERVIEW.md](phase-3/OVERVIEW.md), etc.
+→ [phase-2/OVERVIEW.md](phase-2/OVERVIEW.md), [phase-3/OVERVIEW.md](phase-3/OVERVIEW.md)
+
+**Want to see optional enhancements (Phases 4-5)?**
+→ [PHASE_4_5_IMPLEMENTATION_GUIDE.md](../PHASE_4_5_IMPLEMENTATION_GUIDE.md)
 
 ---
 
