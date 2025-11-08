@@ -325,10 +325,36 @@ git submodule update --init --recursive
 **Cause:** Symlink not created or Claude Code not detecting `.claude/`
 
 **Solution:**
-1. Verify `.claude/` exists (or `.standards/.claude/`)
-2. Restart VS Code
-3. Check Claude Code extension settings
-4. Manually configure Claude Code to look in `.standards/.claude/`
+
+**Quick Fix (Windows):**
+```powershell
+# Run PowerShell as Administrator, then:
+cd path\to\your\project
+.\scripts\fix-symlinks.ps1
+```
+
+**Manual Fix (Windows):**
+```powershell
+# In PowerShell as Administrator:
+cd MyApp
+New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude"
+New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates"
+```
+
+**Manual Fix (Linux/Mac):**
+```bash
+cd MyApp
+ln -s .standards/.claude .claude
+ln -s .standards/templates templates
+```
+
+**Verification:**
+1. Check if `.claude/commands/` exists
+2. Restart VS Code / Claude Code
+3. Type `/` to see available commands
+
+**Alternative (No Symlink):**
+Access commands directly from `.standards/.claude/commands/` in Claude Code
 
 ### Issue: Submodule Not Updating
 

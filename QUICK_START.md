@@ -103,6 +103,37 @@ cd ..
 
 ---
 
+## 🔧 Troubleshooting
+
+### Slash Commands Not Working?
+
+**Problem:** Claude Code doesn't see the `/` commands
+
+**Cause:** Symlinks weren't created (need Admin rights on Windows)
+
+**Quick Fix:**
+```powershell
+# Run PowerShell as Administrator
+cd path\to\your\project
+
+# Option 1: Use fix script
+.\scripts\fix-symlinks.ps1
+
+# Option 2: Manual fix
+New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude"
+New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates"
+```
+
+**Verify:**
+```powershell
+dir .claude\commands  # Should show command files
+```
+
+**Alternative (No Admin):**
+Access commands directly from `.standards/.claude/commands/` in your file explorer and reference them manually.
+
+---
+
 ## 📖 Full Documentation
 
 For detailed setup options and troubleshooting:
@@ -112,4 +143,4 @@ For detailed setup options and troubleshooting:
 
 ---
 
-**Last Updated**: 2025-11-07
+**Last Updated**: 2025-11-08
