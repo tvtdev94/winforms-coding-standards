@@ -22,10 +22,37 @@ Automated scripts to create new WinForms projects with all best practices pre-co
 
 ## 🚀 Quick Start
 
-### Windows (PowerShell)
+### Option 1: Interactive Mode (Recommended for Beginners) ⭐
+
+**New!** Interactive prompts guide you through the setup:
 
 ```powershell
-# Create new project
+# Windows (PowerShell)
+.\scripts\init-project-interactive.ps1
+
+# Linux/Mac (Bash) - Coming soon
+# ./scripts/init-project-interactive.sh
+```
+
+**You will be asked**:
+1. Project name? (e.g., CustomerManagement)
+2. Framework? (.NET 8.0 / 6.0 / Framework 4.8)
+3. Database? (SQLite / SQL Server / PostgreSQL / MySQL / None)
+4. Pattern? (MVP / MVVM / Simple)
+5. Include tests? (Y/n)
+6. Include example code? (y/N)
+7. Integrate standards? (Y/n)
+
+**Then confirms** your choices before creating the project!
+
+---
+
+### Option 2: Command-Line Mode (For Automation/Scripts)
+
+Quick project creation with command-line parameters:
+
+```powershell
+# Windows (PowerShell) - Basic
 .\scripts\init-project.ps1 -ProjectName "MyWinFormsApp"
 
 # With options
@@ -39,22 +66,35 @@ Automated scripts to create new WinForms projects with all best practices pre-co
     -IncludeExampleCode
 ```
 
-### Linux/Mac (Bash)
-
 ```bash
-# Make script executable
+# Linux/Mac (Bash)
 chmod +x scripts/init-project.sh
-
-# Create new project
-./scripts/init-project.sh MyWinFormsApp
-
-# With framework option
-./scripts/init-project.sh MyApp net8.0
+./scripts/init-project.sh MyWinFormsApp net8.0
 ```
 
 ---
 
-## 📋 Parameters
+## 🗄️ Database Support
+
+The interactive script supports multiple databases out of the box:
+
+| Database | Use Case | NuGet Package |
+|----------|----------|---------------|
+| **SQLite** ⭐ | Development, testing, demos | Microsoft.EntityFrameworkCore.Sqlite |
+| **SQL Server** | Windows enterprise, production | Microsoft.EntityFrameworkCore.SqlServer |
+| **PostgreSQL** | Cross-platform, open source | Npgsql.EntityFrameworkCore.PostgreSQL |
+| **MySQL** | Cross-platform, popular | Pomelo.EntityFrameworkCore.MySql |
+| **None** | No database needed | - |
+
+**The script automatically**:
+- ✅ Installs correct NuGet packages
+- ✅ Generates appropriate connection string
+- ✅ Adds DbContext registration to Program.cs
+- ✅ Creates Data folder for EF Core code
+
+---
+
+## 📋 Parameters (Command-Line Mode)
 
 ### PowerShell Script
 
@@ -64,6 +104,7 @@ chmod +x scripts/init-project.sh
 | `-Framework` | ❌ No | `net8.0` | Target framework (net8.0, net6.0, net48) |
 | `-IncludeTests` | ❌ No | `$true` | Include test projects |
 | `-IncludeExampleCode` | ❌ No | `$false` | Include example MVP code |
+| `-IntegrateStandards` | ❌ No | `$true` | Integrate coding standards as submodule |
 
 ### Examples
 
@@ -80,6 +121,8 @@ chmod +x scripts/init-project.sh
 # With example code
 .\scripts\init-project.ps1 -ProjectName "LearningProject" -IncludeExampleCode
 ```
+
+**Note**: Command-line mode uses SQLite by default. For other databases, use interactive mode.
 
 ---
 
