@@ -42,10 +42,6 @@
 - **AI Agents**: 4 specialized agents for automation
 - **Plan Templates**: 6 comprehensive project planning templates
 
-📊 **Full status**: [COMPLETION_STATUS.md](COMPLETION_STATUS.md)
-📝 **Review report**: [CODE_REVIEW_REPORT.md](CODE_REVIEW_REPORT.md)
-📋 **Completed items**: [MISSING_DOCS.md](MISSING_DOCS.md) (now shows completion)
-
 ---
 
 ## 📦 Tech Stack
