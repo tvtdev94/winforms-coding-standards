@@ -67,10 +67,28 @@ Write-Host "  [OK] WinForms project created" -ForegroundColor Green
 Write-Host ""
 Write-Host "[3] Creating folder structure..." -ForegroundColor Cyan
 
-$folders = @("Models", "Services", "Repositories", "Forms", "Views", "Presenters", "Data", "Utils", "Resources")
+$folders = @(
+    @{Name="Models"; Template="// Place your data models here`n// Example: Customer.cs, Order.cs`n"},
+    @{Name="Services"; Template="// Place your business logic services here`n// Example: CustomerService.cs, OrderService.cs`n"},
+    @{Name="Repositories"; Template="// Place your data access repositories here`n// Example: CustomerRepository.cs, OrderRepository.cs`n"},
+    @{Name="Forms"; Template=$null},  # MainForm will be moved here
+    @{Name="Views"; Template="// Place your view interfaces here (for MVP pattern)`n// Example: ICustomerView.cs, IOrderView.cs`n"},
+    @{Name="Presenters"; Template="// Place your presenters here (for MVP pattern)`n// Example: CustomerPresenter.cs, OrderPresenter.cs`n"},
+    @{Name="Data"; Template="// Place your DbContext and configurations here`n// Example: AppDbContext.cs, EntityConfigurations/`n"},
+    @{Name="Utils"; Template="// Place your utility classes and extensions here`n// Example: StringExtensions.cs, DateHelper.cs`n"},
+    @{Name="Resources"; Template="// Place your resources here`n// Example: Icons/, Images/, Strings.resx`n"}
+)
+
 foreach ($folder in $folders) {
-    New-Item -ItemType Directory -Path "$ProjectName/$folder" -Force | Out-Null
-    Write-Host "  [OK] Created $folder/" -ForegroundColor Green
+    New-Item -ItemType Directory -Path "$ProjectName/$($folder.Name)" -Force | Out-Null
+
+    # Add README.md to help Rider/VS show the folder
+    if ($folder.Template) {
+        $readmeContent = "# $($folder.Name)`n`n$($folder.Template)"
+        $readmeContent | Out-File -FilePath "$ProjectName/$($folder.Name)/README.md" -Encoding UTF8 -Force
+    }
+
+    Write-Host "  [OK] Created $($folder.Name)/" -ForegroundColor Green
 }
 
 # Move Form1 to Forms folder and rename to MainForm
@@ -121,6 +139,30 @@ foreach ($package in $packages) {
 Write-Host "  Restoring packages..." -NoNewline
 dotnet restore $ProjectName | Out-Null
 Write-Host " [OK]" -ForegroundColor Green
+
+# Add README.md files to .csproj so they show in Rider/VS
+$csprojPath = "$ProjectName/$ProjectName.csproj"
+$csprojContent = Get-Content $csprojPath -Raw
+
+# Add ItemGroup for README files if not already present
+if (-not $csprojContent.Contains("<None Include=")) {
+    $readmeItemGroup = @"
+
+  <ItemGroup>
+    <None Include="Models\README.md" />
+    <None Include="Services\README.md" />
+    <None Include="Repositories\README.md" />
+    <None Include="Views\README.md" />
+    <None Include="Presenters\README.md" />
+    <None Include="Data\README.md" />
+    <None Include="Utils\README.md" />
+    <None Include="Resources\README.md" />
+  </ItemGroup>
+"@
+    $endProjectTag = '</Project>'
+    $csprojContent = $csprojContent.Replace($endProjectTag, $readmeItemGroup + [Environment]::NewLine + $endProjectTag)
+    $csprojContent | Out-File -FilePath $csprojPath -Encoding UTF8 -Force
+}
 
 # ============================================================================
 # Step 5: Create appsettings.json
