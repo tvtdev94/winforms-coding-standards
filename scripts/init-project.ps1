@@ -66,26 +66,26 @@ $patternRecommendation = ""
 
 if ($Database -eq "None" -and ($Framework -eq "net48" -or $Framework -eq "net6.0")) {
     $recommendedPattern = "Simple"
-    $patternRecommendation = "💡 Recommended: Simple (no database, lightweight app)"
+    $patternRecommendation = "Recommended: Simple (no database, lightweight app)"
 }
 elseif ($Framework -eq "net8.0" -and $Database -ne "None") {
     $recommendedPattern = "MVP"
-    $patternRecommendation = "💡 Recommended: MVP (best balance of testability and simplicity)"
+    $patternRecommendation = "Recommended: MVP (best balance of testability and simplicity)"
 }
 elseif ($Framework -eq "net48") {
     $recommendedPattern = "MVP"
-    $patternRecommendation = "💡 Recommended: MVP (.NET Framework works best with MVP)"
+    $patternRecommendation = "Recommended: MVP (.NET Framework works best with MVP)"
 }
 else {
     $recommendedPattern = "MVP"
-    $patternRecommendation = "💡 Recommended: MVP (works well in most scenarios)"
+    $patternRecommendation = "Recommended: MVP (works well in most scenarios)"
 }
 
 # Display options with descriptions
 Write-Host "   [1] MVP (Model-View-Presenter)" -ForegroundColor $(if ($recommendedPattern -eq "MVP") { "Green" } else { "Gray" })
-Write-Host "       ✅ Best for: Most WinForms apps" -ForegroundColor DarkGray
-Write-Host "       ✅ Easy to test, clear separation" -ForegroundColor DarkGray
-Write-Host "       ✅ Works with all .NET versions" -ForegroundColor DarkGray
+Write-Host "       - Best for: Most WinForms apps" -ForegroundColor DarkGray
+Write-Host "       - Easy to test, clear separation" -ForegroundColor DarkGray
+Write-Host "       - Works with all .NET versions" -ForegroundColor DarkGray
 Write-Host ""
 
 # MVVM availability based on framework
@@ -98,19 +98,19 @@ $mvvmColor = if ($mvvmAvailable) {
 
 Write-Host "   [2] MVVM (Model-View-ViewModel)" -ForegroundColor $mvvmColor
 if ($mvvmAvailable) {
-    Write-Host "       ✅ Best for: Complex UI with data binding" -ForegroundColor DarkGray
-    Write-Host "       ✅ Two-way binding, INotifyPropertyChanged" -ForegroundColor DarkGray
-    Write-Host "       ⚠️  More complex than MVP" -ForegroundColor DarkGray
+    Write-Host "       - Best for: Complex UI with data binding" -ForegroundColor DarkGray
+    Write-Host "       - Two-way binding, INotifyPropertyChanged" -ForegroundColor DarkGray
+    Write-Host "       - More complex than MVP" -ForegroundColor DarkGray
 } else {
-    Write-Host "       ❌ Not recommended for $Framework" -ForegroundColor DarkGray
-    Write-Host "       ℹ️  Use .NET 6+ for better MVVM support" -ForegroundColor DarkGray
+    Write-Host "       - Not recommended for $Framework" -ForegroundColor DarkGray
+    Write-Host "       - Use .NET 6+ for better MVVM support" -ForegroundColor DarkGray
 }
 Write-Host ""
 
 Write-Host "   [3] Simple (no pattern)" -ForegroundColor $(if ($recommendedPattern -eq "Simple") { "Green" } else { "Gray" })
-Write-Host "       ✅ Best for: Quick prototypes, demos" -ForegroundColor DarkGray
-Write-Host "       ⚠️  All code in Forms (harder to test)" -ForegroundColor DarkGray
-Write-Host "       ⚠️  Not recommended for production" -ForegroundColor DarkGray
+Write-Host "       - Best for: Quick prototypes, demos" -ForegroundColor DarkGray
+Write-Host "       - All code in Forms (harder to test)" -ForegroundColor DarkGray
+Write-Host "       - Not recommended for production" -ForegroundColor DarkGray
 Write-Host ""
 
 # Show recommendation
@@ -387,6 +387,19 @@ if ($Database -ne "None") {
 Write-Host ""
 Write-Host "[6] Creating Program.cs with DI..." -ForegroundColor Cyan
 
+# Generate using statements based on database
+$usingStatements = if ($Database -ne "None") {
+    switch ($Database) {
+        "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
+        "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
+        "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
+        "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
+        default { "" }
+    }
+} else {
+    ""
+}
+
 # Generate DbContext registration code based on database
 $dbContextCode = if ($Database -ne "None") {
     switch ($Database) {
@@ -431,6 +444,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using $ProjectName.Forms;
+$usingStatements
 
 namespace $ProjectName
 {
@@ -510,6 +524,49 @@ $dbContextCode
 $programCs | Out-File -FilePath "$ProjectName/Program.cs" -Encoding UTF8 -Force
 
 Write-Host "  [OK] Program.cs created with DI" -ForegroundColor Green
+
+# ============================================================================
+# Step 6.5: Create AppDbContext (if database is selected)
+# ============================================================================
+if ($Database -ne "None") {
+    Write-Host ""
+    Write-Host "[6.5] Creating AppDbContext..." -ForegroundColor Cyan
+
+    $appDbContextCs = @"
+using Microsoft.EntityFrameworkCore;
+
+namespace $ProjectName.Data
+{
+    /// <summary>
+    /// Application database context.
+    /// </summary>
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
+        // TODO: Add your DbSets here
+        // Example:
+        // public DbSet<Customer> Customers { get; set; } = null!;
+        // public DbSet<Order> Orders { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // TODO: Add your entity configurations here
+            // Example:
+            // modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+        }
+    }
+}
+"@
+
+    $appDbContextCs | Out-File -FilePath "$ProjectName/Data/AppDbContext.cs" -Encoding UTF8 -Force
+    Write-Host "  [OK] AppDbContext.cs created" -ForegroundColor Green
+}
 
 # ============================================================================
 # Step 7: Create Test Project (if requested)
@@ -749,5 +806,5 @@ if ($IntegrateStandards -and (Test-Path ".standards")) {
     Write-Host "  cd .standards && git pull && cd .."
 }
 Write-Host ""
-Write-Host "Happy coding! 🚀" -ForegroundColor Green
+Write-Host "Happy coding!" -ForegroundColor Green
 Write-Host ""
