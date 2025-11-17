@@ -22,10 +22,10 @@
 - ✅ **Configuration files** (4/4) - .gitignore, .editorconfig, LICENSE, pre-commit hooks
 - ✅ **Architecture documentation** (4/4) - MVP, MVVM, DI, project structure
 - ✅ **Coding conventions** (3/3) - Naming, style, comments
-- ✅ **Templates** (5/5) - Form, service, repository, test, **review comments** ⭐
+- ✅ **Templates** (6/6) - Form, service, repository, **Unit of Work**, test, review comments ⭐
 - ✅ **UI/UX documentation** (6/6) - ~6,800 lines 🎉
 - ✅ **Best practices documentation** (8/8) - ~6,200 lines 🎉
-- ✅ **Data access documentation** (3/3) - ~4,100 lines 🎉
+- ✅ **Data access documentation** (4/4) - Repository, Connection, EF Core, **Unit of Work** ⭐ ~6,100 lines 🎉
 - ✅ **Advanced topics** (5/5) - ~5,700 lines 🎉
 - ✅ **Examples documentation** (3/3) - ~2,200 lines 🎉
 - ✅ **Testing documentation** (5/5) - ~3,700 lines 🎉
@@ -89,8 +89,9 @@ Standard WinForms project structure:
 
 ### Architecture
 - **Pattern**: MVP (recommended) or MVVM (.NET 8+)
-- **Separation**: UI → Presenter/ViewModel → Service → Repository → Database
-- 📖 [MVP Pattern](docs/architecture/mvp-pattern.md) | [MVVM Pattern](docs/architecture/mvvm-pattern.md)
+- **Data Access**: **Unit of Work pattern** (manages repositories & transactions)
+- **Separation**: UI → Presenter/ViewModel → Service → **Unit of Work** → Repository → Database
+- 📖 [MVP Pattern](docs/architecture/mvp-pattern.md) | [MVVM Pattern](docs/architecture/mvvm-pattern.md) | [Unit of Work](docs/data-access/unit-of-work-pattern.md)
 
 ### Naming Conventions
 | Type | Convention | Example |
@@ -208,27 +209,31 @@ When writing code, **ALWAYS follow these rules**:
 
 ### ✅ DO:
 1. **Separate concerns**: UI logic in Forms, business logic in Services
-2. **Use async/await**: For all I/O operations (DB, file, network)
-3. **Dispose resources**: Use `using` statements for IDisposable
-4. **Validate input**: Always validate user input before processing
-5. **Handle errors**: Use try-catch with proper logging
-6. **Add XML comments**: For all public APIs
-7. **Follow MVP/MVVM**: Don't mix UI and business logic
-8. **Use DI**: Constructor injection for dependencies
-9. **Write tests**: Unit tests for Services, integration tests for Repositories
-10. **Thread-safe UI**: Use `Invoke`/`BeginInvoke` for cross-thread UI updates
+2. **Use Unit of Work**: Inject `IUnitOfWork` into services, NOT `IRepository`
+3. **Call SaveChangesAsync**: Always call `_unitOfWork.SaveChangesAsync()` after modifications
+4. **Use async/await**: For all I/O operations (DB, file, network)
+5. **Dispose resources**: Use `using` statements for IDisposable
+6. **Validate input**: Always validate user input before processing
+7. **Handle errors**: Use try-catch with proper logging
+8. **Add XML comments**: For all public APIs
+9. **Follow MVP/MVVM**: Don't mix UI and business logic
+10. **Use DI**: Constructor injection for dependencies
+11. **Write tests**: Unit tests for Services, integration tests for Repositories
+12. **Thread-safe UI**: Use `Invoke`/`BeginInvoke` for cross-thread UI updates
 
 ### ❌ DON'T:
 1. ❌ Put business logic in Forms
-2. ❌ Use synchronous I/O (use async instead)
-3. ❌ Leave resources undisposed (memory leaks)
-4. ❌ Ignore exceptions silently
-5. ❌ Use magic numbers/strings (use constants)
-6. ❌ Create UI controls from background threads
-7. ❌ Hardcode connection strings (use configuration)
-8. ❌ Skip input validation
-9. ❌ Write code without tests
-10. ❌ Use Hungarian notation excessively
+2. ❌ **Call SaveChangesAsync in repositories** (use Unit of Work instead)
+3. ❌ **Inject IRepository directly** (inject IUnitOfWork into services)
+4. ❌ Use synchronous I/O (use async instead)
+5. ❌ Leave resources undisposed (memory leaks)
+6. ❌ Ignore exceptions silently
+7. ❌ Use magic numbers/strings (use constants)
+8. ❌ Create UI controls from background threads
+9. ❌ Hardcode connection strings (use configuration)
+10. ❌ Skip input validation
+11. ❌ Write code without tests
+12. ❌ Use Hungarian notation excessively
 
 ---
 
@@ -289,8 +294,9 @@ See [COMPLETION_STATUS.md](COMPLETION_STATUS.md) for full file list.
 
 Templates are **production-ready** and follow all standards:
 - `/templates/form-template.cs` - MVP pattern form
-- `/templates/service-template.cs` - Business logic service
-- `/templates/repository-template.cs` - Data access repository
+- `/templates/service-template.cs` - Business logic service with Unit of Work
+- `/templates/repository-template.cs` - Data access repository (NO SaveChanges)
+- `/templates/unitofwork-template.cs` - Unit of Work pattern implementation
 - `/templates/test-template.cs` - Unit test structure
 
 **Never generate code from scratch** - always start with templates!
@@ -323,20 +329,31 @@ Templates are **production-ready** and follow all standards:
 
 ### When generating Services:
 1. ✅ Start with `service-template.cs`
-2. ✅ Constructor injection for all dependencies
-3. ✅ Validate all inputs (ArgumentNullException, ArgumentException)
-4. ✅ Async methods with proper cancellation token support
-5. ✅ Log all operations (info, errors, warnings)
-6. ✅ Wrap exceptions with meaningful messages
-7. ✅ XML documentation on all public methods
+2. ✅ **Inject `IUnitOfWork`, NOT `IRepository`** (Unit of Work pattern)
+3. ✅ Access repositories via `_unitOfWork.EntityName` (e.g., `_unitOfWork.Customers`)
+4. ✅ **Call `await _unitOfWork.SaveChangesAsync()` after Add/Update/Delete operations**
+5. ✅ Validate all inputs (ArgumentNullException, ArgumentException)
+6. ✅ Async methods with proper cancellation token support
+7. ✅ Log all operations (info, errors, warnings)
+8. ✅ Wrap exceptions with meaningful messages
+9. ✅ XML documentation on all public methods
 
 ### When generating Repositories:
 1. ✅ Start with `repository-template.cs`
-2. ✅ Implement generic repository pattern
-3. ✅ Use EF Core async methods (ToListAsync, FirstOrDefaultAsync, etc.)
-4. ✅ Proper disposal of DbContext
-5. ✅ Include soft-delete support if applicable
-6. ✅ Error handling with data access exceptions
+2. ✅ Implement generic repository pattern with entity-specific interface
+3. ✅ **NEVER call `SaveChangesAsync()` in repositories** (handled by Unit of Work)
+4. ✅ Use EF Core async methods (ToListAsync, FirstOrDefaultAsync, etc.)
+5. ✅ Use `AsNoTracking()` for read-only queries
+6. ✅ Return `Task.CompletedTask` for Update/Delete (no SaveChanges)
+7. ✅ Include soft-delete support if applicable
+
+### When creating Unit of Work:
+1. ✅ Use `unitofwork-template.cs` as starting point
+2. ✅ Add repository properties for each entity (lazy-loaded)
+3. ✅ Implement `SaveChangesAsync()` method
+4. ✅ Implement transaction methods (Begin/Commit/Rollback)
+5. ✅ Proper disposal pattern
+6. ✅ Register as `Scoped` in DI (one instance per scope)
 
 ### When generating Tests:
 1. ✅ Start with `test-template.cs`

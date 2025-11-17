@@ -1,5 +1,5 @@
+using CustomerManagement.Data;
 using CustomerManagement.Models;
-using CustomerManagement.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -10,19 +10,19 @@ namespace CustomerManagement.Services;
 /// </summary>
 public partial class CustomerService : ICustomerService
 {
-    private readonly ICustomerRepository _customerRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CustomerService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CustomerService"/> class.
     /// </summary>
-    /// <param name="customerRepository">The customer repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     /// <param name="logger">The logger.</param>
     public CustomerService(
-        ICustomerRepository customerRepository,
+        IUnitOfWork unitOfWork,
         ILogger<CustomerService> logger)
     {
-        _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -32,7 +32,7 @@ public partial class CustomerService : ICustomerService
         try
         {
             _logger.LogInformation("Getting all customers");
-            var customers = await _customerRepository.GetAllAsync(cancellationToken);
+            var customers = await _unitOfWork.Customers.GetAllAsync(cancellationToken);
             _logger.LogInformation("Retrieved {Count} customers", customers.Count);
             return customers;
         }
@@ -49,7 +49,7 @@ public partial class CustomerService : ICustomerService
         try
         {
             _logger.LogInformation("Getting customer with ID: {CustomerId}", customerId);
-            var customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId, cancellationToken);
 
             if (customer == null)
             {
@@ -71,7 +71,7 @@ public partial class CustomerService : ICustomerService
         try
         {
             _logger.LogInformation("Getting customer with orders, ID: {CustomerId}", customerId);
-            var customer = await _customerRepository.GetWithOrdersAsync(customerId, cancellationToken);
+            var customer = await _unitOfWork.Customers.GetWithOrdersAsync(customerId, cancellationToken);
 
             if (customer == null)
             {
@@ -98,7 +98,7 @@ public partial class CustomerService : ICustomerService
         try
         {
             _logger.LogInformation("Getting active customers");
-            var customers = await _customerRepository.GetActiveCustomersAsync(cancellationToken);
+            var customers = await _unitOfWork.Customers.GetActiveCustomersAsync(cancellationToken);
             _logger.LogInformation("Retrieved {Count} active customers", customers.Count);
             return customers;
         }
@@ -115,7 +115,7 @@ public partial class CustomerService : ICustomerService
         try
         {
             _logger.LogInformation("Searching customers with term: {SearchTerm}", searchTerm);
-            var customers = await _customerRepository.SearchByNameAsync(searchTerm, cancellationToken);
+            var customers = await _unitOfWork.Customers.SearchByNameAsync(searchTerm, cancellationToken);
             _logger.LogInformation("Found {Count} customers matching '{SearchTerm}'", customers.Count, searchTerm);
             return customers;
         }
@@ -159,7 +159,10 @@ public partial class CustomerService : ICustomerService
             customer.CreatedAt = DateTime.UtcNow;
             customer.UpdatedAt = null;
 
-            var createdCustomer = await _customerRepository.AddAsync(customer, cancellationToken);
+            // Add customer and save changes via Unit of Work
+            var createdCustomer = await _unitOfWork.Customers.AddAsync(customer, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
             _logger.LogInformation("Customer created successfully with ID: {CustomerId}", createdCustomer.Id);
 
             return createdCustomer;
@@ -188,7 +191,7 @@ public partial class CustomerService : ICustomerService
             _logger.LogInformation("Updating customer with ID: {CustomerId}", customer.Id);
 
             // Check if customer exists
-            var existingCustomer = await _customerRepository.GetByIdAsync(customer.Id, cancellationToken);
+            var existingCustomer = await _unitOfWork.Customers.GetByIdAsync(customer.Id, cancellationToken);
             if (existingCustomer == null)
             {
                 _logger.LogWarning("Customer with ID {CustomerId} not found", customer.Id);
@@ -213,7 +216,10 @@ public partial class CustomerService : ICustomerService
                 throw new InvalidOperationException($"A customer with email '{customer.Email}' already exists.");
             }
 
-            await _customerRepository.UpdateAsync(customer, cancellationToken);
+            // Update customer and save changes via Unit of Work
+            await _unitOfWork.Customers.UpdateAsync(customer, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
             _logger.LogInformation("Customer with ID {CustomerId} updated successfully", customer.Id);
         }
         catch (InvalidOperationException)
@@ -234,14 +240,17 @@ public partial class CustomerService : ICustomerService
         {
             _logger.LogInformation("Deleting customer with ID: {CustomerId}", customerId);
 
-            var customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
+            var customer = await _unitOfWork.Customers.GetByIdAsync(customerId, cancellationToken);
             if (customer == null)
             {
                 _logger.LogWarning("Customer with ID {CustomerId} not found", customerId);
                 throw new InvalidOperationException($"Customer with ID {customerId} not found.");
             }
 
-            await _customerRepository.DeleteAsync(customer, cancellationToken);
+            // Delete customer and save changes via Unit of Work
+            await _unitOfWork.Customers.DeleteAsync(customer, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
             _logger.LogInformation("Customer with ID {CustomerId} deleted successfully", customerId);
         }
         catch (InvalidOperationException)
@@ -326,7 +335,7 @@ public partial class CustomerService : ICustomerService
             return false;
         }
 
-        var customer = await _customerRepository.GetByEmailAsync(email, cancellationToken);
+        var customer = await _unitOfWork.Customers.GetByEmailAsync(email, cancellationToken);
 
         if (customer == null)
         {

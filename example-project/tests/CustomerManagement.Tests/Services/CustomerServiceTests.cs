@@ -1,3 +1,4 @@
+using CustomerManagement.Data;
 using CustomerManagement.Models;
 using CustomerManagement.Repositories;
 using CustomerManagement.Services;
@@ -14,15 +15,23 @@ namespace CustomerManagement.Tests.Services;
 /// </summary>
 public class CustomerServiceTests
 {
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly Mock<ICustomerRepository> _mockRepository;
     private readonly Mock<ILogger<CustomerService>> _mockLogger;
     private readonly CustomerService _service;
 
     public CustomerServiceTests()
     {
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
         _mockRepository = new Mock<ICustomerRepository>();
         _mockLogger = new Mock<ILogger<CustomerService>>();
-        _service = new CustomerService(_mockRepository.Object, _mockLogger.Object);
+
+        // Setup Unit of Work to return the mock repository
+        _mockUnitOfWork.Setup(u => u.Customers).Returns(_mockRepository.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        _service = new CustomerService(_mockUnitOfWork.Object, _mockLogger.Object);
     }
 
     #region GetAllCustomersAsync Tests
@@ -88,6 +97,7 @@ public class CustomerServiceTests
         result.Id.Should().Be(1);
         result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         _mockRepository.Verify(r => r.AddAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -200,6 +210,7 @@ public class CustomerServiceTests
 
         // Assert
         _mockRepository.Verify(r => r.UpdateAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -248,6 +259,7 @@ public class CustomerServiceTests
 
         // Assert
         _mockRepository.Verify(r => r.DeleteAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockUnitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

@@ -55,13 +55,13 @@ public class CustomerRepository : ICustomerRepository
             throw new ArgumentNullException(nameof(entity));
         }
 
-        _context.Customers.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.Customers.AddAsync(entity, cancellationToken);
+        // Note: SaveChanges is now handled by Unit of Work
         return entity;
     }
 
     /// <inheritdoc/>
-    public async Task UpdateAsync(Customer entity, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Customer entity, CancellationToken cancellationToken = default)
     {
         if (entity == null)
         {
@@ -69,11 +69,12 @@ public class CustomerRepository : ICustomerRepository
         }
 
         _context.Customers.Update(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        // Note: SaveChanges is now handled by Unit of Work
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
-    public async Task DeleteAsync(Customer entity, CancellationToken cancellationToken = default)
+    public Task DeleteAsync(Customer entity, CancellationToken cancellationToken = default)
     {
         if (entity == null)
         {
@@ -81,7 +82,8 @@ public class CustomerRepository : ICustomerRepository
         }
 
         _context.Customers.Remove(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        // Note: SaveChanges is now handled by Unit of Work
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>

@@ -84,10 +84,9 @@ namespace YourApp
                 options.UseSqlServer(connectionString);
             });
 
-            // Repositories
-            services.AddScoped<ICustomerRepository, CustomerRepository>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<IProductRepository, ProductRepository>();
+            // Unit of Work (Scoped - one instance per request/scope)
+            // IMPORTANT: Use Unit of Work pattern instead of registering repositories directly
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Services
             services.AddScoped<ICustomerService, CustomerService>();
@@ -229,10 +228,10 @@ private static void ConfigureServices(IServiceCollection services)
     services.AddSingleton<ICacheService, MemoryCacheService>();
 
     // SCOPED - Created once per scope (per form/operation)
-    // Use for: Database contexts, repositories, unit of work
+    // Use for: Database contexts, Unit of Work, business services
     services.AddScoped<AppDbContext>();
-    services.AddScoped<ICustomerRepository, CustomerRepository>();
-    services.AddScoped<IUnitOfWork, UnitOfWork>();
+    services.AddScoped<IUnitOfWork, UnitOfWork>(); // Unit of Work manages repositories
+    services.AddScoped<ICustomerService, CustomerService>();
 
     // TRANSIENT - Created every time it's requested
     // Use for: Lightweight services, presenters, forms
@@ -268,20 +267,29 @@ private static void ConfigureServices(IServiceCollection services)
 ```csharp
 public class CustomerService : ICustomerService
 {
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<CustomerService> _logger;
     private readonly int _maxRetries;
 
     public CustomerService(
-        ICustomerRepository repository,
+        IUnitOfWork unitOfWork,
         IConfiguration configuration,
         ILogger<CustomerService> logger)
     {
-        _repository = repository;
-        _configuration = configuration;
-        _logger = logger;
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Read from configuration
         _maxRetries = _configuration.GetValue<int>("AppSettings:MaxRetries", 3);
+    }
+
+    public async Task CreateCustomerAsync(Customer customer)
+    {
+        // Access repository via Unit of Work
+        await _unitOfWork.Customers.AddAsync(customer);
+        await _unitOfWork.SaveChangesAsync();
     }
 }
 ```

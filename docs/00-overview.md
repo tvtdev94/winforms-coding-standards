@@ -100,8 +100,14 @@ Patterns for efficient, maintainable database interactions.
 
 - **[Repository Pattern](data-access/repository-pattern.md)**
   - Generic repository implementation
-  - Unit of Work pattern
+  - Repository best practices
   - Testing with repositories
+
+- **[Unit of Work Pattern](data-access/unit-of-work-pattern.md)** ⭐ **NEW!**
+  - Centralized transaction management
+  - Multiple repository coordination
+  - Explicit transaction control
+  - Testing with Unit of Work
 
 - **[Connection Management](data-access/connection-management.md)**
   - Connection pooling
@@ -297,7 +303,8 @@ Working code samples demonstrating key patterns.
 #### Working with Data
 1. [Entity Framework Core](data-access/entity-framework.md)
 2. [Repository Pattern](data-access/repository-pattern.md)
-3. [Async/Await Pattern](best-practices/async-await.md)
+3. [Unit of Work Pattern](data-access/unit-of-work-pattern.md) ⭐
+4. [Async/Await Pattern](best-practices/async-await.md)
 
 #### Ensuring Quality
 1. [Testing Overview](testing/testing-overview.md)

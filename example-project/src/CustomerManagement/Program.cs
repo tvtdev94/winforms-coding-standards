@@ -118,8 +118,8 @@ internal static class Program
             #endif
         });
 
-        // Repositories
-        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        // Unit of Work (Scoped - one instance per request/scope)
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Services
         services.AddScoped<ICustomerService, CustomerService>();

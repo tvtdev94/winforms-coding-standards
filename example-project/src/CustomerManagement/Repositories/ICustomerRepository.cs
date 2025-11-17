@@ -44,5 +44,5 @@ public interface ICustomerRepository : IRepository<Customer>
     /// <param name="city">The city name.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of customers in the specified city.</returns>
-    Task<List<Customer>> GetByCity Async(string city, CancellationToken cancellationToken = default);
+    Task<List<Customer>> GetByCityAsync(string city, CancellationToken cancellationToken = default);
 }
