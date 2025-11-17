@@ -1,8 +1,8 @@
+using CustomerManagement.Factories;
 using CustomerManagement.Models;
 using CustomerManagement.Presenters;
 using CustomerManagement.Services;
 using CustomerManagement.Views;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace CustomerManagement.Forms;
@@ -13,7 +13,7 @@ namespace CustomerManagement.Forms;
 /// </summary>
 public partial class CustomerListForm : Form, ICustomerListView
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IFormFactory _formFactory;
     private readonly CustomerListPresenter _presenter;
     private DataGridView _dgvCustomers = null!;
     private TextBox _txtSearch = null!;
@@ -88,11 +88,11 @@ public partial class CustomerListForm : Form, ICustomerListView
     /// Initializes a new instance of the <see cref="CustomerListForm"/> class.
     /// </summary>
     public CustomerListForm(
-        IServiceProvider serviceProvider,
+        IFormFactory formFactory,
         ICustomerService customerService,
         ILogger<CustomerListPresenter> logger)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _formFactory = formFactory ?? throw new ArgumentNullException(nameof(formFactory));
 
         InitializeComponent();
 
@@ -187,7 +187,7 @@ public partial class CustomerListForm : Form, ICustomerListView
         };
         _btnAdd.Click += (s, e) =>
         {
-            var editForm = _serviceProvider.GetRequiredService<CustomerEditForm>();
+            var editForm = _formFactory.Create<CustomerEditForm>();
             editForm.CustomerId = 0; // New customer
             if (editForm.ShowDialog(this) == DialogResult.OK)
             {
@@ -211,7 +211,7 @@ public partial class CustomerListForm : Form, ICustomerListView
                 return;
             }
 
-            var editForm = _serviceProvider.GetRequiredService<CustomerEditForm>();
+            var editForm = _formFactory.Create<CustomerEditForm>();
             editForm.CustomerId = customer.Id;
             if (editForm.ShowDialog(this) == DialogResult.OK)
             {
