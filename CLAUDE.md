@@ -8,8 +8,8 @@
 ## 📊 Project Status
 
 **Repository Completion**: **100%** (62/62 files) 🎉🎉🎉
-**Last Updated**: 2025-11-08
-**Version**: 5.1.0 (PR Review System Added!)
+**Last Updated**: 2025-11-17
+**Version**: 5.2.0 (Documentation Confirmation Rule Added!)
 
 ### Recent Enhancements ✨
 - ✅ **Phase 1**: Workflows extracted, commands organized into categories
@@ -200,6 +200,39 @@ Comprehensive templates for planning feature implementations:
 - **[Template Usage Guide](plans/templates/template-usage-guide.md)** - How to use all plan templates effectively
 
 📖 **Usage**: Copy a template to `plans/` folder, replace `{{PLACEHOLDERS}}`, and track your progress.
+
+---
+
+## ⚠️ CRITICAL RULE: Documentation Confirmation Required
+
+**🛑 ALWAYS ASK FOR CONFIRMATION BEFORE CREATING DOCUMENTATION FILES**
+
+Before writing ANY specification, planning document, or feature documentation, you **MUST**:
+1. Ask the user for explicit confirmation
+2. Wait for a clear "yes" or approval from the user
+3. Only proceed after receiving confirmation
+
+**This applies to**:
+- Creating new specs in `specs/` folder
+- Writing `spec.md`, `tasks.md`, `data-model.md`, or similar planning documents
+- Creating feature development documentation
+- Writing implementation guides or quickstart documents
+- Any markdown files related to planning or specifications
+
+**This does NOT apply to**:
+- Code files (`.cs`, `.csproj`, etc.)
+- Code templates
+- Test files
+- Configuration files (`.editorconfig`, `.gitignore`, etc.)
+- Updating existing documentation when explicitly requested
+
+**Example**:
+```
+❌ WRONG: "I'll create a spec.md file for this feature..." [proceeds to create file]
+✅ CORRECT: "Should I create a spec.md file to document this feature's requirements?"
+```
+
+**Why this rule exists**: The user wants to maintain control over what documentation is created in the repository and avoid unnecessary or unwanted documentation files.
 
 ---
 
@@ -491,8 +524,8 @@ Use templates from `/templates/` folder:
 
 ---
 
-**Last Updated**: 2025-11-08
-**Version**: 5.1.0 (PR Review System Added!)
+**Last Updated**: 2025-11-17
+**Version**: 5.2.0 (Documentation Confirmation Rule Added!)
 **Changes**:
 - Phase 1: Extracted 4 workflows, organized commands into categories, added metadata.json
 - Phase 2: Added 4 specialized AI agents (reviewer, test-generator, docs-manager, mvp-validator)
@@ -504,3 +537,7 @@ Use templates from `/templates/` folder:
   - New templates: review-comment-templates.md (25+ reusable templates)
   - Enhanced: winforms-reviewer agent (v2.0 with PR review mode)
   - Updated: CLAUDE.md with Code Review section
+- **Version 5.2.0**: Added CRITICAL documentation confirmation rule
+  - AI must always ask for explicit confirmation before creating any documentation files
+  - Prevents unwanted spec.md, tasks.md, and planning documents
+  - Gives user full control over documentation creation
