@@ -1,48 +1,33 @@
 # C# WinForms Coding Standards - Claude Code Guide
 
 > **Project**: C# WinForms Coding Standards and Best Practices Documentation
-> **Purpose**: Guidelines for building maintainable, scalable WinForms applications
+> **Purpose**: Quick reference guide for AI assistants building WinForms applications
+> **Repository Type**: Submodule reference - Link this repo into C# projects for Claude Code integration
 
 ---
 
 ## 📊 Project Status
 
-**Repository Completion**: **100%** (62/62 files) 🎉🎉🎉
+**Repository Completion**: **100%** (62/62 files) 🎉
 **Last Updated**: 2025-11-17
-**Version**: 5.2.0 (Documentation Confirmation Rule Added!)
+**Version**: 5.3.0 (Modular Guide Structure!)
 
-### Recent Enhancements ✨
-- ✅ **Phase 1**: Workflows extracted, commands organized into categories
-- ✅ **Phase 2**: 4 specialized AI agents (code review, testing, docs, MVP validation)
-- ✅ **Phase 3**: 6 comprehensive plan templates for feature implementation
-- ⭐ **NEW! PR Review System**: Complete team code review workflow with templates
-- 📋 **Phase 4 & 5**: Optional enhancements documented in [PHASE_4_5_IMPLEMENTATION_GUIDE.md](PHASE_4_5_IMPLEMENTATION_GUIDE.md)
+### What's New ✨
+- ⭐ **NEW! Modular Guides**: CLAUDE.md refactored into focused guides
+- ✅ **5 Specialized Guides**: Coding standards, architecture, code generation, testing, AI instructions
+- ✅ **Context Loading Map**: Clear guide for when to read which documentation
+- ✅ **Compact Main File**: 200 lines vs. 546 lines (63% reduction!)
 
 ### What's Complete ✅
-- ✅ **Configuration files** (4/4) - .gitignore, .editorconfig, LICENSE, pre-commit hooks
-- ✅ **Architecture documentation** (5/5) - MVP, MVVM, DI, **Factory Pattern** ⭐, project structure
-- ✅ **Coding conventions** (3/3) - Naming, style, comments
-- ✅ **Templates** (7/7) - Form, service, repository, **Unit of Work**, **Factory** ⭐, test, review comments
-- ✅ **UI/UX documentation** (6/6) - ~6,800 lines 🎉
-- ✅ **Best practices documentation** (8/8) - ~6,200 lines 🎉
-- ✅ **Data access documentation** (4/4) - Repository, Connection, EF Core, **Unit of Work** ⭐ ~6,100 lines 🎉
-- ✅ **Advanced topics** (5/5) - ~5,700 lines 🎉
-- ✅ **Examples documentation** (3/3) - ~2,200 lines 🎉
-- ✅ **Testing documentation** (5/5) - ~3,700 lines 🎉
-- ✅ **Slash commands** (13/13) - Complete command suite + **PR review commands** ⭐ 🎉
-- ✅ **Working example project** - Complete Customer Management app with tests! 🎉
-- ✅ **Support docs** (5/5) - USAGE_GUIDE, TROUBLESHOOTING, README, etc.
+- ✅ **Documentation** (62/62 files) - 100% complete! 🎉
+- ✅ **Templates** (7/7) - Form, Service, Repository, Unit of Work, Factory, Test
+- ✅ **Slash Commands** (13/13) - Complete command suite
+- ✅ **AI Agents** (4/4) - WinForms Reviewer, Test Generator, Docs Manager, MVP Validator
+- ✅ **Workflows** (5/5) - Development, Testing, Code Review, PR Review, Expert Behavior
+- ✅ **Plan Templates** (6/6) - Feature planning templates
+- ✅ **Example Project** - Complete Customer Management app with tests
 
-### Documentation Stats 📊
-- **Total lines created**: **~48,000+ lines** (+6,000 new lines!)
-- **Total files created**: **78 files** (38 docs + 13 commands + 5 workflows + 4 agents + 6 plan templates + 12 others)
-- **Code examples**: **250+ working examples**
-- **Review templates**: **25+ reusable comment templates** ⭐
-- **Test coverage**: **65+ unit & integration tests** in example project
-- **Coverage**: **100% - ALL** core WinForms topics! 🏆
-- **Workflows**: 5 specialized development workflows (+ **PR Review**) ⭐
-- **AI Agents**: 4 specialized agents (**WinForms Reviewer enhanced for PR review**) ⭐
-- **Plan Templates**: 6 comprehensive project planning templates
+📊 **Stats**: **~48,000+ lines** of documentation | **250+ code examples** | **65+ tests**
 
 ---
 
@@ -52,155 +37,39 @@
 - **Language**: C# 12.0 / C# 10.0
 - **UI Framework**: Windows Forms
 - **ORM**: Entity Framework Core 8.0
-- **Testing**: xUnit / NUnit
+- **Testing**: xUnit / NUnit + Moq
 - **DI Container**: Microsoft.Extensions.DependencyInjection
 - **Logging**: Serilog / NLog
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Quick Reference
 
-Standard WinForms project structure:
-
+### Project Structure
 ```
 /ProjectName
-    ├── /Forms              # UI Layer (minimal logic)
-    ├── /Controls           # Custom user controls
-    ├── /Models             # Business/data models
-    ├── /Services           # Business logic
-    ├── /Repositories       # Data access layer
-    ├── /Utils              # Helpers, extensions
-    ├── /Resources          # Icons, strings, localization
-    ├── Program.cs
-    └── App.config
+├── /Forms              # UI Layer (minimal logic)
+├── /Presenters         # MVP Presenters
+├── /Services           # Business logic
+├── /Repositories       # Data access layer
+├── /Data               # DbContext, Unit of Work
+├── /Factories          # Form factories
+└── Program.cs
 ```
 
-**Key Principles**:
-- ✅ Forms contain **UI handling only**, no business logic
-- ✅ Business logic lives in **Services**
-- ✅ Use **Dependency Injection** for loose coupling
-- ✅ Follow **MVP** or **MVVM** pattern for larger apps
+### Architecture Patterns
+- **MVP Pattern** ⭐ (recommended) - View + Presenter + Service
+- **Factory Pattern** ⭐ (required) - Use `IFormFactory`, NOT `IServiceProvider`
+- **Unit of Work** ⭐ (required) - Inject `IUnitOfWork`, NOT `IRepository`
+- **Dependency Injection** ⭐ (mandatory)
 
-📖 **Detailed docs**: [docs/architecture/project-structure.md](docs/architecture/project-structure.md)
-
----
-
-## 🎯 Coding Standards Quick Reference
-
-### Architecture
-- **Pattern**: MVP (recommended) or MVVM (.NET 8+)
-- **Data Access**: **Unit of Work pattern** (manages repositories & transactions)
-- **Form Creation**: **Factory Pattern** (replaces Service Locator anti-pattern)
-- **Separation**: UI → Presenter/ViewModel → Service → **Unit of Work** → Repository → Database
-- 📖 [MVP Pattern](docs/architecture/mvp-pattern.md) | [MVVM Pattern](docs/architecture/mvvm-pattern.md) | [Unit of Work](docs/data-access/unit-of-work-pattern.md) | [Factory Pattern](docs/architecture/factory-pattern.md)
-
-### Naming Conventions
-| Type | Convention | Example |
-|------|-----------|---------|
-| Class | PascalCase | `CustomerService`, `MainForm` |
-| Method | PascalCase | `LoadCustomers()`, `SaveData()` |
-| Variable | camelCase | `customerList`, `isActive` |
-| Constant | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| Control | prefix + PascalCase | `btnSave`, `txtName`, `dgvCustomers` |
-
-📖 **Full conventions**: [docs/conventions/naming-conventions.md](docs/conventions/naming-conventions.md)
-
-### Control Prefixes
+### Quick Conventions
 ```
-btn → Button        lbl → Label         txt → TextBox
-cbx → ComboBox      chk → CheckBox      dgv → DataGridView
-grp → GroupBox      tab → TabControl    pnl → Panel
+Classes: PascalCase          Methods: PascalCase
+Variables: camelCase         Constants: UPPER_SNAKE_CASE
+Controls: prefix+PascalCase  (btn, txt, dgv, etc.)
+Async methods: MethodNameAsync
 ```
-
----
-
-## ⚙️ Common Commands
-
-```bash
-# Build project
-dotnet build
-
-# Run tests
-dotnet test
-
-# Run tests with coverage
-dotnet test /p:CollectCoverage=true
-
-# Run specific test
-dotnet test --filter "FullyQualifiedName~ServiceTests"
-
-# Clean and rebuild
-dotnet clean && dotnet build
-```
-
----
-
-## 📋 Workflows
-
-Detailed workflows for common development tasks:
-
-- **[Development Workflow](.claude/workflows/winforms-development-workflow.md)** - Complete guide for creating Forms, Services, Repositories
-- **[Testing Workflow](.claude/workflows/testing-workflow.md)** - TDD approach, test patterns, coverage goals
-- **[Code Review Checklist](.claude/workflows/code-review-checklist.md)** - Pre-commit checks for quality assurance
-- **[PR Review Workflow](.claude/workflows/pr-review-workflow.md)** - ⭐ **NEW!** Complete Pull Request review process for team collaboration
-- **[Expert Behavior Guide](.claude/workflows/expert-behavior-guide.md)** - How to evaluate and guide user requests
-
-📖 **Pro tip**: Load the appropriate workflow file before starting complex tasks.
-
----
-
-## 🔍 Code Review (NEW!)
-
-Complete code review system for team collaboration:
-
-### Slash Commands
-- **`/review-pr <branch>`** - Comprehensive Pull Request review with team feedback
-- **`/review-code <files>`** - Detailed review of specific file(s)
-
-### Resources
-- **[PR Review Workflow](.claude/workflows/pr-review-workflow.md)** - Step-by-step PR review process (15-30 min)
-- **[Review Comment Templates](templates/review-comment-templates.md)** - Reusable templates for common issues
-- **[Code Review Checklist](.claude/workflows/code-review-checklist.md)** - Complete checklist (12 categories)
-
-### Review Modes
-1. **Self Review** (2-5 min) - Quick check before committing
-2. **File Review** (5-10 min) - Detailed review of specific files
-3. **Pull Request Review** (15-30 min) - Full PR review for team members
-
-### Key Features
-✅ Categorizes issues by severity (Critical/Major/Minor)
-✅ Uses standard comment templates
-✅ Provides positive feedback
-✅ References documentation
-✅ Makes clear recommendations (Approve/Request Changes/Comment)
-
----
-
-## 🤖 AI Agents
-
-Specialized agents for automating common tasks:
-
-- **[WinForms Reviewer](.claude/agents/winforms-reviewer.md)** - ⭐ **ENHANCED!** Code quality checks, PR review, team collaboration
-- **[Test Generator](.claude/agents/test-generator.md)** - Auto-generate unit and integration tests with proper mocking
-- **[Docs Manager](.claude/agents/docs-manager.md)** - Keep documentation in sync with code changes
-- **[MVP Validator](.claude/agents/mvp-validator.md)** - Validate MVP/MVVM pattern implementation and architecture
-
-📖 **Usage**: Invoke agents when you need automated help with reviews, testing, or documentation.
-
----
-
-## 📋 Plan Templates
-
-Comprehensive templates for planning feature implementations:
-
-- **[Form Implementation Plan](plans/templates/form-implementation-plan.md)** - Complete plan for creating Forms with MVP
-- **[Service Implementation Plan](plans/templates/service-implementation-plan.md)** - Business logic layer planning
-- **[Repository Implementation Plan](plans/templates/repository-implementation-plan.md)** - Data access layer planning
-- **[Refactoring Plan](plans/templates/refactoring-plan.md)** - Structured approach to code refactoring
-- **[Testing Plan](plans/templates/testing-plan.md)** - Comprehensive testing strategy template
-- **[Template Usage Guide](plans/templates/template-usage-guide.md)** - How to use all plan templates effectively
-
-📖 **Usage**: Copy a template to `plans/` folder, replace `{{PLACEHOLDERS}}`, and track your progress.
 
 ---
 
@@ -218,14 +87,12 @@ Before writing ANY specification, planning document, or feature documentation, y
 - Writing `spec.md`, `tasks.md`, `data-model.md`, or similar planning documents
 - Creating feature development documentation
 - Writing implementation guides or quickstart documents
-- Any markdown files related to planning or specifications
 
 **This does NOT apply to**:
 - Code files (`.cs`, `.csproj`, etc.)
 - Code templates
 - Test files
-- Configuration files (`.editorconfig`, `.gitignore`, etc.)
-- Updating existing documentation when explicitly requested
+- Configuration files
 
 **Example**:
 ```
@@ -233,206 +100,154 @@ Before writing ANY specification, planning document, or feature documentation, y
 ✅ CORRECT: "Should I create a spec.md file to document this feature's requirements?"
 ```
 
-**Why this rule exists**: The user wants to maintain control over what documentation is created in the repository and avoid unnecessary or unwanted documentation files.
+---
+
+## 🚀 AI Assistant Quick Rules
+
+### ✅ ALWAYS DO:
+1. **Use Factory Pattern** - Inject `IFormFactory`, NOT `IServiceProvider`
+2. **Use Unit of Work** - Inject `IUnitOfWork`, NOT `IRepository`
+3. **Call SaveChangesAsync** - In Unit of Work only, NEVER in repositories
+4. **Use async/await** - For all I/O operations
+5. **Validate input** - Before processing
+6. **Handle errors** - Try-catch with logging
+7. **Use templates** - Start with templates from `/templates/` folder
+8. **Write tests** - Unit tests for services, integration tests for repositories
+9. **Follow MVP** - Separate UI from business logic
+10. **Dispose resources** - Use `using` statements
+
+### ❌ NEVER DO:
+1. ❌ Business logic in Forms
+2. ❌ Inject `IServiceProvider` (use `IFormFactory`)
+3. ❌ Call `SaveChangesAsync` in repositories
+4. ❌ Inject `IRepository` directly (use `IUnitOfWork`)
+5. ❌ Synchronous I/O
+6. ❌ Ignore exceptions silently
+7. ❌ Magic numbers/strings
+8. ❌ Create UI from background threads
+9. ❌ Skip validation
+10. ❌ Write code without tests
+
+📖 **Full rules**: [.claude/guides/ai-instructions.md](.claude/guides/ai-instructions.md)
 
 ---
 
-## 🚀 AI Assistant Rules (IMPORTANT!)
+## 🧠 Context Loading Map
 
-When writing code, **ALWAYS follow these rules**:
+**⚡ CRITICAL**: This repository is designed to be used as a **Git Submodule** in C# WinForms projects.
+When AI (Claude Code) starts working on a task, it should **load the appropriate guide** based on the task type.
 
-### ✅ DO:
-1. **Separate concerns**: UI logic in Forms, business logic in Services
-2. **Use Factory Pattern**: Inject `IFormFactory` into forms, NOT `IServiceProvider`
-3. **Use Unit of Work**: Inject `IUnitOfWork` into services, NOT `IRepository`
-4. **Call SaveChangesAsync**: Always call `_unitOfWork.SaveChangesAsync()` after modifications
-5. **Use async/await**: For all I/O operations (DB, file, network)
-6. **Dispose resources**: Use `using` statements for IDisposable
-7. **Validate input**: Always validate user input before processing
-8. **Handle errors**: Use try-catch with proper logging
-9. **Add XML comments**: For all public APIs
-10. **Follow MVP/MVVM**: Don't mix UI and business logic
-11. **Use DI**: Constructor injection for dependencies
-12. **Write tests**: Unit tests for Services, integration tests for Repositories
-13. **Thread-safe UI**: Use `Invoke`/`BeginInvoke` for cross-thread UI updates
+### When to Read Which Guide
 
-### ❌ DON'T:
-1. ❌ Put business logic in Forms
-2. ❌ **Inject IServiceProvider into forms** (use IFormFactory instead - Service Locator is anti-pattern!)
-3. ❌ **Call SaveChangesAsync in repositories** (use Unit of Work instead)
-4. ❌ **Inject IRepository directly** (inject IUnitOfWork into services)
-5. ❌ Use synchronous I/O (use async instead)
-6. ❌ Leave resources undisposed (memory leaks)
-7. ❌ Ignore exceptions silently
-8. ❌ Use magic numbers/strings (use constants)
-9. ❌ Create UI controls from background threads
-10. ❌ Hardcode connection strings (use configuration)
-11. ❌ Skip input validation
-12. ❌ Write code without tests
-13. ❌ Use Hungarian notation excessively
+| Task Type | Required Reading | Purpose |
+|-----------|------------------|---------|
+| **Any WinForms task** | [AI Instructions](.claude/guides/ai-instructions.md) | ⭐ Core DO/DON'T rules (READ FIRST!) |
+| **Creating Forms** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + `templates/form-template.cs` | MVP pattern, presenters, view interfaces |
+| **Creating Services** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + [Architecture Guide](.claude/guides/architecture-guide.md) | Unit of Work pattern, validation, error handling |
+| **Creating Repositories** | [Code Generation Guide](.claude/guides/code-generation-guide.md) | Repository pattern (NO SaveChanges!) |
+| **Understanding Architecture** | [Architecture Guide](.claude/guides/architecture-guide.md) | MVP, MVVM, DI, Factory, Unit of Work |
+| **Writing Tests** | [Testing Guide](.claude/guides/testing-guide.md) + `templates/test-template.cs` | Unit tests, integration tests, Moq |
+| **Coding Standards** | [Coding Standards Guide](.claude/guides/coding-standards.md) | Naming, style, formatting |
+| **Code Review** | [Code Review Checklist](.claude/workflows/code-review-checklist.md) | Pre-commit checks |
+| **Pull Request Review** | [PR Review Workflow](.claude/workflows/pr-review-workflow.md) | Team collaboration |
 
----
+### How to Use This Repository
 
-## 👨‍🏫 Expert Behavior
+**For AI Assistants (Claude Code)**:
+1. **ALWAYS start** by reading [AI Instructions](.claude/guides/ai-instructions.md)
+2. **Load the appropriate guide** based on the task (see table above)
+3. **Use templates** from `/templates/` folder
+4. **Follow the patterns** exactly as documented
+5. **Verify** against the Code Review Checklist before committing
 
-**YOU ARE A WINFORMS CODING STANDARDS EXPERT** - Not just a code generator!
-
-📖 **Full guide**: [.claude/workflows/expert-behavior-guide.md](.claude/workflows/expert-behavior-guide.md)
-
-**Core Principle**: Evaluate requests, educate on best practices, suggest better alternatives.
-
-**Key actions**:
-- ✅ Approve requests that follow best practices
-- ⚠️ Warn about potential issues with explanations
-- ❌ Block anti-patterns, suggest proper solutions
-- 📚 Reference Microsoft docs and industry standards
+**For Developers**:
+1. Add this repository as a Git Submodule to your project
+2. Point Claude Code to this repository's CLAUDE.md
+3. Claude will automatically load the appropriate documentation
+4. Use slash commands (type `/` in Claude Code) for common tasks
 
 ---
 
-## 🧠 Claude Code Context Loading
+## 📚 Detailed Guides
 
-When starting a new coding task, follow this context loading strategy:
+### Core Guides
 
-### 1. **This File is Auto-Loaded**
-CLAUDE.md is automatically loaded at the start of every session. You already have the core guidelines.
+| Guide | Description | When to Read |
+|-------|-------------|--------------|
+| [🤖 AI Instructions](.claude/guides/ai-instructions.md) | ⭐ **START HERE!** Complete DO/DON'T rules for AI | Every task |
+| [🏛️ Architecture Guide](.claude/guides/architecture-guide.md) | MVP, MVVM, DI, Factory, Unit of Work patterns | Understanding architecture |
+| [⚙️ Code Generation Guide](.claude/guides/code-generation-guide.md) | How to generate Forms, Services, Repositories, Tests | Creating code |
+| [✅ Testing Guide](.claude/guides/testing-guide.md) | Unit testing, integration testing, Moq patterns | Writing tests |
+| [📝 Coding Standards](.claude/guides/coding-standards.md) | Naming, style, formatting conventions | Code style questions |
 
-### 2. **Load Context Based on Task Type**
+### Workflows
 
-| Task Type | Files to Read |
-|-----------|--------------|
-| **Creating a new Form** | `templates/form-template.cs`, `docs/architecture/mvp-pattern.md`, `docs/ui-ux/input-validation.md` |
-| **Creating a Service** | `templates/service-template.cs`, `docs/best-practices/async-await.md`, `docs/best-practices/error-handling.md` |
-| **Creating a Repository** | `templates/repository-template.cs`, `docs/data-access/entity-framework.md`, `docs/data-access/repository-pattern.md` |
-| **Writing Tests** | `templates/test-template.cs`, `docs/testing/unit-testing.md`, `docs/testing/integration-testing.md` |
-| **Data Binding** | `docs/ui-ux/data-binding.md`, `docs/ui-ux/datagridview-practices.md` |
-| **Form Communication** | `docs/ui-ux/form-communication.md`, `docs/architecture/mvp-pattern.md` |
-| **Error Handling** | `docs/best-practices/error-handling.md`, `docs/best-practices/resource-management.md` |
-| **Thread Safety** | `docs/best-practices/thread-safety.md`, `docs/best-practices/async-await.md` |
-| **Performance** | `docs/best-practices/performance.md`, `docs/advanced/performance-profiling.md` |
-| **Security** | `docs/best-practices/security.md`, `docs/data-access/connection-management.md` |
-| **General Questions** | `CODE_REVIEW_REPORT.md`, `USAGE_GUIDE.md` for practical examples |
+- [Development Workflow](.claude/workflows/winforms-development-workflow.md) - Complete dev process
+- [Testing Workflow](.claude/workflows/testing-workflow.md) - TDD approach
+- [Code Review Checklist](.claude/workflows/code-review-checklist.md) - Pre-commit checks
+- [PR Review Workflow](.claude/workflows/pr-review-workflow.md) - Team collaboration
+- [Expert Behavior Guide](.claude/workflows/expert-behavior-guide.md) - How to evaluate requests
 
-### 3. **Documentation Availability** ✅
+### Templates (Production-Ready!)
 
-✅ **ALL DOCS AVAILABLE**: Complete documentation coverage for all WinForms topics!
+All templates in `/templates/` folder:
+- `form-template.cs` - MVP pattern form with presenter
+- `service-template.cs` - Business logic with Unit of Work
+- `repository-template.cs` - Data access (NO SaveChanges)
+- `unitofwork-template.cs` - Transaction coordinator
+- `factory-template.cs` - Form factory for DI
+- `test-template.cs` - Unit test with Moq
 
-**Quick Access**:
-- **UI/UX**: All 6 docs complete (responsive design, data binding, validation, etc.)
-- **Best Practices**: All 8 docs complete (async/await, threading, security, etc.)
-- **Data Access**: All 3 docs complete (EF Core, repositories, connections)
-- **Testing**: All 5 docs complete (unit, integration, UI, coverage)
-- **Advanced**: All 5 docs complete (nullable types, LINQ, i18n, profiling)
-- **Examples**: 3 complete working examples with full code
-
-See [COMPLETION_STATUS.md](COMPLETION_STATUS.md) for full file list.
-
-### 4. **Always Use Templates**
-
-Templates are **production-ready** and follow all standards:
-- `/templates/form-template.cs` - MVP pattern form
-- `/templates/service-template.cs` - Business logic service with Unit of Work
-- `/templates/repository-template.cs` - Data access repository (NO SaveChanges)
-- `/templates/unitofwork-template.cs` - Unit of Work pattern implementation
-- `/templates/test-template.cs` - Unit test structure
-
-**Never generate code from scratch** - always start with templates!
+**⚠️ CRITICAL**: NEVER generate code from scratch - ALWAYS start with templates!
 
 ---
 
-## 🎨 Code Generation Patterns
+## 🔧 Common Commands
 
-📖 **Detailed patterns**: [.claude/workflows/winforms-development-workflow.md](.claude/workflows/winforms-development-workflow.md#code-generation-patterns)
+```bash
+# Build project
+dotnet build
 
-**Key patterns**:
-1. **Creating Forms** - Use form-template.cs, implement MVP, async handlers
-2. **Creating Services** - Use service-template.cs, DI, async methods, validation
-3. **Creating Repositories** - Use repository-template.cs, EF Core async, proper disposal
-4. **Writing Tests** - Use test-template.cs, Moq, AAA pattern, proper naming
-5. **Code Review** - Check against checklist, DO/DON'T rules, templates
+# Run tests
+dotnet test
 
----
+# Run tests with coverage
+dotnet test /p:CollectCoverage=true
 
-## 🎯 Code Generation Rules Summary
-
-### When generating Forms:
-1. ✅ Start with `form-template.cs`
-2. ✅ Implement MVP pattern (Form + IView + Presenter)
-3. ✅ Async event handlers for data operations
-4. ✅ Try-catch with user-friendly error messages
-5. ✅ Dispose resources in Dispose() method
-6. ✅ Set TabIndex for proper keyboard navigation
-7. ✅ Use meaningful control names (not button1, textBox1)
-
-### When generating Services:
-1. ✅ Start with `service-template.cs`
-2. ✅ **Inject `IUnitOfWork`, NOT `IRepository`** (Unit of Work pattern)
-3. ✅ Access repositories via `_unitOfWork.EntityName` (e.g., `_unitOfWork.Customers`)
-4. ✅ **Call `await _unitOfWork.SaveChangesAsync()` after Add/Update/Delete operations**
-5. ✅ Validate all inputs (ArgumentNullException, ArgumentException)
-6. ✅ Async methods with proper cancellation token support
-7. ✅ Log all operations (info, errors, warnings)
-8. ✅ Wrap exceptions with meaningful messages
-9. ✅ XML documentation on all public methods
-
-### When generating Repositories:
-1. ✅ Start with `repository-template.cs`
-2. ✅ Implement generic repository pattern with entity-specific interface
-3. ✅ **NEVER call `SaveChangesAsync()` in repositories** (handled by Unit of Work)
-4. ✅ Use EF Core async methods (ToListAsync, FirstOrDefaultAsync, etc.)
-5. ✅ Use `AsNoTracking()` for read-only queries
-6. ✅ Return `Task.CompletedTask` for Update/Delete (no SaveChanges)
-7. ✅ Include soft-delete support if applicable
-
-### When creating Unit of Work:
-1. ✅ Use `unitofwork-template.cs` as starting point
-2. ✅ Add repository properties for each entity (lazy-loaded)
-3. ✅ Implement `SaveChangesAsync()` method
-4. ✅ Implement transaction methods (Begin/Commit/Rollback)
-5. ✅ Proper disposal pattern
-6. ✅ Register as `Scoped` in DI (one instance per scope)
-
-### When generating Tests:
-1. ✅ Start with `test-template.cs`
-2. ✅ One test class per class under test
-3. ✅ Use Moq for mocking dependencies
-4. ✅ Arrange-Act-Assert structure
-5. ✅ Test naming: `MethodName_Scenario_ExpectedResult`
-6. ✅ Test both success and failure scenarios
-7. ✅ Use Assert.Throws for exception testing
+# Clean and rebuild
+dotnet clean && dotnet build
+```
 
 ---
 
-## 📚 Documentation Structure
+## 🎯 Complete Documentation
 
-### Core Documentation
-- **[Overview](docs/00-overview.md)** - Full documentation index
-
-### Architecture & Design
+### Architecture & Patterns
 - [Project Structure](docs/architecture/project-structure.md)
-- [MVP Pattern](docs/architecture/mvp-pattern.md)
+- [MVP Pattern](docs/architecture/mvp-pattern.md) ⭐
 - [MVVM Pattern](docs/architecture/mvvm-pattern.md)
-- [Dependency Injection](docs/architecture/dependency-injection.md)
+- [Dependency Injection](docs/architecture/dependency-injection.md) ⭐
+- [Factory Pattern](docs/architecture/factory-pattern.md) ⭐
 
-### Conventions
-- [Naming Conventions](docs/conventions/naming-conventions.md)
-- [Code Style](docs/conventions/code-style.md)
-- [Comments & Docstrings](docs/conventions/comments-docstrings.md)
-
-### UI & UX
-- [Responsive Design](docs/ui-ux/responsive-design.md)
-- [Form Communication](docs/ui-ux/form-communication.md)
-- [Data Binding](docs/ui-ux/data-binding.md)
-- [Input Validation](docs/ui-ux/input-validation.md)
-- [DataGridView Best Practices](docs/ui-ux/datagridview-practices.md)
+### Data Access
+- [Repository Pattern](docs/data-access/repository-pattern.md)
+- [Unit of Work Pattern](docs/data-access/unit-of-work-pattern.md) ⭐
+- [Entity Framework Core](docs/data-access/entity-framework.md)
+- [Connection Management](docs/data-access/connection-management.md)
 
 ### Best Practices
 - [Async/Await Pattern](docs/best-practices/async-await.md)
-- [Resource Management](docs/best-practices/resource-management.md)
 - [Error Handling & Logging](docs/best-practices/error-handling.md)
 - [Thread Safety](docs/best-practices/thread-safety.md)
+- [Resource Management](docs/best-practices/resource-management.md)
 - [Performance Optimization](docs/best-practices/performance.md)
 - [Security](docs/best-practices/security.md)
-- [Configuration Management](docs/best-practices/configuration.md)
+
+### UI & UX
+- [Responsive Design](docs/ui-ux/responsive-design.md)
+- [Data Binding](docs/ui-ux/data-binding.md)
+- [Input Validation](docs/ui-ux/input-validation.md)
+- [Form Communication](docs/ui-ux/form-communication.md)
 
 ### Testing
 - [Testing Overview](docs/testing/testing-overview.md)
@@ -440,107 +255,93 @@ Templates are **production-ready** and follow all standards:
 - [Integration Testing](docs/testing/integration-testing.md)
 - [UI Testing](docs/testing/ui-testing.md)
 
-### Advanced Topics
-- [Nullable Reference Types](docs/advanced/nullable-reference-types.md)
-- [LINQ Best Practices](docs/advanced/linq-practices.md)
-- [Localization (i18n)](docs/advanced/localization-i18n.md)
-
-### Examples
-- [MVP Example](docs/examples/mvp-example.md)
-- [DI Example](docs/examples/di-example.md)
-- [Async UI Example](docs/examples/async-ui-example.md)
-
----
-
-## 🔧 Code Templates
-
-Use templates from `/templates/` folder:
-- `form-template.cs` - Standard Form with MVP pattern
-- `service-template.cs` - Service layer template
-- `repository-template.cs` - Repository pattern template
-- `test-template.cs` - Unit test template
-
----
-
-## ✅ Pre-Commit Checklist
-
-📖 **Full checklist**: [.claude/workflows/code-review-checklist.md](.claude/workflows/code-review-checklist.md)
-
-**Quick check**:
-- [ ] Code compiles, tests pass
-- [ ] No business logic in Forms
-- [ ] Resources disposed, async/await used
-- [ ] Input validated, errors handled
-- [ ] Code follows naming conventions
-
 ---
 
 ## 🔗 Quick Links
 
 - **[📘 USAGE GUIDE](USAGE_GUIDE.md)** - ⭐ **Start here!** Practical step-by-step examples
-- **[Full Overview](docs/00-overview.md)** - Complete documentation index
-- **[MVP Pattern Guide](docs/architecture/mvp-pattern.md)** - Recommended architecture
-- **[Testing Guide](docs/testing/testing-overview.md)** - How to test WinForms apps
-- **[Code Examples](docs/examples/)** - Working code samples
-- **[Working Example Project](example-project/)** - Complete Customer Management app 🎉
-
----
-
-## 📞 Need Help?
-
-1. **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - ⭐ Practical examples (Login form, Customer form, etc.)
-2. Check **[docs/00-overview.md](docs/00-overview.md)** for full documentation
-3. Search for specific topic in `/docs/` folders
-4. Review **[examples](docs/examples/)** and **[example-project](example-project/)** for working code
-5. Use slash commands (type `/` in Claude Code) for common tasks
+- **[🤖 AI Instructions](.claude/guides/ai-instructions.md)** - ⭐ **AI must read!** Core rules
+- **[Full Documentation Index](docs/00-overview.md)** - Complete docs
+- **[Example Project](example-project/)** - Complete working app
+- **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues
 
 ---
 
 ## 🎓 Learning Path
 
-**For new developers**:
-1. Read [Project Structure](docs/architecture/project-structure.md)
-2. Understand [MVP Pattern](docs/architecture/mvp-pattern.md)
-3. Review [Naming Conventions](docs/conventions/naming-conventions.md)
-4. Study [Code Examples](docs/examples/)
-5. **Explore [Working Example Project](example-project/)** - Complete app demonstrating all patterns
-6. Practice with templates from `/templates/`
+**For AI Assistants**:
+1. ✅ Read [AI Instructions](.claude/guides/ai-instructions.md) - **REQUIRED**
+2. ✅ Load appropriate guide based on task (see Context Loading Map)
+3. ✅ Use templates - NEVER generate from scratch
+4. ✅ Follow patterns exactly
+5. ✅ Verify against Code Review Checklist
 
-**For AI assistants**:
-1. Load this file first (automatic)
-2. **Check project status** - Know what docs exist vs missing
-3. Reference specific docs as needed for deep dives
-4. **Always use templates** - Never generate code from scratch
-5. Follow code generation patterns above
-6. Follow pre-commit checklist before suggesting commits
-7. Validate against DO/DON'T rules before responding
+**For Developers**:
+1. Read [USAGE_GUIDE.md](USAGE_GUIDE.md)
+2. Understand [MVP Pattern](docs/architecture/mvp-pattern.md)
+3. Explore [Example Project](example-project/)
+4. Practice with templates
 
 ---
 
-## 📝 Common Code Snippets
+## 🤖 AI Agents
 
-📖 **Full snippets**: [.claude/workflows/winforms-development-workflow.md](.claude/workflows/winforms-development-workflow.md#common-code-snippets)
+Specialized agents for automating tasks:
 
-- Async button click handler
-- Thread-safe UI updates
-- Proper resource disposal
+- [WinForms Reviewer](.claude/agents/winforms-reviewer.md) - Code quality checks, PR review
+- [Test Generator](.claude/agents/test-generator.md) - Auto-generate tests
+- [Docs Manager](.claude/agents/docs-manager.md) - Keep docs in sync
+- [MVP Validator](.claude/agents/mvp-validator.md) - Validate architecture
+
+---
+
+## 📋 Slash Commands
+
+Common commands (type `/` in Claude Code):
+
+**Create**:
+- `/create:form` - Create new form with MVP
+- `/create:service` - Create service class
+- `/create:repository` - Create repository class
+
+**Add Features**:
+- `/add:validation` - Add input validation
+- `/add:data-binding` - Setup data binding
+- `/add:logging` - Setup logging
+
+**Fix Issues**:
+- `/fix:threading` - Fix cross-thread UI issues
+- `/fix:performance` - Optimize performance
+- `/fix:bug` - Smart bug fixing
+
+**Review**:
+- `/review-pr <branch>` - Comprehensive PR review
+- `/review-code <files>` - Detailed file review
+
+---
+
+## 📞 Need Help?
+
+1. **Quick reference** - This file (you are here!)
+2. **Practical examples** - [USAGE_GUIDE.md](USAGE_GUIDE.md)
+3. **Detailed guides** - [.claude/guides/](.claude/guides/)
+4. **Full documentation** - [docs/00-overview.md](docs/00-overview.md)
+5. **Working example** - [example-project/](example-project/)
+6. **Issues?** - [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ---
 
 **Last Updated**: 2025-11-17
-**Version**: 5.2.0 (Documentation Confirmation Rule Added!)
-**Changes**:
-- Phase 1: Extracted 4 workflows, organized commands into categories, added metadata.json
-- Phase 2: Added 4 specialized AI agents (reviewer, test-generator, docs-manager, mvp-validator)
-- Phase 3: Created 6 comprehensive plan templates with placeholder system
-- Phase 4 & 5: Documented optional enhancements in PHASE_4_5_IMPLEMENTATION_GUIDE.md
-- **Version 5.1.0**: Added complete PR review system for team collaboration
-  - New slash commands: /review-pr, /review-code
-  - New workflow: pr-review-workflow.md (comprehensive 5-phase process)
-  - New templates: review-comment-templates.md (25+ reusable templates)
-  - Enhanced: winforms-reviewer agent (v2.0 with PR review mode)
-  - Updated: CLAUDE.md with Code Review section
-- **Version 5.2.0**: Added CRITICAL documentation confirmation rule
-  - AI must always ask for explicit confirmation before creating any documentation files
-  - Prevents unwanted spec.md, tasks.md, and planning documents
-  - Gives user full control over documentation creation
+**Version**: 5.3.0 (Modular Guide Structure!)
+
+**Major Changes in 5.3.0**:
+- ✅ Refactored CLAUDE.md into 5 focused guides
+- ✅ Created Context Loading Map for AI assistants
+- ✅ Reduced main file from 546 to ~200 lines (63% smaller!)
+- ✅ Improved organization for submodule use case
+- ✅ Clear "when to read which guide" instructions
+
+**Previous Versions**:
+- v5.2.0: Added CRITICAL documentation confirmation rule
+- v5.1.0: Added complete PR review system
+- v5.0.0: Complete repository with 100% documentation coverage
