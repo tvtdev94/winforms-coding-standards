@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+using CustomerManagement.Factories;
 
 namespace CustomerManagement.Forms;
 
@@ -7,15 +7,15 @@ namespace CustomerManagement.Forms;
 /// </summary>
 public partial class MainForm : Form
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IFormFactory _formFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainForm"/> class.
     /// </summary>
-    /// <param name="serviceProvider">The service provider for DI.</param>
-    public MainForm(IServiceProvider serviceProvider)
+    /// <param name="formFactory">The form factory for creating child forms.</param>
+    public MainForm(IFormFactory formFactory)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _formFactory = formFactory ?? throw new ArgumentNullException(nameof(formFactory));
         InitializeComponent();
     }
 
@@ -82,8 +82,8 @@ public partial class MainForm : Form
     /// </summary>
     private void OnManageCustomersClick(object? sender, EventArgs e)
     {
-        // Create customer list form using DI
-        var customerListForm = _serviceProvider.GetRequiredService<CustomerListForm>();
+        // Create customer list form using Factory Pattern
+        var customerListForm = _formFactory.Create<CustomerListForm>();
         customerListForm.ShowDialog(this);
     }
 
@@ -98,8 +98,9 @@ public partial class MainForm : Form
             "A WinForms example demonstrating:\n" +
             "- MVP Pattern\n" +
             "- Dependency Injection\n" +
+            "- Unit of Work Pattern\n" +
+            "- Factory Pattern\n" +
             "- Entity Framework Core\n" +
-            "- Repository Pattern\n" +
             "- Async/Await\n" +
             "- Best Practices",
             "About",

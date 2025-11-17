@@ -30,6 +30,11 @@ Master the architectural patterns and project organization for scalable WinForms
   - Service lifetime (Singleton, Scoped, Transient)
   - DI in WinForms applications
 
+- **[Factory Pattern](architecture/factory-pattern.md)** ⭐ RECOMMENDED
+  - Form creation with dependency injection
+  - Replaces Service Locator anti-pattern
+  - IFormFactory implementation and testing
+
 ---
 
 ### 🎨 Conventions & Code Style

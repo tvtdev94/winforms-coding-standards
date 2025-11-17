@@ -294,51 +294,132 @@ public class CustomerService : ICustomerService
 }
 ```
 
-### Step 6: Factory Pattern for Complex Creation
+### Step 6: Factory Pattern for Form Creation (RECOMMENDED)
 
-✅ **Use factory for complex form creation**:
+**IMPORTANT:** Use Factory Pattern instead of Service Locator anti-pattern!
+
+✅ **Create IFormFactory and FormFactory**:
+
 ```csharp
-public interface IFormFactory
+// Factories/IFormFactory.cs
+using System.Windows.Forms;
+
+namespace YourApp.Factories
 {
-    T Create<T>() where T : Form;
-}
-
-public class FormFactory : IFormFactory
-{
-    private readonly IServiceProvider _serviceProvider;
-
-    public FormFactory(IServiceProvider serviceProvider)
+    /// <summary>
+    /// Factory interface for creating forms with dependency injection.
+    /// This pattern replaces the Service Locator anti-pattern.
+    /// </summary>
+    public interface IFormFactory
     {
-        _serviceProvider = serviceProvider;
-    }
-
-    public T Create<T>() where T : Form
-    {
-        return _serviceProvider.GetRequiredService<T>();
+        /// <summary>
+        /// Creates an instance of the specified form type with all dependencies resolved.
+        /// </summary>
+        TForm Create<TForm>() where TForm : Form;
     }
 }
 
-// Register factory
-services.AddSingleton<IFormFactory, FormFactory>();
+// Factories/FormFactory.cs
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Windows.Forms;
 
-// Use factory
+namespace YourApp.Factories
+{
+    /// <summary>
+    /// Implementation of the form factory pattern.
+    /// IMPORTANT: This is the ONLY class that should inject IServiceProvider.
+    /// </summary>
+    public class FormFactory : IFormFactory
+    {
+        private readonly IServiceProvider _serviceProvider;
+
+        public FormFactory(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        }
+
+        public TForm Create<TForm>() where TForm : Form
+        {
+            return _serviceProvider.GetRequiredService<TForm>();
+        }
+    }
+}
+```
+
+✅ **Register factory in Program.cs**:
+```csharp
+private static void ConfigureServices(IServiceCollection services)
+{
+    // ... other services ...
+
+    // Factory Pattern (Singleton - one instance for entire app)
+    // IMPORTANT: This replaces IServiceProvider injection in forms
+    services.AddSingleton<IFormFactory, FormFactory>();
+
+    // Forms (Transient - new instance each time)
+    services.AddTransient<MainForm>();
+    services.AddTransient<CustomerForm>();
+    services.AddTransient<OrderForm>();
+}
+```
+
+✅ **Use factory in forms (NOT IServiceProvider)**:
+```csharp
 public partial class MainForm : Form
 {
-    private readonly IFormFactory _formFactory;
+    private readonly IFormFactory _formFactory; // ✅ GOOD: Factory Pattern
 
+    // ❌ NEVER inject IServiceProvider - that's Service Locator anti-pattern!
     public MainForm(IFormFactory formFactory)
     {
         InitializeComponent();
-        _formFactory = formFactory;
+        _formFactory = formFactory ?? throw new ArgumentNullException(nameof(formFactory));
     }
 
     private void btnCustomers_Click(object sender, EventArgs e)
     {
-        using (var form = _formFactory.Create<CustomerForm>())
+        // Create form using factory
+        var form = _formFactory.Create<CustomerForm>();
+        form.ShowDialog(this);
+    }
+
+    private void btnEditCustomer_Click(object sender, EventArgs e)
+    {
+        // Modal dialog with using statement
+        using (var editForm = _formFactory.Create<CustomerEditForm>())
         {
-            form.ShowDialog(this);
+            editForm.Initialize(customerId);
+
+            if (editForm.ShowDialog(this) == DialogResult.OK)
+            {
+                // Handle result
+                LoadCustomers();
+            }
         }
     }
+}
+```
+
+**Why Factory Pattern?**
+- ✅ Eliminates Service Locator anti-pattern
+- ✅ Explicit dependencies (easy to see what form needs)
+- ✅ Easy to test and mock
+- ✅ Compile-time safety
+- ✅ Better separation of concerns
+
+**Service Locator vs Factory:**
+```csharp
+// ❌ BAD - Service Locator anti-pattern
+public MainForm(IServiceProvider serviceProvider)
+{
+    var form = serviceProvider.GetRequiredService<CustomerForm>();
+}
+
+// ✅ GOOD - Factory Pattern
+public MainForm(IFormFactory formFactory)
+{
+    var form = formFactory.Create<CustomerForm>();
 }
 ```
 
@@ -375,18 +456,19 @@ public async Task SaveCustomer_ValidData_Succeeds()
 4. **Best Practices**:
    - ✅ Register services in Program.cs ConfigureServices
    - ✅ Use constructor injection for all dependencies
+   - ✅ **Use IFormFactory in forms, NOT IServiceProvider**
+   - ✅ **Use IUnitOfWork in services, NOT IRepository**
    - ✅ Choose appropriate service lifetime (Singleton/Scoped/Transient)
-   - ✅ Use IServiceProvider to resolve forms
    - ✅ Store configuration in appsettings.json
-   - ✅ Don't use ServiceLocator anti-pattern
    - ✅ Create scopes for long-running operations
    - ✅ Dispose forms properly after use
 
 5. **Common Pitfalls to Avoid**:
-   - ❌ Storing IServiceProvider in fields (use IServiceScopeFactory instead)
+   - ❌ **Injecting IServiceProvider into forms** (use IFormFactory - Service Locator is anti-pattern!)
+   - ❌ **Injecting IRepository into services** (use IUnitOfWork instead)
+   - ❌ Storing IServiceProvider in fields (only in FormFactory)
    - ❌ Resolving scoped services from root provider
    - ❌ Circular dependencies between services
-   - ❌ Using Service Locator pattern instead of injection
    - ❌ Not disposing forms created from DI
    - ❌ Mixing DI and manual instantiation
 

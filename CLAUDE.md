@@ -20,9 +20,9 @@
 
 ### What's Complete ✅
 - ✅ **Configuration files** (4/4) - .gitignore, .editorconfig, LICENSE, pre-commit hooks
-- ✅ **Architecture documentation** (4/4) - MVP, MVVM, DI, project structure
+- ✅ **Architecture documentation** (5/5) - MVP, MVVM, DI, **Factory Pattern** ⭐, project structure
 - ✅ **Coding conventions** (3/3) - Naming, style, comments
-- ✅ **Templates** (6/6) - Form, service, repository, **Unit of Work**, test, review comments ⭐
+- ✅ **Templates** (7/7) - Form, service, repository, **Unit of Work**, **Factory** ⭐, test, review comments
 - ✅ **UI/UX documentation** (6/6) - ~6,800 lines 🎉
 - ✅ **Best practices documentation** (8/8) - ~6,200 lines 🎉
 - ✅ **Data access documentation** (4/4) - Repository, Connection, EF Core, **Unit of Work** ⭐ ~6,100 lines 🎉
@@ -90,8 +90,9 @@ Standard WinForms project structure:
 ### Architecture
 - **Pattern**: MVP (recommended) or MVVM (.NET 8+)
 - **Data Access**: **Unit of Work pattern** (manages repositories & transactions)
+- **Form Creation**: **Factory Pattern** (replaces Service Locator anti-pattern)
 - **Separation**: UI → Presenter/ViewModel → Service → **Unit of Work** → Repository → Database
-- 📖 [MVP Pattern](docs/architecture/mvp-pattern.md) | [MVVM Pattern](docs/architecture/mvvm-pattern.md) | [Unit of Work](docs/data-access/unit-of-work-pattern.md)
+- 📖 [MVP Pattern](docs/architecture/mvp-pattern.md) | [MVVM Pattern](docs/architecture/mvvm-pattern.md) | [Unit of Work](docs/data-access/unit-of-work-pattern.md) | [Factory Pattern](docs/architecture/factory-pattern.md)
 
 ### Naming Conventions
 | Type | Convention | Example |
@@ -242,31 +243,33 @@ When writing code, **ALWAYS follow these rules**:
 
 ### ✅ DO:
 1. **Separate concerns**: UI logic in Forms, business logic in Services
-2. **Use Unit of Work**: Inject `IUnitOfWork` into services, NOT `IRepository`
-3. **Call SaveChangesAsync**: Always call `_unitOfWork.SaveChangesAsync()` after modifications
-4. **Use async/await**: For all I/O operations (DB, file, network)
-5. **Dispose resources**: Use `using` statements for IDisposable
-6. **Validate input**: Always validate user input before processing
-7. **Handle errors**: Use try-catch with proper logging
-8. **Add XML comments**: For all public APIs
-9. **Follow MVP/MVVM**: Don't mix UI and business logic
-10. **Use DI**: Constructor injection for dependencies
-11. **Write tests**: Unit tests for Services, integration tests for Repositories
-12. **Thread-safe UI**: Use `Invoke`/`BeginInvoke` for cross-thread UI updates
+2. **Use Factory Pattern**: Inject `IFormFactory` into forms, NOT `IServiceProvider`
+3. **Use Unit of Work**: Inject `IUnitOfWork` into services, NOT `IRepository`
+4. **Call SaveChangesAsync**: Always call `_unitOfWork.SaveChangesAsync()` after modifications
+5. **Use async/await**: For all I/O operations (DB, file, network)
+6. **Dispose resources**: Use `using` statements for IDisposable
+7. **Validate input**: Always validate user input before processing
+8. **Handle errors**: Use try-catch with proper logging
+9. **Add XML comments**: For all public APIs
+10. **Follow MVP/MVVM**: Don't mix UI and business logic
+11. **Use DI**: Constructor injection for dependencies
+12. **Write tests**: Unit tests for Services, integration tests for Repositories
+13. **Thread-safe UI**: Use `Invoke`/`BeginInvoke` for cross-thread UI updates
 
 ### ❌ DON'T:
 1. ❌ Put business logic in Forms
-2. ❌ **Call SaveChangesAsync in repositories** (use Unit of Work instead)
-3. ❌ **Inject IRepository directly** (inject IUnitOfWork into services)
-4. ❌ Use synchronous I/O (use async instead)
-5. ❌ Leave resources undisposed (memory leaks)
-6. ❌ Ignore exceptions silently
-7. ❌ Use magic numbers/strings (use constants)
-8. ❌ Create UI controls from background threads
-9. ❌ Hardcode connection strings (use configuration)
-10. ❌ Skip input validation
-11. ❌ Write code without tests
-12. ❌ Use Hungarian notation excessively
+2. ❌ **Inject IServiceProvider into forms** (use IFormFactory instead - Service Locator is anti-pattern!)
+3. ❌ **Call SaveChangesAsync in repositories** (use Unit of Work instead)
+4. ❌ **Inject IRepository directly** (inject IUnitOfWork into services)
+5. ❌ Use synchronous I/O (use async instead)
+6. ❌ Leave resources undisposed (memory leaks)
+7. ❌ Ignore exceptions silently
+8. ❌ Use magic numbers/strings (use constants)
+9. ❌ Create UI controls from background threads
+10. ❌ Hardcode connection strings (use configuration)
+11. ❌ Skip input validation
+12. ❌ Write code without tests
+13. ❌ Use Hungarian notation excessively
 
 ---
 

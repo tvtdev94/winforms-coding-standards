@@ -1,4 +1,5 @@
 using CustomerManagement.Data;
+using CustomerManagement.Factories;
 using CustomerManagement.Forms;
 using CustomerManagement.Repositories;
 using CustomerManagement.Services;
@@ -123,6 +124,9 @@ internal static class Program
 
         // Services
         services.AddScoped<ICustomerService, CustomerService>();
+
+        // Factory Pattern (Singleton - one instance for entire app lifetime)
+        services.AddSingleton<IFormFactory, FormFactory>();
 
         // Forms (Transient - new instance each time)
         services.AddTransient<MainForm>();
