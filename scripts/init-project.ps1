@@ -20,6 +20,15 @@ if ([string]::IsNullOrWhiteSpace($ProjectName)) {
     Write-Host "[ERROR] Project name cannot be empty!" -ForegroundColor Red
     exit 1
 }
+
+# Check if directory already exists
+if (Test-Path $ProjectName) {
+    Write-Host "[ERROR] Directory '$ProjectName' already exists!" -ForegroundColor Red
+    Write-Host "   Please choose a different name or delete the existing directory." -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host "   Project name: $ProjectName" -ForegroundColor Green
 Write-Host ""
 
 # Question 2: Framework
@@ -196,11 +205,6 @@ Write-Host ""
 # Step 1: Create Solution
 # ============================================================================
 Write-Host "[1] Creating solution..." -ForegroundColor Cyan
-
-if (Test-Path $ProjectName) {
-    Write-Host "[ERROR] Directory '$ProjectName' already exists!" -ForegroundColor Red
-    exit 1
-}
 
 dotnet new sln -n $ProjectName -o $ProjectName
 Set-Location $ProjectName
@@ -765,9 +769,9 @@ Write-Host "  [OK] .vscode/launch.json created" -ForegroundColor Green
 Write-Host ""
 Write-Host "[10] Initializing git repository..." -ForegroundColor Cyan
 
-git init *>$null
-git add . *>$null
-git commit -m "Initial commit: Project structure created by init-project-interactive.ps1" *>$null
+git init 2>&1 | Out-Null
+git -c core.autocrlf=false add . 2>&1 | Out-Null
+git commit -m "Initial commit: Project structure created by init-project-interactive.ps1" 2>&1 | Out-Null
 
 Write-Host "  [OK] Git repository initialized" -ForegroundColor Green
 
@@ -866,17 +870,17 @@ if ($IntegrateStandards) {
             }
 
             # Commit submodule and symlinks/copies
-            git add .gitmodules .standards *>$null
+            git -c core.autocrlf=false add .gitmodules .standards 2>&1 | Out-Null
             if (Test-Path ".claude") {
-                git add .claude *>$null
+                git -c core.autocrlf=false add .claude 2>&1 | Out-Null
             }
             if (Test-Path "templates") {
-                git add templates *>$null
+                git -c core.autocrlf=false add templates 2>&1 | Out-Null
             }
             if (Test-Path "CLAUDE.md") {
-                git add CLAUDE.md *>$null
+                git -c core.autocrlf=false add CLAUDE.md 2>&1 | Out-Null
             }
-            git commit -m "Add coding standards as submodule" *>$null
+            git commit -m "Add coding standards as submodule" 2>&1 | Out-Null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
         } else {
             Write-Host "  [WARN]  Could not add standards submodule" -ForegroundColor Yellow
@@ -895,13 +899,15 @@ Write-Host "[12] Creating project context for AI assistants..." -ForegroundColor
 # Determine paths
 $standardsPath = if ($IntegrateStandards -and (Test-Path ".standards")) { ".standards" } else { $repoRoot }
 $templatePath = Join-Path $standardsPath ".claude/project-context-template.md"
-$outputPath = ".claude/project-context.md"
 
-# Check if .claude directory exists (from standards integration or created manually)
-if (-not (Test-Path ".claude")) {
-    New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
-    Write-Host "  [OK] Created .claude directory" -ForegroundColor Green
+# Project-specific context should NOT go in submodule
+# Create context/ for project-specific files
+$contextPath = "context"
+if (-not (Test-Path $contextPath)) {
+    New-Item -ItemType Directory -Path $contextPath -Force | Out-Null
 }
+
+$outputPath = Join-Path $contextPath "project-context.md"
 
 # Generate framework description
 $frameworkDesc = switch ($Framework) {
@@ -1168,11 +1174,18 @@ $nugetPackages
 
 # Write the file
 $projectContextContent | Out-File -FilePath $outputPath -Encoding UTF8 -Force
-Write-Host "  [OK] Created .claude/project-context.md" -ForegroundColor Green
+Write-Host "  [OK] Created context/project-context.md" -ForegroundColor Green
 
-# Add to git
-git add .claude/project-context.md *>$null
-git commit -m "Add project context for AI assistants" *>$null
+# Copy to .claude/ so AI can find it (will be ignored by git if .claude is symlink)
+$claudeDest = ".claude/project-context.md"
+Copy-Item $outputPath $claudeDest -Force -ErrorAction SilentlyContinue
+if (Test-Path $claudeDest) {
+    Write-Host "  [OK] Copied to .claude/project-context.md (for AI access)" -ForegroundColor Green
+}
+
+# Add to git from context/ (not submodule)
+git -c core.autocrlf=false add context/project-context.md 2>&1 | Out-Null
+git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
 Write-Host "  [OK] Project context committed to git" -ForegroundColor Green
 
 # ============================================================================
