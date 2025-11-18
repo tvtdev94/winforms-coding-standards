@@ -795,8 +795,87 @@ if ($IntegrateStandards) {
             git submodule update --init --recursive *>&1 | Out-Null
             Write-Host "  [OK] Standards added as submodule" -ForegroundColor Green
 
-            # Commit submodule
+            # Create symlinks for .claude and templates (requires Admin on Windows)
+            Write-Host ""
+            Write-Host "  Creating symlinks for Claude Code integration..." -ForegroundColor Cyan
+
+            # Check if running as Administrator
+            $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+            if ($isAdmin) {
+                try {
+                    # Create symlink for .claude directory
+                    if (Test-Path ".standards\.claude") {
+                        New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude" -Force -ErrorAction Stop | Out-Null
+                        Write-Host "  [OK] Created symlink: .claude -> .standards\.claude" -ForegroundColor Green
+                    }
+
+                    # Create symlink for templates directory
+                    if (Test-Path ".standards\templates") {
+                        New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates" -Force -ErrorAction Stop | Out-Null
+                        Write-Host "  [OK] Created symlink: templates -> .standards\templates" -ForegroundColor Green
+                    }
+
+                    # Create symlink for CLAUDE.md (important for Claude Code context)
+                    if (Test-Path ".standards\CLAUDE.md") {
+                        New-Item -ItemType SymbolicLink -Path "CLAUDE.md" -Target ".standards\CLAUDE.md" -Force -ErrorAction Stop | Out-Null
+                        Write-Host "  [OK] Created symlink: CLAUDE.md -> .standards\CLAUDE.md" -ForegroundColor Green
+                    }
+
+                    Write-Host "  [OK] Symlinks created successfully" -ForegroundColor Green
+                    Write-Host "  [INFO] Claude Code will now see all slash commands!" -ForegroundColor Cyan
+                } catch {
+                    Write-Host "  [WARN] Could not create symlinks: $($_.Exception.Message)" -ForegroundColor Yellow
+                    Write-Host "  [INFO] Falling back to copying files..." -ForegroundColor Cyan
+
+                    # Fallback: Copy instead of symlink
+                    if (Test-Path ".standards\.claude") {
+                        Copy-Item -Recurse ".standards\.claude" -Destination ".claude" -Force
+                        Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
+                    }
+                    if (Test-Path ".standards\templates") {
+                        Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
+                        Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
+                    }
+                    if (Test-Path ".standards\CLAUDE.md") {
+                        Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
+                        Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
+                    }
+                }
+            } else {
+                # Not running as Admin - copy instead
+                Write-Host "  [WARN] Not running as Administrator - cannot create symlinks" -ForegroundColor Yellow
+                Write-Host "  [INFO] Copying files instead (will not auto-update with standards)" -ForegroundColor Cyan
+
+                if (Test-Path ".standards\.claude") {
+                    Copy-Item -Recurse ".standards\.claude" -Destination ".claude" -Force
+                    Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
+                }
+                if (Test-Path ".standards\templates") {
+                    Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
+                    Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
+                }
+                if (Test-Path ".standards\CLAUDE.md") {
+                    Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
+                    Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
+                }
+
+                Write-Host ""
+                Write-Host "  [TIP] To get auto-updating standards, re-run this script as Administrator:" -ForegroundColor Yellow
+                Write-Host "        Right-click PowerShell -> Run as Administrator" -ForegroundColor Gray
+            }
+
+            # Commit submodule and symlinks/copies
             git add .gitmodules .standards
+            if (Test-Path ".claude") {
+                git add .claude
+            }
+            if (Test-Path "templates") {
+                git add templates
+            }
+            if (Test-Path "CLAUDE.md") {
+                git add CLAUDE.md
+            }
             git commit -m "Add coding standards as submodule" | Out-Null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
         } else {
@@ -806,6 +885,295 @@ if ($IntegrateStandards) {
         Write-Host "  [WARN]  Standards repo URL not detected, skipping" -ForegroundColor Yellow
     }
 }
+
+# ============================================================================
+# Step 12: Create Project Context for AI (Claude Code)
+# ============================================================================
+Write-Host ""
+Write-Host "[12] Creating project context for AI assistants..." -ForegroundColor Cyan
+
+# Determine paths
+$standardsPath = if ($IntegrateStandards -and (Test-Path ".standards")) { ".standards" } else { $repoRoot }
+$templatePath = Join-Path $standardsPath ".claude/project-context-template.md"
+$outputPath = ".claude/project-context.md"
+
+# Check if .claude directory exists (from standards integration or created manually)
+if (-not (Test-Path ".claude")) {
+    New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
+    Write-Host "  [OK] Created .claude directory" -ForegroundColor Green
+}
+
+# Generate framework description
+$frameworkDesc = switch ($Framework) {
+    "net8.0" { "Use **C# 12.0** features, latest async/await patterns, required properties, file-scoped types" }
+    "net6.0" { "Use **C# 10.0** features, global using, file-scoped namespaces, async/await" }
+    "net48"  { "Use **C# 7.3** features, avoid C# 8+ features (nullable reference types, ranges, etc.)" }
+    default  { "Use latest C# features available for this framework" }
+}
+
+# Generate UI framework description and instructions
+$uiFrameworkDesc = switch ($UIFramework) {
+    "Standard" { "Use **standard WinForms controls**: Button, TextBox, DataGridView, Label, etc." }
+    "DevExpress" { "Use **DevExpress controls**: XtraGrid, LookUpEdit, LayoutControl, SimpleButton, etc. See [DevExpress Overview](docs/devexpress/devexpress-overview.md)" }
+    "ReaLTaiizor" { "Use **ReaLTaiizor controls**: MaterialButton, MaterialTextBox, MaterialListView, MetroGrid, etc. See [ReaLTaiizor Overview](docs/realtaiizor/realtaiizor-overview.md)" }
+    default { "Use standard WinForms controls" }
+}
+
+$formInstructions = switch ($UIFramework) {
+    "Standard" { @"
+- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/form-template.cs]($($standardsPath.Replace('\', '/'))/templates/form-template.cs)
+- Use standard controls: Button, TextBox, DataGridView
+- Follow MVP pattern with Presenter and View interface
+- Prefix controls: btn, txt, dgv, lbl, etc.
+"@ }
+    "DevExpress" { @"
+- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs)
+- Use DevExpress controls: SimpleButton, TextEdit, GridControl, LayoutControl
+- Follow MVP pattern with Presenter and View interface
+- Prefix controls: btn, txt, grid, lbl, lookup, etc.
+- **READ FIRST**: [$($standardsPath.Replace('\', '/'))/docs/devexpress/devexpress-overview.md]($($standardsPath.Replace('\', '/'))/docs/devexpress/devexpress-overview.md)
+"@ }
+    "ReaLTaiizor" { @"
+- **ALWAYS use**: [$($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs) OR [$($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs)
+- Use ReaLTaiizor controls: MaterialButton, MaterialTextBox, MaterialListView, MetroGrid
+- Follow MVP pattern with Presenter and View interface
+- Prefix controls: btn, txt, lst, grid, etc.
+- **READ FIRST**: [$($standardsPath.Replace('\', '/'))/docs/realtaiizor/realtaiizor-overview.md]($($standardsPath.Replace('\', '/'))/docs/realtaiizor/realtaiizor-overview.md)
+"@ }
+    default { "Use templates from /templates/ folder" }
+}
+
+$serviceInstructions = switch ($Database) {
+    "None" { "- No database configured, skip repository creation`n- Create services without data access" }
+    default { @"
+- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs) for repositories
+- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs) for services
+- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/unitofwork-template.cs]($($standardsPath.Replace('\', '/'))/templates/unitofwork-template.cs) for Unit of Work
+- Database: **$Database** - Use appropriate Entity Framework provider
+"@ }
+}
+
+$testInstructions = if ($IncludeTests) {
+    "- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)`n- Use xUnit + Moq + FluentAssertions`n- Test projects already created: $ProjectName.Tests, $ProjectName.IntegrationTests"
+} else {
+    "- No test projects created`n- Consider adding tests later"
+}
+
+$patternDesc = switch ($Pattern) {
+    "MVP" { "**Model-View-Presenter**: Forms implement View interfaces, Presenters contain UI logic, Services contain business logic. See [$($standardsPath.Replace('\', '/'))/docs/architecture/mvp-pattern.md]($($standardsPath.Replace('\', '/'))/docs/architecture/mvp-pattern.md)" }
+    "MVVM" { "**Model-View-ViewModel**: Use ViewModels with INotifyPropertyChanged, data binding. See [$($standardsPath.Replace('\', '/'))/docs/architecture/mvvm-pattern.md]($($standardsPath.Replace('\', '/'))/docs/architecture/mvvm-pattern.md)" }
+    "Simple" { "**Simple/Code-behind**: All logic in Form classes. Not recommended for production." }
+    default { "Follow standard WinForms patterns" }
+}
+
+# Template list
+$templateList = switch ($UIFramework) {
+    "Standard" { @"
+- Form: [$($standardsPath.Replace('\', '/'))/templates/form-template.cs]($($standardsPath.Replace('\', '/'))/templates/form-template.cs)
+- Service: [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs)
+- Repository: [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs)
+- Test: [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)
+"@ }
+    "DevExpress" { @"
+- Form: [$($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs)
+- Grid: [$($standardsPath.Replace('\', '/'))/templates/dx-grid-template.cs]($($standardsPath.Replace('\', '/'))/templates/dx-grid-template.cs)
+- Service: [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs)
+- Repository: [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs)
+- Test: [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)
+"@ }
+    "ReaLTaiizor" { @"
+- Material Form: [$($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs)
+- Metro Form: [$($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs)
+- Controls: [$($standardsPath.Replace('\', '/'))/templates/rt-controls-patterns.cs]($($standardsPath.Replace('\', '/'))/templates/rt-controls-patterns.cs)
+- Service: [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs)
+- Repository: [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs)
+- Test: [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)
+"@ }
+    default { "See /templates/ folder" }
+}
+
+# DO/DON'T lists
+$doList = @"
+- ✅ Use **$UIFramework** controls (NOT standard controls)
+- ✅ Follow **$Pattern** pattern
+- ✅ Use templates from **.standards/templates/** or **templates/**
+- ✅ Inject **IUnitOfWork**, NOT IRepository
+- ✅ Inject **IFormFactory**, NOT IServiceProvider
+- ✅ Call **SaveChangesAsync()** in Unit of Work ONLY
+- ✅ Use **async/await** for all I/O operations
+- ✅ Validate input before processing
+- ✅ Handle errors with try-catch + logging
+"@
+
+$dontList = @"
+- ❌ DON'T use standard controls when $UIFramework is selected
+- ❌ DON'T inject IRepository directly (use IUnitOfWork)
+- ❌ DON'T inject IServiceProvider (use IFormFactory)
+- ❌ DON'T call SaveChangesAsync in repositories
+- ❌ DON'T put business logic in Forms
+- ❌ DON'T use synchronous I/O
+- ❌ DON'T ignore exceptions
+- ❌ DON'T create UI from background threads
+"@
+
+# Additional folders based on pattern
+$additionalFolders = if ($Pattern -eq "MVP") {
+    "├── /Views              # View interfaces`n├── /Presenters         # Presenters"
+} elseif ($Pattern -eq "MVVM") {
+    "├── /ViewModels         # ViewModels"
+} else {
+    ""
+}
+
+# Get NuGet packages list
+$nugetPackages = @"
+- Microsoft.Extensions.DependencyInjection
+- Microsoft.Extensions.Configuration.Json
+- Microsoft.Extensions.Logging
+- Serilog.Extensions.Logging
+- Serilog.Sinks.File
+"@
+
+if ($Database -ne "None") {
+    $nugetPackages += "`n- Microsoft.EntityFrameworkCore (for $Database)"
+}
+
+if ($UIFramework -eq "DevExpress") {
+    $nugetPackages += "`n- DevExpress.WindowsDesktop.Win.Grid`n- DevExpress.WindowsDesktop.Win.Editors`n- DevExpress.WindowsDesktop.Win.Layout"
+}
+
+if ($UIFramework -eq "ReaLTaiizor") {
+    $nugetPackages += "`n- ReaLTaiizor (free, open-source)"
+}
+
+# Connection string
+$connectionStringDisplay = if ($Database -ne "None") { $connectionString } else { "N/A (no database)" }
+
+# Generate project-context.md content
+$projectContextContent = @"
+# Project Context
+
+> **IMPORTANT**: This file is **auto-generated** by ``init-project.ps1`` and contains project-specific configuration.
+> AI assistants (Claude Code) should **ALWAYS read this file** to understand the project setup.
+
+---
+
+## Project Information
+
+- **Project Name**: ``$ProjectName``
+- **Created Date**: ``$(Get-Date -Format "yyyy-MM-dd")``
+- **Framework**: ``$Framework``
+- **Pattern**: ``$Pattern``
+
+---
+
+## Configuration
+
+### Target Framework
+``````
+$Framework
+``````
+
+**What this means**:
+$frameworkDesc
+
+### Database Provider
+``````
+$Database
+``````
+
+**Connection String** (from appsettings.json):
+``````
+$connectionStringDisplay
+``````
+
+### UI Framework
+``````
+$UIFramework
+``````
+
+**What this means**:
+$uiFrameworkDesc
+
+### Architecture Pattern
+``````
+$Pattern
+``````
+
+**What this means**:
+$patternDesc
+
+### Testing
+``````
+$($IncludeTests ? "Unit tests + Integration tests included" : "No tests included")
+``````
+
+---
+
+## AI Instructions - READ THIS!
+
+### 🎯 When Creating Forms
+
+$formInstructions
+
+### 🎯 When Creating Services/Repositories
+
+$serviceInstructions
+
+### 🎯 When Writing Tests
+
+$testInstructions
+
+### 🎯 Available Templates
+
+Based on this project configuration, use these templates:
+
+$templateList
+
+---
+
+## Project Structure
+
+``````
+/$ProjectName
+├── /Forms              # UI Layer (minimal logic)
+$additionalFolders
+├── /Services           # Business logic
+├── /Repositories       # Data access layer
+├── /Data               # DbContext, Unit of Work
+└── Program.cs
+``````
+
+---
+
+## Quick Reference for AI
+
+### DO ✅ for this project:
+$doList
+
+### DON'T ❌ for this project:
+$dontList
+
+---
+
+## NuGet Packages Installed
+
+$nugetPackages
+
+---
+
+**Last Updated**: ``$(Get-Date -Format "yyyy-MM-dd")``
+**Generated by**: ``init-project.ps1`` v2.0
+"@
+
+# Write the file
+$projectContextContent | Out-File -FilePath $outputPath -Encoding UTF8 -Force
+Write-Host "  [OK] Created .claude/project-context.md" -ForegroundColor Green
+
+# Add to git
+git add .claude/project-context.md 2>&1 | Out-Null
+git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
+Write-Host "  [OK] Project context committed to git" -ForegroundColor Green
 
 # ============================================================================
 # Summary
@@ -856,10 +1224,30 @@ if ($IntegrateStandards -and (Test-Path ".standards")) {
     Write-Host "  .standards/USAGE_GUIDE.md     # Practical examples"
     Write-Host "  .standards/CLAUDE.md          # AI assistant guide"
     Write-Host "  .standards/docs/              # Full documentation"
-    Write-Host "  Type / in Claude Code         # See slash commands"
+    Write-Host ""
+    Write-Host "[Claude Code Integration]" -ForegroundColor Yellow
+    if (Test-Path ".claude") {
+        Write-Host "  ✅ Slash commands available!" -ForegroundColor Green
+        Write-Host "  Type / in Claude Code to see 19 commands:" -ForegroundColor Cyan
+        Write-Host "    /create:form, /create:service, /create:repository" -ForegroundColor Gray
+        Write-Host "    /add:validation, /add:logging, /add:error-handling" -ForegroundColor Gray
+        Write-Host "    /fix:bug, /fix:threading, /fix:performance" -ForegroundColor Gray
+        Write-Host "    /auto-implement - Auto-create complete features!" -ForegroundColor Gray
+    } else {
+        Write-Host "  ⚠️  Slash commands not available" -ForegroundColor Yellow
+        Write-Host "  Run as Administrator to enable symlinks" -ForegroundColor Gray
+    }
     Write-Host ""
     Write-Host "[Update standards]" -ForegroundColor Yellow
     Write-Host "  cd .standards && git pull && cd .."
+    if (Test-Path ".claude") {
+        $claudeLinkType = (Get-Item ".claude").LinkType
+        if ($claudeLinkType -eq "SymbolicLink") {
+            Write-Host "  (Symlinks will auto-update slash commands)" -ForegroundColor Gray
+        } else {
+            Write-Host "  (Re-copy .claude after updating: Copy-Item .standards\.claude .claude -Recurse -Force)" -ForegroundColor Gray
+        }
+    }
 }
 Write-Host ""
 Write-Host "Happy coding!" -ForegroundColor Green
