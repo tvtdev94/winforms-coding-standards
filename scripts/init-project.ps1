@@ -310,27 +310,52 @@ if ($UIFramework -eq "ReaLTaiizor") {
     $packages += "ReaLTaiizor"
 }
 
-# Add database-specific packages
+# Determine EF Core version based on .NET version
+$efCoreVersion = switch ($Framework) {
+    "net8.0" { "8.0.11" }
+    "net6.0" { "6.0.36" }
+    "net48"  { "6.0.36" }  # .NET Framework 4.8 uses EF Core 6.x (last version supporting .NET Framework)
+    default  { "8.0.11" }
+}
+
+# Add database-specific packages with version
 if ($Database -eq "SQLite") {
-    $packages += "Microsoft.EntityFrameworkCore.Sqlite"
-    $packages += "Microsoft.EntityFrameworkCore.Design"
+    $packages += "Microsoft.EntityFrameworkCore.Sqlite:$efCoreVersion"
+    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
 }
 elseif ($Database -eq "SQLServer") {
-    $packages += "Microsoft.EntityFrameworkCore.SqlServer"
-    $packages += "Microsoft.EntityFrameworkCore.Design"
+    $packages += "Microsoft.EntityFrameworkCore.SqlServer:$efCoreVersion"
+    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
 }
 elseif ($Database -eq "PostgreSQL") {
-    $packages += "Npgsql.EntityFrameworkCore.PostgreSQL"
-    $packages += "Microsoft.EntityFrameworkCore.Design"
+    # Npgsql follows EF Core versioning
+    $packages += "Npgsql.EntityFrameworkCore.PostgreSQL:$efCoreVersion"
+    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
 }
 elseif ($Database -eq "MySQL") {
-    $packages += "Pomelo.EntityFrameworkCore.MySql"
-    $packages += "Microsoft.EntityFrameworkCore.Design"
+    # Pomelo.EntityFrameworkCore.MySql versioning
+    $mySqlVersion = switch ($Framework) {
+        "net8.0" { "8.0.0" }
+        "net6.0" { "6.0.2" }
+        "net48"  { "6.0.2" }
+        default  { "8.0.0" }
+    }
+    $packages += "Pomelo.EntityFrameworkCore.MySql:$mySqlVersion"
+    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
 }
 
 foreach ($package in $packages) {
-    Write-Host "  Adding $package..." -NoNewline
-    dotnet add $ProjectName package $package --no-restore | Out-Null
+    # Split package name and version
+    $packageParts = $package -split ":"
+    $packageName = $packageParts[0]
+    $packageVersion = if ($packageParts.Length -gt 1) { $packageParts[1] } else { $null }
+
+    Write-Host "  Adding $packageName..." -NoNewline
+    if ($packageVersion) {
+        dotnet add $ProjectName package $packageName --version $packageVersion --no-restore | Out-Null
+    } else {
+        dotnet add $ProjectName package $packageName --no-restore | Out-Null
+    }
     Write-Host " [OK]" -ForegroundColor Green
 }
 
@@ -620,18 +645,18 @@ if ($IncludeTests) {
         dotnet sln add "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
         dotnet add "$ProjectName.IntegrationTests" reference $ProjectName
 
-        # Add database package to integration tests
+        # Add database package to integration tests (with correct version)
         if ($Database -eq "SQLite") {
-            dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.Sqlite --no-restore
+            dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.Sqlite --version $efCoreVersion --no-restore
         }
         elseif ($Database -eq "SQLServer") {
-            dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.SqlServer --no-restore
+            dotnet add "$ProjectName.IntegrationTests" package Microsoft.EntityFrameworkCore.SqlServer --version $efCoreVersion --no-restore
         }
         elseif ($Database -eq "PostgreSQL") {
-            dotnet add "$ProjectName.IntegrationTests" package Npgsql.EntityFrameworkCore.PostgreSQL --no-restore
+            dotnet add "$ProjectName.IntegrationTests" package Npgsql.EntityFrameworkCore.PostgreSQL --version $efCoreVersion --no-restore
         }
         elseif ($Database -eq "MySQL") {
-            dotnet add "$ProjectName.IntegrationTests" package Pomelo.EntityFrameworkCore.MySql --no-restore
+            dotnet add "$ProjectName.IntegrationTests" package Pomelo.EntityFrameworkCore.MySql --version $mySqlVersion --no-restore
         }
 
         Write-Host "  [OK] Integration test project created" -ForegroundColor Green
