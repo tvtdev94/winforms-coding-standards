@@ -994,26 +994,26 @@ $templateList = switch ($UIFramework) {
 
 # DO/DON'T lists
 $doList = @"
-- ✅ Use **$UIFramework** controls (NOT standard controls)
-- ✅ Follow **$Pattern** pattern
-- ✅ Use templates from **.standards/templates/** or **templates/**
-- ✅ Inject **IUnitOfWork**, NOT IRepository
-- ✅ Inject **IFormFactory**, NOT IServiceProvider
-- ✅ Call **SaveChangesAsync()** in Unit of Work ONLY
-- ✅ Use **async/await** for all I/O operations
-- ✅ Validate input before processing
-- ✅ Handle errors with try-catch + logging
+- [DO] Use **$UIFramework** controls (NOT standard controls)
+- [DO] Follow **$Pattern** pattern
+- [DO] Use templates from **.standards/templates/** or **templates/**
+- [DO] Inject **IUnitOfWork**, NOT IRepository
+- [DO] Inject **IFormFactory**, NOT IServiceProvider
+- [DO] Call **SaveChangesAsync()** in Unit of Work ONLY
+- [DO] Use **async/await** for all I/O operations
+- [DO] Validate input before processing
+- [DO] Handle errors with try-catch + logging
 "@
 
 $dontList = @"
-- ❌ DON'T use standard controls when $UIFramework is selected
-- ❌ DON'T inject IRepository directly (use IUnitOfWork)
-- ❌ DON'T inject IServiceProvider (use IFormFactory)
-- ❌ DON'T call SaveChangesAsync in repositories
-- ❌ DON'T put business logic in Forms
-- ❌ DON'T use synchronous I/O
-- ❌ DON'T ignore exceptions
-- ❌ DON'T create UI from background threads
+- [DON'T] DON'T use standard controls when $UIFramework is selected
+- [DON'T] DON'T inject IRepository directly (use IUnitOfWork)
+- [DON'T] DON'T inject IServiceProvider (use IFormFactory)
+- [DON'T] DON'T call SaveChangesAsync in repositories
+- [DON'T] DON'T put business logic in Forms
+- [DON'T] DON'T use synchronous I/O
+- [DON'T] DON'T ignore exceptions
+- [DON'T] DON'T create UI from background threads
 "@
 
 # Additional folders based on pattern
@@ -1148,10 +1148,10 @@ $additionalFolders
 
 ## Quick Reference for AI
 
-### DO ✅ for this project:
+### DO for this project:
 $doList
 
-### DON'T ❌ for this project:
+### DON'T for this project:
 $dontList
 
 ---
@@ -1227,14 +1227,14 @@ if ($IntegrateStandards -and (Test-Path ".standards")) {
     Write-Host ""
     Write-Host "[Claude Code Integration]" -ForegroundColor Yellow
     if (Test-Path ".claude") {
-        Write-Host "  ✅ Slash commands available!" -ForegroundColor Green
+        Write-Host "  [OK] Slash commands available!" -ForegroundColor Green
         Write-Host "  Type / in Claude Code to see 19 commands:" -ForegroundColor Cyan
         Write-Host "    /create:form, /create:service, /create:repository" -ForegroundColor Gray
         Write-Host "    /add:validation, /add:logging, /add:error-handling" -ForegroundColor Gray
         Write-Host "    /fix:bug, /fix:threading, /fix:performance" -ForegroundColor Gray
         Write-Host "    /auto-implement - Auto-create complete features!" -ForegroundColor Gray
     } else {
-        Write-Host "  ⚠️  Slash commands not available" -ForegroundColor Yellow
+        Write-Host "  [WARN] Slash commands not available" -ForegroundColor Yellow
         Write-Host "  Run as Administrator to enable symlinks" -ForegroundColor Gray
     }
     Write-Host ""
