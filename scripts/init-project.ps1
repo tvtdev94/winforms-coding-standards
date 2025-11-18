@@ -901,8 +901,8 @@ $standardsPath = if ($IntegrateStandards -and (Test-Path ".standards")) { ".stan
 $templatePath = Join-Path $standardsPath ".claude/project-context-template.md"
 
 # Project-specific context should NOT go in submodule
-# Create context/ for project-specific files
-$contextPath = "context"
+# Create .context/ for project-specific files (hidden folder)
+$contextPath = ".context"
 if (-not (Test-Path $contextPath)) {
     New-Item -ItemType Directory -Path $contextPath -Force | Out-Null
 }
@@ -1174,7 +1174,7 @@ $nugetPackages
 
 # Write to both locations initially
 $projectContextContent | Out-File -FilePath $outputPath -Encoding UTF8 -Force
-Write-Host "  [OK] Created context/project-context.md" -ForegroundColor Green
+Write-Host "  [OK] Created .context/project-context.md" -ForegroundColor Green
 
 # Also write to .claude/ directory (if it exists and is writable)
 $claudeDest = ".claude/project-context.md"
@@ -1198,38 +1198,38 @@ if (Test-Path ".claude") {
 }
 
 if ($claudeIsSymlink) {
-    # .claude is symlink → Keep context/project-context.md, remove .claude/project-context.md
-    Write-Host "  [INFO] Keeping context/project-context.md (cannot track files in symlinked directory)" -ForegroundColor Cyan
+    # .claude is symlink → Keep .context/project-context.md, remove .claude/project-context.md
+    Write-Host "  [INFO] Keeping .context/project-context.md (cannot track files in symlinked directory)" -ForegroundColor Cyan
     if (Test-Path $claudeDest) {
         Remove-Item $claudeDest -Force -ErrorAction SilentlyContinue
         Write-Host "  [OK] Removed .claude/project-context.md (symlink to submodule)" -ForegroundColor Green
     }
-    # Add context/project-context.md to git
-    git -c core.autocrlf=false add context/project-context.md 2>&1 | Out-Null
+    # Add .context/project-context.md to git
+    git -c core.autocrlf=false add .context/project-context.md 2>&1 | Out-Null
     git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
-    Write-Host "  [OK] Project context committed to git (context/project-context.md)" -ForegroundColor Green
+    Write-Host "  [OK] Project context committed to git (.context/project-context.md)" -ForegroundColor Green
     Write-Host ""
     Write-Host "  [TIP] AI assistants will find project-context.md in:" -ForegroundColor Yellow
-    Write-Host "        - context/project-context.md (project-specific)" -ForegroundColor Gray
+    Write-Host "        - .context/project-context.md (project-specific)" -ForegroundColor Gray
     Write-Host "        - .claude/ (from standards submodule via symlink)" -ForegroundColor Gray
 } else {
-    # .claude is NOT symlink → Keep .claude/project-context.md, remove context/project-context.md
+    # .claude is NOT symlink → Keep .claude/project-context.md, remove .context/project-context.md
     if (Test-Path $claudeDest) {
         Write-Host "  [INFO] Keeping .claude/project-context.md (AI can access directly)" -ForegroundColor Cyan
         if (Test-Path $outputPath) {
             Remove-Item $outputPath -Force
-            Write-Host "  [OK] Removed context/project-context.md (keeping only .claude version)" -ForegroundColor Green
+            Write-Host "  [OK] Removed .context/project-context.md (keeping only .claude version)" -ForegroundColor Green
         }
         # Add .claude/project-context.md to git
         git -c core.autocrlf=false add .claude/project-context.md 2>&1 | Out-Null
         git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
         Write-Host "  [OK] Project context committed to git (.claude/project-context.md)" -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] .claude/project-context.md not found, keeping context/project-context.md" -ForegroundColor Yellow
-        # Add context/project-context.md to git as fallback
-        git -c core.autocrlf=false add context/project-context.md 2>&1 | Out-Null
+        Write-Host "  [WARN] .claude/project-context.md not found, keeping .context/project-context.md" -ForegroundColor Yellow
+        # Add .context/project-context.md to git as fallback
+        git -c core.autocrlf=false add .context/project-context.md 2>&1 | Out-Null
         git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
-        Write-Host "  [OK] Project context committed to git (context/project-context.md)" -ForegroundColor Green
+        Write-Host "  [OK] Project context committed to git (.context/project-context.md)" -ForegroundColor Green
     }
 }
 
