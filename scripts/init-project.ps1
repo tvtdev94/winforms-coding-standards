@@ -765,9 +765,9 @@ Write-Host "  [OK] .vscode/launch.json created" -ForegroundColor Green
 Write-Host ""
 Write-Host "[10] Initializing git repository..." -ForegroundColor Cyan
 
-git init | Out-Null
-git add . | Out-Null
-git commit -m "Initial commit: Project structure created by init-project-interactive.ps1" | Out-Null
+git init *>$null
+git add . *>$null
+git commit -m "Initial commit: Project structure created by init-project-interactive.ps1" *>$null
 
 Write-Host "  [OK] Git repository initialized" -ForegroundColor Green
 
@@ -866,17 +866,17 @@ if ($IntegrateStandards) {
             }
 
             # Commit submodule and symlinks/copies
-            git add .gitmodules .standards
+            git add .gitmodules .standards *>$null
             if (Test-Path ".claude") {
-                git add .claude
+                git add .claude *>$null
             }
             if (Test-Path "templates") {
-                git add templates
+                git add templates *>$null
             }
             if (Test-Path "CLAUDE.md") {
-                git add CLAUDE.md
+                git add CLAUDE.md *>$null
             }
-            git commit -m "Add coding standards as submodule" | Out-Null
+            git commit -m "Add coding standards as submodule" *>$null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
         } else {
             Write-Host "  [WARN]  Could not add standards submodule" -ForegroundColor Yellow
@@ -1171,8 +1171,8 @@ $projectContextContent | Out-File -FilePath $outputPath -Encoding UTF8 -Force
 Write-Host "  [OK] Created .claude/project-context.md" -ForegroundColor Green
 
 # Add to git
-git add .claude/project-context.md 2>&1 | Out-Null
-git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
+git add .claude/project-context.md *>$null
+git commit -m "Add project context for AI assistants" *>$null
 Write-Host "  [OK] Project context committed to git" -ForegroundColor Green
 
 # ============================================================================
