@@ -590,6 +590,25 @@ When working with DevExpress:
 - `/templates/dx-lookup-template.cs` - LookUpEdit patterns
 - `/templates/dx-report-template.cs` - XtraReport template
 
+### When Using ReaLTaiizor Controls
+
+If the project uses ReaLTaiizor (free, open-source UI library with 20+ themes):
+
+#### ✅ DO (ReaLTaiizor)
+
+1. **Inherit from theme-specific forms** (MaterialForm, MetroForm, PoisonForm)
+2. **Use ONE theme consistently** - Don't mix Material + Metro + Poison
+3. **Use ReaLTaiizor templates** from `/templates/rt-*.cs`
+4. **Follow MVP pattern** (same as standard WinForms)
+
+#### ❌ DON'T (ReaLTaiizor)
+
+1. ❌ Mix themes in same application
+2. ❌ Mix ReaLTaiizor with standard WinForms controls
+3. ❌ Change theme mid-application
+
+📖 **ReaLTaiizor Documentation**: [docs/realtaiizor/](../../docs/realtaiizor/)
+
 ---
 
 ## Summary
@@ -612,6 +631,8 @@ When working with DevExpress:
 13. **[DevExpress] Use XtraForm and DevExpress controls**
 14. **[DevExpress] Use LayoutControl for responsive design**
 15. **[DevExpress] Enable built-in search in GridView**
+16. **[ReaLTaiizor] Use theme-specific forms (MaterialForm, MetroForm)**
+17. **[ReaLTaiizor] Use ONE theme consistently**
 
 ### DON'T ❌
 1. Business logic in Forms
@@ -628,6 +649,7 @@ When working with DevExpress:
 12. No tests
 13. **[DevExpress] Mix standard WinForms and DevExpress controls**
 14. **[DevExpress] Use different DevExpress versions**
+15. **[ReaLTaiizor] Mix themes in same application**
 
 ### Expert Behavior
 - ✅ Approve good requests

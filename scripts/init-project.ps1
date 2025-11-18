@@ -59,11 +59,13 @@ Write-Host ""
 # Question 4: UI Framework
 Write-Host "4. UI Framework" -ForegroundColor Yellow
 Write-Host "   [1] Standard WinForms (default controls)" -ForegroundColor Gray
-Write-Host "   [2] DevExpress (XtraGrid, XtraEditors, XtraLayout, XtraReports)" -ForegroundColor Gray
-$uiChoice = Read-Host "   Select UI framework (1-2)"
+Write-Host "   [2] DevExpress (commercial, advanced features)" -ForegroundColor Gray
+Write-Host "   [3] ReaLTaiizor (free, modern themes)" -ForegroundColor Gray
+$uiChoice = Read-Host "   Select UI framework (1-3)"
 $UIFramework = switch ($uiChoice) {
     "1" { "Standard" }
     "2" { "DevExpress" }
+    "3" { "ReaLTaiizor" }
     default { "Standard" }
 }
 Write-Host "   Selected: $UIFramework" -ForegroundColor Green
@@ -301,6 +303,11 @@ if ($UIFramework -eq "DevExpress") {
     $packages += "DevExpress.WindowsDesktop.Win.Layout"
     $packages += "DevExpress.WindowsDesktop.Win.Navigation"
     $packages += "DevExpress.WindowsDesktop.Win.Reporting"
+}
+
+# Add ReaLTaiizor package if selected
+if ($UIFramework -eq "ReaLTaiizor") {
+    $packages += "ReaLTaiizor"
 }
 
 # Add database-specific packages

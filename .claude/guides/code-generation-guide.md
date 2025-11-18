@@ -54,6 +54,12 @@ All templates are **production-ready** and follow all coding standards.
 - ✅ Use `/templates/dx-grid-template.cs` for list forms
 - ✅ Use standard templates for Services, Repositories, Unit of Work (same patterns)
 
+**If project uses ReaLTaiizor** (check for `ReaLTaiizor` NuGet or MaterialForm/MetroForm):
+- ✅ Use `/templates/rt-material-form-template.cs` for Material Design forms
+- ✅ Use `/templates/rt-metro-form-template.cs` for Metro forms with grid
+- ✅ Use `/templates/rt-controls-patterns.cs` for common control patterns
+- ✅ Use standard templates for Services, Repositories, Unit of Work (same patterns)
+
 **If project uses standard WinForms**:
 - ✅ Use `/templates/form-template.cs` for forms
 - ✅ Use standard templates for all other code
