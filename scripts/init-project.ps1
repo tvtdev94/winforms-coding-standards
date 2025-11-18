@@ -1018,9 +1018,9 @@ $dontList = @"
 
 # Additional folders based on pattern
 $additionalFolders = if ($Pattern -eq "MVP") {
-    "├── /Views              # View interfaces`n├── /Presenters         # Presenters"
+    "|-- /Views              # View interfaces`n|-- /Presenters         # Presenters"
 } elseif ($Pattern -eq "MVVM") {
-    "├── /ViewModels         # ViewModels"
+    "|-- /ViewModels         # ViewModels"
 } else {
     ""
 }
@@ -1105,7 +1105,7 @@ $patternDesc
 
 ### Testing
 ``````
-$($IncludeTests ? "Unit tests + Integration tests included" : "No tests included")
+$(if ($IncludeTests) { "Unit tests + Integration tests included" } else { "No tests included" })
 ``````
 
 ---
@@ -1136,12 +1136,12 @@ $templateList
 
 ``````
 /$ProjectName
-├── /Forms              # UI Layer (minimal logic)
+|-- /Forms              # UI Layer (minimal logic)
 $additionalFolders
-├── /Services           # Business logic
-├── /Repositories       # Data access layer
-├── /Data               # DbContext, Unit of Work
-└── Program.cs
+|-- /Services           # Business logic
+|-- /Repositories       # Data access layer
+|-- /Data               # DbContext, Unit of Work
++-- Program.cs
 ``````
 
 ---
