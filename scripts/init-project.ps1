@@ -56,8 +56,21 @@ $Database = switch ($dbChoice) {
 Write-Host "   Selected: $Database" -ForegroundColor Green
 Write-Host ""
 
-# Question 4: Architecture Pattern
-Write-Host "4. Architecture Pattern" -ForegroundColor Yellow
+# Question 4: UI Framework
+Write-Host "4. UI Framework" -ForegroundColor Yellow
+Write-Host "   [1] Standard WinForms (default controls)" -ForegroundColor Gray
+Write-Host "   [2] DevExpress (XtraGrid, XtraEditors, XtraLayout, XtraReports)" -ForegroundColor Gray
+$uiChoice = Read-Host "   Select UI framework (1-2)"
+$UIFramework = switch ($uiChoice) {
+    "1" { "Standard" }
+    "2" { "DevExpress" }
+    default { "Standard" }
+}
+Write-Host "   Selected: $UIFramework" -ForegroundColor Green
+Write-Host ""
+
+# Question 5: Architecture Pattern
+Write-Host "5. Architecture Pattern" -ForegroundColor Yellow
 Write-Host ""
 
 # Smart recommendation based on previous choices
@@ -134,22 +147,22 @@ $Pattern = switch ($patternChoice) {
 Write-Host "   Selected: $Pattern" -ForegroundColor Green
 Write-Host ""
 
-# Question 5: Include Tests
-Write-Host "5. Unit & Integration Tests" -ForegroundColor Yellow
+# Question 6: Include Tests
+Write-Host "6. Unit & Integration Tests" -ForegroundColor Yellow
 $includeTestsInput = Read-Host "   Include test projects? (Y/n)"
 $IncludeTests = $includeTestsInput -ne "n" -and $includeTestsInput -ne "N"
 Write-Host "   Tests: $(if ($IncludeTests) { 'Yes' } else { 'No' })" -ForegroundColor Green
 Write-Host ""
 
-# Question 6: Include Example Code
-Write-Host "6. Example Code" -ForegroundColor Yellow
+# Question 7: Include Example Code
+Write-Host "7. Example Code" -ForegroundColor Yellow
 $includeExampleInput = Read-Host "   Include example code? (y/N)"
 $IncludeExampleCode = $includeExampleInput -eq "y" -or $includeExampleInput -eq "Y"
 Write-Host "   Example code: $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })" -ForegroundColor Green
 Write-Host ""
 
-# Question 7: Integrate Standards
-Write-Host "7. Coding Standards Integration" -ForegroundColor Yellow
+# Question 8: Integrate Standards
+Write-Host "8. Coding Standards Integration" -ForegroundColor Yellow
 $integrateStandardsInput = Read-Host "   Integrate coding standards? (Y/n)"
 $IntegrateStandards = $integrateStandardsInput -ne "n" -and $integrateStandardsInput -ne "N"
 Write-Host "   Standards: $(if ($IntegrateStandards) { 'Yes' } else { 'No' })" -ForegroundColor Green
@@ -164,6 +177,7 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Project Name    : $ProjectName"
 Write-Host "Framework       : $Framework"
 Write-Host "Database        : $Database"
+Write-Host "UI Framework    : $UIFramework"
 Write-Host "Pattern         : $Pattern"
 Write-Host "Tests           : $(if ($IncludeTests) { 'Yes' } else { 'No' })"
 Write-Host "Example Code    : $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })"
@@ -279,6 +293,15 @@ $packages = @(
     "Serilog.Extensions.Logging",
     "Serilog.Sinks.File"
 )
+
+# Add DevExpress packages if selected
+if ($UIFramework -eq "DevExpress") {
+    $packages += "DevExpress.WindowsDesktop.Win.Grid"
+    $packages += "DevExpress.WindowsDesktop.Win.Editors"
+    $packages += "DevExpress.WindowsDesktop.Win.Layout"
+    $packages += "DevExpress.WindowsDesktop.Win.Navigation"
+    $packages += "DevExpress.WindowsDesktop.Win.Reporting"
+}
 
 # Add database-specific packages
 if ($Database -eq "SQLite") {
@@ -766,6 +789,7 @@ Write-Host "[Configuration]" -ForegroundColor Yellow
 Write-Host "  Project Name : $ProjectName"
 Write-Host "  Framework    : $Framework"
 Write-Host "  Database     : $Database"
+Write-Host "  UI Framework : $UIFramework"
 Write-Host "  Pattern      : $Pattern"
 Write-Host "  Tests        : $(if ($IncludeTests) { 'Yes' } else { 'No' })"
 Write-Host "  Standards    : $(if ($IntegrateStandards) { 'Yes' } else { 'No' })"

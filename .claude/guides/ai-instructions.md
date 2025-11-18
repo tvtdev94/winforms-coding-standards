@@ -492,6 +492,106 @@ Before suggesting code commits, verify:
 
 ---
 
+## DevExpress-Specific Rules
+
+### When Using DevExpress Controls
+
+If the project uses DevExpress (detected by presence of DevExpress NuGet packages or `XtraForm` inheritance):
+
+#### ✅ DO (DevExpress)
+
+1. **Inherit from XtraForm** instead of Form
+2. **Use DevExpress controls** instead of standard WinForms
+   - `GridControl` + `GridView` instead of DataGridView
+   - `TextEdit` instead of TextBox
+   - `LookUpEdit` instead of ComboBox
+   - `DateEdit` instead of DateTimePicker
+   - `SimpleButton` instead of Button
+3. **Use LayoutControl** for responsive forms
+4. **Enable built-in search** in GridView (`OptionsFind.AlwaysVisible = true`)
+5. **Configure grid after binding** data
+6. **Use consistent DevExpress naming** (see naming conventions)
+7. **Use DevExpress templates** from `/templates/dx-*.cs`
+8. **Apply consistent skin** across the app
+9. **Use XtraMessageBox** instead of MessageBox
+
+**Example**:
+```csharp
+// ✅ CORRECT: DevExpress form
+public partial class CustomerForm : XtraForm, ICustomerView
+{
+    private readonly CustomerPresenter _presenter;
+
+    public CustomerForm(CustomerPresenter presenter)
+    {
+        InitializeComponent();
+        _presenter = presenter;
+
+        // DevExpress configuration
+        ConfigureLayoutControl();
+        ConfigureGrid();
+    }
+
+    private void ConfigureGrid()
+    {
+        var gridView = gridControl1.MainView as GridView;
+
+        gridView.OptionsBehavior.Editable = false;
+        gridView.OptionsFind.AlwaysVisible = true;  // ✅ Built-in search
+        gridView.OptionsFind.FindNullPrompt = "Search...";
+    }
+}
+```
+
+#### ❌ DON'T (DevExpress)
+
+1. ❌ **Mix standard WinForms and DevExpress controls** (inconsistent UI)
+2. ❌ **Use different DevExpress versions** in same project
+3. ❌ **Forget to configure GridView** after binding data
+4. ❌ **Skip LayoutControl** for complex forms
+5. ❌ **Use default control names** (textEdit1, simpleButton1)
+
+**Example**:
+```csharp
+// ❌ WRONG: Mixing controls
+public partial class CustomerForm : XtraForm
+{
+    private TextBox txtName;        // ❌ Standard WinForms
+    private TextEdit txtEmail;      // DevExpress
+    private Button btnSave;         // ❌ Standard WinForms
+    private SimpleButton btnCancel; // DevExpress
+}
+
+// ✅ CORRECT: All DevExpress
+public partial class CustomerForm : XtraForm
+{
+    private TextEdit txtName;       // ✅ DevExpress
+    private TextEdit txtEmail;      // ✅ DevExpress
+    private SimpleButton btnSave;   // ✅ DevExpress
+    private SimpleButton btnCancel; // ✅ DevExpress
+}
+```
+
+#### DevExpress Documentation
+
+When working with DevExpress:
+
+📖 **Read these guides**:
+- [DevExpress Overview](../../docs/devexpress/devexpress-overview.md) - Setup and getting started
+- [DevExpress Controls](../../docs/devexpress/devexpress-controls.md) - Control reference
+- [DevExpress Data Binding](../../docs/devexpress/devexpress-data-binding.md) - Binding patterns
+- [DevExpress Grid Patterns](../../docs/devexpress/devexpress-grid-patterns.md) - XtraGrid best practices
+- [DevExpress Responsive Design](../../docs/devexpress/devexpress-responsive-design.md) - LayoutControl
+- [DevExpress Naming](../../docs/devexpress/devexpress-naming-conventions.md) - Naming conventions
+
+🛠️ **Use DevExpress templates**:
+- `/templates/dx-form-template.cs` - DevExpress form with MVP
+- `/templates/dx-grid-template.cs` - XtraGrid setup
+- `/templates/dx-lookup-template.cs` - LookUpEdit patterns
+- `/templates/dx-report-template.cs` - XtraReport template
+
+---
+
 ## Summary
 
 **Key Rules for AI Assistants**:
@@ -509,6 +609,9 @@ Before suggesting code commits, verify:
 10. Use templates
 11. Thread-safe UI updates
 12. Dispose resources
+13. **[DevExpress] Use XtraForm and DevExpress controls**
+14. **[DevExpress] Use LayoutControl for responsive design**
+15. **[DevExpress] Enable built-in search in GridView**
 
 ### DON'T ❌
 1. Business logic in Forms
@@ -523,6 +626,8 @@ Before suggesting code commits, verify:
 10. Hardcoded connection strings
 11. Skip validation
 12. No tests
+13. **[DevExpress] Mix standard WinForms and DevExpress controls**
+14. **[DevExpress] Use different DevExpress versions**
 
 ### Expert Behavior
 - ✅ Approve good requests

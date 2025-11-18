@@ -23,6 +23,8 @@
 
 All templates are **production-ready** and follow all coding standards.
 
+#### Standard WinForms Templates
+
 | Template | Path | Purpose |
 |----------|------|---------|
 | **Form** | `/templates/form-template.cs` | MVP pattern form with presenter |
@@ -32,9 +34,29 @@ All templates are **production-ready** and follow all coding standards.
 | **Factory** | `/templates/factory-template.cs` | Form factory for DI |
 | **Test** | `/templates/test-template.cs` | Unit test with Moq |
 
+#### DevExpress Templates
+
+| Template | Path | Purpose |
+|----------|------|---------|
+| **DX Form** | `/templates/dx-form-template.cs` | DevExpress form with MVP + LayoutControl |
+| **DX Grid** | `/templates/dx-grid-template.cs` | XtraGrid with CRUD operations |
+| **DX LookUp** | `/templates/dx-lookup-template.cs` | LookUpEdit patterns and examples |
+| **DX Report** | `/templates/dx-report-template.cs` | XtraReport basic template |
+
 ### Critical Rule
 
 **⚠️ NEVER generate code from scratch - ALWAYS start with templates!**
+
+### Choosing the Right Template
+
+**If project uses DevExpress** (check for `XtraForm` or DevExpress NuGet packages):
+- ✅ Use `/templates/dx-form-template.cs` for forms
+- ✅ Use `/templates/dx-grid-template.cs` for list forms
+- ✅ Use standard templates for Services, Repositories, Unit of Work (same patterns)
+
+**If project uses standard WinForms**:
+- ✅ Use `/templates/form-template.cs` for forms
+- ✅ Use standard templates for all other code
 
 ---
 
@@ -665,23 +687,121 @@ private void BindCustomers(List<Customer> customers)
 
 ---
 
+## DevExpress Code Generation
+
+### When to Use DevExpress Templates
+
+**Indicators that project uses DevExpress**:
+- Forms inherit from `XtraForm` instead of `Form`
+- NuGet packages like `DevExpress.WindowsDesktop.Win.Grid`
+- Controls like `GridControl`, `TextEdit`, `LookUpEdit`
+- `init-project.ps1` was run with UI Framework = DevExpress
+
+### DevExpress Form Generation
+
+Use `/templates/dx-form-template.cs` for all DevExpress forms.
+
+**Key Differences from Standard Forms**:
+1. Inherit from `XtraForm` instead of `Form`
+2. Use DevExpress controls (`TextEdit`, `LookUpEdit`, `DateEdit`, etc.)
+3. Use `LayoutControl` for responsive design
+4. Use `XtraMessageBox` instead of `MessageBox`
+5. Configure DevExpress-specific properties
+
+**Example**:
+```csharp
+// ✅ DevExpress Form
+public partial class CustomerEditForm : XtraForm, ICustomerEditView
+{
+    private LayoutControl layoutControl1;
+    private TextEdit txtCustomerName;
+    private LookUpEdit lkeCustomerType;
+    private DateEdit dteCreatedDate;
+    private SimpleButton btnSave;
+
+    private void ConfigureDevExpress()
+    {
+        // LayoutControl
+        layoutControl1.Dock = DockStyle.Fill;
+        layoutControl1.AllowCustomization = false;
+
+        // LookUpEdit
+        lkeCustomerType.Properties.NullText = "-- Select Type --";
+        lkeCustomerType.Properties.SearchMode = SearchMode.AutoFilter;
+    }
+}
+```
+
+### DevExpress Grid Generation
+
+Use `/templates/dx-grid-template.cs` for list forms with XtraGrid.
+
+**Key Features**:
+1. GridControl + GridView instead of DataGridView
+2. Built-in search panel
+3. Export to Excel/PDF
+4. Context menu
+5. Async data loading
+
+**Example**:
+```csharp
+private void ConfigureGrid()
+{
+    var gridView = gridControl1.MainView as GridView;
+
+    gridView.OptionsBehavior.Editable = false;
+    gridView.OptionsFind.AlwaysVisible = true;  // Built-in search
+    gridView.OptionsFind.FindNullPrompt = "Search...";
+    gridView.BestFitColumns();
+}
+```
+
+### DevExpress Naming Conventions
+
+Use DevExpress-specific prefixes:
+
+| Control | Prefix | Example |
+|---------|--------|---------|
+| GridControl | `grc` | `grcCustomers` |
+| GridView | `grv` | `grvCustomers` |
+| TextEdit | `txt` | `txtCustomerName` |
+| LookUpEdit | `lke` | `lkeCustomerType` |
+| DateEdit | `dte` | `dteCreatedDate` |
+| CheckEdit | `chk` | `chkIsActive` |
+| MemoEdit | `memo` | `memoNotes` |
+| SimpleButton | `btn` | `btnSave` |
+| LayoutControl | `lc` | `lcMain` |
+| LayoutControlItem | `lci` | `lciCustomerName` |
+
+📖 **Full naming guide**: [DevExpress Naming Conventions](../../docs/devexpress/devexpress-naming-conventions.md)
+
+---
+
 ## Summary
 
 **Key Takeaways**:
 
 1. **ALWAYS use templates** - Never generate from scratch
-2. **Forms** - MVP pattern with 3 files (IView, Form, Presenter)
-3. **Services** - Inject IUnitOfWork, validate inputs, log operations
-4. **Repositories** - NEVER call SaveChangesAsync
-5. **Unit of Work** - Single SaveChangesAsync, lazy-loaded repositories
-6. **Tests** - Moq mocks, AAA pattern, verify calls
+2. **Check UI framework** - DevExpress vs Standard WinForms
+3. **Forms** - MVP pattern with 3 files (IView, Form, Presenter)
+4. **Services** - Inject IUnitOfWork, validate inputs, log operations
+5. **Repositories** - NEVER call SaveChangesAsync
+6. **Unit of Work** - Single SaveChangesAsync, lazy-loaded repositories
+7. **Tests** - Moq mocks, AAA pattern, verify calls
+8. **DevExpress** - Use DX templates, XtraForm, LayoutControl
 
-**Template Locations**:
+**Standard WinForms Templates**:
 - `/templates/form-template.cs`
 - `/templates/service-template.cs`
 - `/templates/repository-template.cs`
 - `/templates/unitofwork-template.cs`
 - `/templates/test-template.cs`
+
+**DevExpress Templates**:
+- `/templates/dx-form-template.cs`
+- `/templates/dx-grid-template.cs`
+- `/templates/dx-lookup-template.cs`
+- `/templates/dx-report-template.cs`
 
 ---
 
@@ -689,3 +809,6 @@ private void BindCustomers(List<Customer> customers)
 - [Development Workflow](../workflows/winforms-development-workflow.md) - Complete workflow guide
 - [Architecture Guide](./architecture-guide.md) - Pattern explanations
 - [AI Instructions](./ai-instructions.md) - DO/DON'T rules
+- **[DevExpress Overview](../../docs/devexpress/devexpress-overview.md)** - DevExpress getting started
+- **[DevExpress Controls](../../docs/devexpress/devexpress-controls.md)** - Control reference
+- **[DevExpress Data Binding](../../docs/devexpress/devexpress-data-binding.md)** - Binding patterns

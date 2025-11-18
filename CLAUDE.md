@@ -35,11 +35,18 @@
 
 - **.NET**: 8.0 (recommended) / .NET Framework 4.8
 - **Language**: C# 12.0 / C# 10.0
-- **UI Framework**: Windows Forms
+- **UI Framework**: Windows Forms (Standard) **OR** DevExpress WinForms Controls
 - **ORM**: Entity Framework Core 8.0
 - **Testing**: xUnit / NUnit + Moq
 - **DI Container**: Microsoft.Extensions.DependencyInjection
 - **Logging**: Serilog / NLog
+
+### UI Framework Options
+
+| Framework | When to Use | Key Benefits |
+|-----------|-------------|--------------|
+| **Standard WinForms** | Simple apps, prototypes, no budget | Free, simple, lightweight |
+| **DevExpress** | Professional apps, enterprise | Advanced controls, responsive design, built-in features |
 
 ---
 
@@ -142,7 +149,7 @@ When AI (Claude Code) starts working on a task, it should **load the appropriate
 | Task Type | Required Reading | Purpose |
 |-----------|------------------|---------|
 | **Any WinForms task** | [AI Instructions](.claude/guides/ai-instructions.md) | ⭐ Core DO/DON'T rules (READ FIRST!) |
-| **Creating Forms** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + `templates/form-template.cs` | MVP pattern, presenters, view interfaces |
+| **Creating Forms** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + `templates/form-template.cs` OR `templates/dx-form-template.cs` | MVP pattern, presenters, view interfaces |
 | **Creating Services** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + [Architecture Guide](.claude/guides/architecture-guide.md) | Unit of Work pattern, validation, error handling |
 | **Creating Repositories** | [Code Generation Guide](.claude/guides/code-generation-guide.md) | Repository pattern (NO SaveChanges!) |
 | **Understanding Architecture** | [Architecture Guide](.claude/guides/architecture-guide.md) | MVP, MVVM, DI, Factory, Unit of Work |
@@ -150,6 +157,7 @@ When AI (Claude Code) starts working on a task, it should **load the appropriate
 | **Coding Standards** | [Coding Standards Guide](.claude/guides/coding-standards.md) | Naming, style, formatting |
 | **Code Review** | [Code Review Checklist](.claude/workflows/code-review-checklist.md) | Pre-commit checks |
 | **Pull Request Review** | [PR Review Workflow](.claude/workflows/pr-review-workflow.md) | Team collaboration |
+| **DevExpress Projects** | [DevExpress Overview](docs/devexpress/devexpress-overview.md) | ⭐ DevExpress setup, controls, patterns |
 
 ### How to Use This Repository
 
@@ -190,6 +198,8 @@ When AI (Claude Code) starts working on a task, it should **load the appropriate
 
 ### Templates (Production-Ready!)
 
+#### Standard WinForms Templates
+
 All templates in `/templates/` folder:
 - `form-template.cs` - MVP pattern form with presenter
 - `service-template.cs` - Business logic with Unit of Work
@@ -197,6 +207,14 @@ All templates in `/templates/` folder:
 - `unitofwork-template.cs` - Transaction coordinator
 - `factory-template.cs` - Form factory for DI
 - `test-template.cs` - Unit test with Moq
+
+#### DevExpress Templates
+
+DevExpress-specific templates:
+- `dx-form-template.cs` - DevExpress form with MVP + LayoutControl
+- `dx-grid-template.cs` - XtraGrid with CRUD operations
+- `dx-lookup-template.cs` - LookUpEdit patterns
+- `dx-report-template.cs` - XtraReport template
 
 **⚠️ CRITICAL**: NEVER generate code from scratch - ALWAYS start with templates!
 
@@ -248,6 +266,14 @@ dotnet clean && dotnet build
 - [Data Binding](docs/ui-ux/data-binding.md)
 - [Input Validation](docs/ui-ux/input-validation.md)
 - [Form Communication](docs/ui-ux/form-communication.md)
+
+### DevExpress (Optional - for DevExpress projects)
+- [DevExpress Overview](docs/devexpress/devexpress-overview.md) ⭐ Setup & getting started
+- [DevExpress Controls](docs/devexpress/devexpress-controls.md) - XtraGrid, XtraEditors, etc.
+- [DevExpress Data Binding](docs/devexpress/devexpress-data-binding.md) - Binding patterns
+- [DevExpress Grid Patterns](docs/devexpress/devexpress-grid-patterns.md) - XtraGrid best practices
+- [DevExpress Responsive Design](docs/devexpress/devexpress-responsive-design.md) - LayoutControl
+- [DevExpress Naming Conventions](docs/devexpress/devexpress-naming-conventions.md) - Naming rules
 
 ### Testing
 - [Testing Overview](docs/testing/testing-overview.md)
@@ -332,16 +358,18 @@ Common commands (type `/` in Claude Code):
 ---
 
 **Last Updated**: 2025-11-17
-**Version**: 5.3.0 (Modular Guide Structure!)
+**Version**: 5.4.0 (DevExpress Integration!)
 
-**Major Changes in 5.3.0**:
-- ✅ Refactored CLAUDE.md into 5 focused guides
-- ✅ Created Context Loading Map for AI assistants
-- ✅ Reduced main file from 546 to ~200 lines (63% smaller!)
-- ✅ Improved organization for submodule use case
-- ✅ Clear "when to read which guide" instructions
+**Major Changes in 5.4.0**:
+- ✅ **DevExpress Integration** - Full support for DevExpress WinForms Controls
+- ✅ **6 DevExpress Documentation Files** - Complete guides for DX controls
+- ✅ **4 DevExpress Templates** - Production-ready DX templates
+- ✅ **Updated init-project.ps1** - UI Framework selection (DevExpress/Standard)
+- ✅ **Updated AI Instructions** - DevExpress-specific DO/DON'T rules
+- ✅ **Context Loading Map** - Added DevExpress guides
 
 **Previous Versions**:
+- v5.3.0: Refactored CLAUDE.md into 5 focused guides
 - v5.2.0: Added CRITICAL documentation confirmation rule
 - v5.1.0: Added complete PR review system
 - v5.0.0: Complete repository with 100% documentation coverage
