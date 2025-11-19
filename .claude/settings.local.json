@@ -14,7 +14,8 @@
       "Bash(mkdir:*)",
       "Bash(tree:*)",
       "Bash(dotnet test:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(Select-Object -First 30)"
     ],
     "deny": [],
     "ask": []

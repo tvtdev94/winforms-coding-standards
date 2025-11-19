@@ -80,14 +80,20 @@
 │   ├── /Forms
 │   ├── /Presenters
 │   └── Program.cs
-├── ProjectName.Core/           # Domain & Interfaces
+├── ProjectName.Domain/           # Domain Layer (Models, Interfaces)
 │   ├── /Models
-│   └── /Interfaces
-├── ProjectName.Business/       # Business Logic
-│   └── /Services
-└── ProjectName.Data/           # Data Access
-    ├── /Repositories
-    └── /Context
+│   ├── /Interfaces
+│   ├── /Enums
+│   └── /Exceptions
+├── ProjectName.Application/      # Application Layer (Use Cases, Services)
+│   ├── /Services
+│   └── /Validators
+└── ProjectName.Infrastructure/   # Infrastructure Layer (Data Access, External)
+    └── /Persistence/             # Database layer
+        ├── /Repositories
+        ├── /Context
+        ├── /Configurations
+        └── /UnitOfWork
 ```
 - ✅ **When to use**: Large apps (20+ forms), 3+ developers, code reuse needed
 - ✅ **Benefits**: Compiler-enforced architecture, better separation, reusable layers

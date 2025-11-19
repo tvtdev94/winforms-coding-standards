@@ -268,35 +268,35 @@ else {
     # Create UI project (WinForms)
     dotnet new winforms -n "$ProjectName.UI" -f $Framework
     dotnet sln add "$ProjectName.UI/$ProjectName.UI.csproj"
-    Write-Host "  [OK] $ProjectName.UI (WinForms) created" -ForegroundColor Green
+    Write-Host "  [OK] $ProjectName.UI (Presentation Layer) created" -ForegroundColor Green
 
-    # Create Core project (Models, Interfaces)
-    dotnet new classlib -n "$ProjectName.Core" -f $Framework
-    dotnet sln add "$ProjectName.Core/$ProjectName.Core.csproj"
-    Write-Host "  [OK] $ProjectName.Core (Models, Interfaces) created" -ForegroundColor Green
+    # Create Domain project (Models, Interfaces)
+    dotnet new classlib -n "$ProjectName.Domain" -f $Framework
+    dotnet sln add "$ProjectName.Domain/$ProjectName.Domain.csproj"
+    Write-Host "  [OK] $ProjectName.Domain (Domain Layer) created" -ForegroundColor Green
 
-    # Create Business project (Services)
-    dotnet new classlib -n "$ProjectName.Business" -f $Framework
-    dotnet sln add "$ProjectName.Business/$ProjectName.Business.csproj"
-    Write-Host "  [OK] $ProjectName.Business (Services) created" -ForegroundColor Green
+    # Create Application project (Services, Use Cases)
+    dotnet new classlib -n "$ProjectName.Application" -f $Framework
+    dotnet sln add "$ProjectName.Application/$ProjectName.Application.csproj"
+    Write-Host "  [OK] $ProjectName.Application (Application Layer) created" -ForegroundColor Green
 
-    # Create Data project (Repositories, DbContext) - only if database is selected
+    # Create Infrastructure project (Data Access, External Services) - only if database is selected
     if ($Database -ne "None") {
-        dotnet new classlib -n "$ProjectName.Data" -f $Framework
-        dotnet sln add "$ProjectName.Data/$ProjectName.Data.csproj"
-        Write-Host "  [OK] $ProjectName.Data (Repositories, DbContext) created" -ForegroundColor Green
+        dotnet new classlib -n "$ProjectName.Infrastructure" -f $Framework
+        dotnet sln add "$ProjectName.Infrastructure/$ProjectName.Infrastructure.csproj"
+        Write-Host "  [OK] $ProjectName.Infrastructure (Infrastructure Layer) created" -ForegroundColor Green
     }
 
     # Add project references
     Write-Host "  Adding project references..." -NoNewline
     if ($Database -ne "None") {
-        dotnet add "$ProjectName.UI" reference "$ProjectName.Core" "$ProjectName.Business" "$ProjectName.Data" | Out-Null
-        dotnet add "$ProjectName.Business" reference "$ProjectName.Core" | Out-Null
-        dotnet add "$ProjectName.Data" reference "$ProjectName.Core" | Out-Null
+        dotnet add "$ProjectName.UI" reference "$ProjectName.Domain" "$ProjectName.Application" "$ProjectName.Infrastructure" | Out-Null
+        dotnet add "$ProjectName.Application" reference "$ProjectName.Domain" | Out-Null
+        dotnet add "$ProjectName.Infrastructure" reference "$ProjectName.Domain" | Out-Null
     }
     else {
-        dotnet add "$ProjectName.UI" reference "$ProjectName.Core" "$ProjectName.Business" | Out-Null
-        dotnet add "$ProjectName.Business" reference "$ProjectName.Core" | Out-Null
+        dotnet add "$ProjectName.UI" reference "$ProjectName.Domain" "$ProjectName.Application" | Out-Null
+        dotnet add "$ProjectName.Application" reference "$ProjectName.Domain" | Out-Null
     }
     Write-Host " [OK]" -ForegroundColor Green
 }
@@ -372,25 +372,26 @@ if ($ProjectStructure -eq "Single") {
 else {
     # Multi-Project: Create folders in appropriate projects
 
-    # Core project folders
-    New-Item -ItemType Directory -Path "$ProjectName.Core/Models" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$ProjectName.Core/Interfaces" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$ProjectName.Core/Enums" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$ProjectName.Core/Exceptions" -Force | Out-Null
-    Write-Host "  [OK] Created Core project folders (Models, Interfaces, Enums, Exceptions)" -ForegroundColor Green
+    # Domain project folders
+    New-Item -ItemType Directory -Path "$ProjectName.Domain/Models" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Domain/Interfaces" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Domain/Enums" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Domain/Exceptions" -Force | Out-Null
+    Write-Host "  [OK] Created Domain project folders (Models, Interfaces, Enums, Exceptions)" -ForegroundColor Green
 
-    # Business project folders
-    New-Item -ItemType Directory -Path "$ProjectName.Business/Services" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$ProjectName.Business/Validators" -Force | Out-Null
-    Write-Host "  [OK] Created Business project folders (Services, Validators)" -ForegroundColor Green
+    # Application project folders
+    New-Item -ItemType Directory -Path "$ProjectName.Application/Services" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Application/Validators" -Force | Out-Null
+    Write-Host "  [OK] Created Application project folders (Services, Validators)" -ForegroundColor Green
 
-    # Data project folders (only if database is selected)
+    # Infrastructure project folders (only if database is selected)
     if ($Database -ne "None") {
-        New-Item -ItemType Directory -Path "$ProjectName.Data/Repositories" -Force | Out-Null
-        New-Item -ItemType Directory -Path "$ProjectName.Data/Context" -Force | Out-Null
-        New-Item -ItemType Directory -Path "$ProjectName.Data/Configurations" -Force | Out-Null
-        New-Item -ItemType Directory -Path "$ProjectName.Data/UnitOfWork" -Force | Out-Null
-        Write-Host "  [OK] Created Data project folders (Repositories, Context, Configurations, UnitOfWork)" -ForegroundColor Green
+        New-Item -ItemType Directory -Path "$ProjectName.Infrastructure/Persistence" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Infrastructure/Persistence/Repositories" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Infrastructure/Persistence/Context" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Infrastructure/Persistence/Configurations" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Infrastructure/Persistence/UnitOfWork" -Force | Out-Null
+        Write-Host "  [OK] Created Infrastructure project folders (Persistence/{Repositories, Context, Configurations, UnitOfWork})" -ForegroundColor Green
     }
 
     # UI project folders
@@ -440,9 +441,9 @@ else {
     # ========================================================================
     Write-Host "  Creating README.md files for each project..." -ForegroundColor Cyan
 
-    # Core Project README
-    $coreReadme = @"
-# $ProjectName.Core
+    # Domain Project README
+    $domainReadme = @"
+# $ProjectName.Domain
 
 > **Layer**: Domain Layer (Core/Innermost Layer)
 > **Dependencies**: None (should not reference other projects)
@@ -498,7 +499,7 @@ Contains the domain model and core business interfaces. This is the **innermost 
 
 ## Example Structure
 \`\`\`
-$ProjectName.Core/
+$ProjectName.Domain/
 ├── Models/
 │   ├── Customer.cs
 │   ├── Order.cs
@@ -519,11 +520,11 @@ $ProjectName.Core/
 - Keep this layer clean and framework-independent
 "@
 
-    $coreReadme | Out-File -FilePath "$ProjectName.Core/README.md" -Encoding UTF8 -Force
+    $domainReadme | Out-File -FilePath "$ProjectName.Domain/README.md" -Encoding UTF8 -Force
 
-    # Business Project README
-    $businessReadme = @"
-# $ProjectName.Business
+    # Application Project README
+    $applicationReadme = @"
+# $ProjectName.Application
 
 > **Layer**: Business Logic Layer (Application Layer)
 > **Dependencies**: Core
@@ -604,11 +605,11 @@ public class CustomerService : ICustomerService
 - ``Microsoft.Extensions.Logging.Abstractions``
 
 **Project References**:
-- ``$ProjectName.Core`` (for models and interfaces)
+- ``$ProjectName.Domain`` (for models and interfaces)
 
 ## Example Structure
 \`\`\`
-$ProjectName.Business/
+$ProjectName.Application/
 ├── Services/
 │   ├── CustomerService.cs
 │   ├── OrderService.cs
@@ -625,41 +626,56 @@ $ProjectName.Business/
 - Let Unit of Work manage SaveChanges()
 "@
 
-    $businessReadme | Out-File -FilePath "$ProjectName.Business/README.md" -Encoding UTF8 -Force
+    $applicationReadme | Out-File -FilePath "$ProjectName.Application/README.md" -Encoding UTF8 -Force
 
-    # Data Project README (only if database selected)
+    # Infrastructure Project README (only if database selected)
     if ($Database -ne "None") {
-        $dataReadme = @"
-# $ProjectName.Data
+        $infrastructureReadme = @"
+# $ProjectName.Infrastructure
 
-> **Layer**: Data Access Layer (Infrastructure Layer)
-> **Dependencies**: Core
+> **Layer**: Infrastructure Layer (Data Access + External Services)
+> **Dependencies**: Domain
 
 ## Purpose
-Handles all database operations using Entity Framework Core. This is the **infrastructure layer**.
+Handles all **external concerns** - database, file system, external APIs, email, etc. This is the **outermost layer** in Clean Architecture.
+
+## Folder Structure
+
+### 📁 Persistence/ (Database)
+All database-related code goes in the ``Persistence`` subfolder:
+
+- ``/Persistence/Context/AppDbContext.cs`` - EF Core DbContext
+- ``/Persistence/Repositories/`` - Repository implementations
+- ``/Persistence/UnitOfWork/`` - Unit of Work implementation
+- ``/Persistence/Configurations/`` - Entity configurations
+
+### 📁 Future: Other Infrastructure Services
+- ``/Email/`` - Email service implementations
+- ``/Logging/`` - Logging implementations
+- ``/ExternalApis/`` - External API clients
 
 ## What Goes Here
 
-### ✅ DbContext
-- ``/Context/AppDbContext.cs``
+### ✅ DbContext (in Persistence/Context/)
+- ``/Persistence/Context/AppDbContext.cs``
 - Entity Framework DbContext
 - DbSet definitions
 - Model configuration
 
-### ✅ Repositories (Data Access)
-- ``/Repositories/CustomerRepository.cs``
-- ``/Repositories/OrderRepository.cs``
-- Implements IRepository interfaces from Core
+### ✅ Repositories (in Persistence/Repositories/)
+- ``/Persistence/Repositories/CustomerRepository.cs``
+- ``/Persistence/Repositories/OrderRepository.cs``
+- Implements IRepository interfaces from Domain
 - **NEVER** call SaveChangesAsync in repositories!
 
-### ✅ Unit of Work
-- ``/UnitOfWork/UnitOfWork.cs``
+### ✅ Unit of Work (in Persistence/UnitOfWork/)
+- ``/Persistence/UnitOfWork/UnitOfWork.cs``
 - Manages transactions
 - Coordinates multiple repositories
 - **ONLY** place to call SaveChangesAsync
 
-### ✅ Entity Configurations
-- ``/Configurations/CustomerConfiguration.cs``
+### ✅ Entity Configurations (in Persistence/Configurations/)
+- ``/Persistence/Configurations/CustomerConfiguration.cs``
 - Fluent API configuration
 - Table mappings, relationships, indexes
 
@@ -741,7 +757,7 @@ public class UnitOfWork : IUnitOfWork
 - ``Microsoft.EntityFrameworkCore.Design`` (v$efCoreVersion)
 
 **Project References**:
-- ``$ProjectName.Core`` (for models and interfaces)
+- ``$ProjectName.Domain`` (for models and interfaces)
 
 ## Database Configuration
 - **Provider**: $Database
@@ -749,27 +765,28 @@ public class UnitOfWork : IUnitOfWork
 
 ## Example Structure
 \`\`\`
-$ProjectName.Data/
-├── Context/
-│   └── AppDbContext.cs
-├── Repositories/
-│   ├── CustomerRepository.cs
-│   └── OrderRepository.cs
-├── UnitOfWork/
-│   └── UnitOfWork.cs
-└── Configurations/
-    ├── CustomerConfiguration.cs
-    └── OrderConfiguration.cs
+$ProjectName.Infrastructure/
+└── Persistence/              # Database layer
+    ├── Context/
+    │   └── AppDbContext.cs
+    ├── Repositories/
+    │   ├── CustomerRepository.cs
+    │   └── OrderRepository.cs
+    ├── UnitOfWork/
+    │   └── UnitOfWork.cs
+    └── Configurations/
+        ├── CustomerConfiguration.cs
+        └── OrderConfiguration.cs
 \`\`\`
 
 ## Migrations
 
 \`\`\`bash
 # Add migration
-dotnet ef migrations add InitialCreate --project $ProjectName.Data --startup-project $ProjectName.UI
+dotnet ef migrations add InitialCreate --project $ProjectName.Infrastructure --startup-project $ProjectName.UI
 
 # Update database
-dotnet ef database update --project $ProjectName.Data --startup-project $ProjectName.UI
+dotnet ef database update --project $ProjectName.Infrastructure --startup-project $ProjectName.UI
 \`\`\`
 
 ## Notes
@@ -779,7 +796,7 @@ dotnet ef database update --project $ProjectName.Data --startup-project $Project
 - Use async/await for all database operations
 "@
 
-        $dataReadme | Out-File -FilePath "$ProjectName.Data/README.md" -Encoding UTF8 -Force
+        $infrastructureReadme | Out-File -FilePath "$ProjectName.Infrastructure/README.md" -Encoding UTF8 -Force
     }
 
     # UI Project README
@@ -943,9 +960,9 @@ $(if ($UIFramework -eq "DevExpress") {
 })
 
 **Project References**:
-- ``$ProjectName.Core`` (for models and interfaces)
-- ``$ProjectName.Business`` (for services)
-$(if ($Database -ne "None") { "- ``$ProjectName.Data`` (for Unit of Work, repositories)" })
+- ``$ProjectName.Domain`` (for models and interfaces)
+- ``$ProjectName.Application`` (for services)
+$(if ($Database -ne "None") { "- ``$ProjectName.Infrastructure`` (for Unit of Work, repositories)" })
 
 ## Configuration
 
@@ -1118,33 +1135,33 @@ else {
         Write-Host " [OK]" -ForegroundColor Green
     }
 
-    # Core Project packages (minimal - just annotations)
-    Write-Host "  Adding packages to Core project..." -ForegroundColor Cyan
-    dotnet add "$ProjectName.Core" package "System.ComponentModel.Annotations" --no-restore | Out-Null
+    # Domain Project packages (minimal - just annotations)
+    Write-Host "  Adding packages to Domain project..." -ForegroundColor Cyan
+    dotnet add "$ProjectName.Domain" package "System.ComponentModel.Annotations" --no-restore | Out-Null
     Write-Host "    Adding System.ComponentModel.Annotations... [OK]" -ForegroundColor Green
 
-    # Business Project packages
-    Write-Host "  Adding packages to Business project..." -ForegroundColor Cyan
-    dotnet add "$ProjectName.Business" package "Microsoft.Extensions.Logging.Abstractions" --no-restore | Out-Null
+    # Application Project packages
+    Write-Host "  Adding packages to Application project..." -ForegroundColor Cyan
+    dotnet add "$ProjectName.Application" package "Microsoft.Extensions.Logging.Abstractions" --no-restore | Out-Null
     Write-Host "    Adding Microsoft.Extensions.Logging.Abstractions... [OK]" -ForegroundColor Green
 
-    # Data Project packages (only if database is selected)
+    # Infrastructure Project packages (only if database is selected)
     if ($Database -ne "None") {
-        Write-Host "  Adding packages to Data project..." -ForegroundColor Cyan
+        Write-Host "  Adding packages to Infrastructure project..." -ForegroundColor Cyan
 
         if ($Database -eq "SQLite") {
-            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Sqlite" --version $efCoreVersion --no-restore | Out-Null
-            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Microsoft.EntityFrameworkCore.Sqlite" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
             Write-Host "    Adding EF Core SQLite... [OK]" -ForegroundColor Green
         }
         elseif ($Database -eq "SQLServer") {
-            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.SqlServer" --version $efCoreVersion --no-restore | Out-Null
-            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Microsoft.EntityFrameworkCore.SqlServer" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
             Write-Host "    Adding EF Core SQL Server... [OK]" -ForegroundColor Green
         }
         elseif ($Database -eq "PostgreSQL") {
-            dotnet add "$ProjectName.Data" package "Npgsql.EntityFrameworkCore.PostgreSQL" --version $efCoreVersion --no-restore | Out-Null
-            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Npgsql.EntityFrameworkCore.PostgreSQL" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
             Write-Host "    Adding EF Core PostgreSQL... [OK]" -ForegroundColor Green
         }
         elseif ($Database -eq "MySQL") {
@@ -1154,8 +1171,8 @@ else {
                 "net48"  { "6.0.2" }
                 default  { "8.0.0" }
             }
-            dotnet add "$ProjectName.Data" package "Pomelo.EntityFrameworkCore.MySql" --version $mySqlVersion --no-restore | Out-Null
-            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Pomelo.EntityFrameworkCore.MySql" --version $mySqlVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Infrastructure" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
             Write-Host "    Adding EF Core MySQL... [OK]" -ForegroundColor Green
         }
     }
@@ -1261,14 +1278,26 @@ if ($Database -ne "None") {
 Write-Host ""
 Write-Host "[6] Creating Program.cs with DI..." -ForegroundColor Cyan
 
-# Generate using statements based on database
+# Generate using statements based on database and project structure
 $usingStatements = if ($Database -ne "None") {
-    switch ($Database) {
-        "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
-        "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
-        "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
-        "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Data;" }
-        default { "" }
+    if ($ProjectStructure -eq "Single") {
+        switch ($Database) {
+            "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
+            "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
+            "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
+            "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
+            default { "" }
+        }
+    }
+    else {
+        # Multi-Project: Use Infrastructure.Persistence namespace
+        switch ($Database) {
+            "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+            "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+            "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+            "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+            default { "" }
+        }
     }
 } else {
     ""
@@ -1410,10 +1439,13 @@ if ($Database -ne "None") {
     Write-Host ""
     Write-Host "[6.5] Creating AppDbContext..." -ForegroundColor Cyan
 
+    # Determine namespace based on project structure
+    $dbContextNamespace = if ($ProjectStructure -eq "Single") { "$ProjectName.Infrastructure" } else { "$ProjectName.Infrastructure.Persistence" }
+
     $appDbContextCs = @"
 using Microsoft.EntityFrameworkCore;
 
-namespace $ProjectName.Data
+namespace $dbContextNamespace
 {
     /// <summary>
     /// Application database context.
@@ -1442,7 +1474,7 @@ namespace $ProjectName.Data
 }
 "@
 
-    $dbContextPath = if ($ProjectStructure -eq "Single") { "$ProjectName/Data/AppDbContext.cs" } else { "$ProjectName.Data/Context/AppDbContext.cs" }
+    $dbContextPath = if ($ProjectStructure -eq "Single") { "$ProjectName/Data/AppDbContext.cs" } else { "$ProjectName.Infrastructure/Persistence/Context/AppDbContext.cs" }
     $appDbContextCs | Out-File -FilePath $dbContextPath -Encoding UTF8 -Force
     Write-Host "  [OK] AppDbContext.cs created" -ForegroundColor Green
 }
@@ -1471,9 +1503,9 @@ if ($IncludeTests) {
     }
     else {
         # Multi-Project: Reference all projects for comprehensive testing
-        dotnet add "$ProjectName.Tests" reference "$ProjectName.Core" "$ProjectName.Business" | Out-Null
+        dotnet add "$ProjectName.Tests" reference "$ProjectName.Domain" "$ProjectName.Application" | Out-Null
         if ($Database -ne "None") {
-            dotnet add "$ProjectName.Tests" reference "$ProjectName.Data" | Out-Null
+            dotnet add "$ProjectName.Tests" reference "$ProjectName.Infrastructure" | Out-Null
         }
     }
 
@@ -1498,8 +1530,8 @@ if ($IncludeTests) {
             dotnet add "$ProjectName.IntegrationTests" reference $ProjectName
         }
         else {
-            # Multi-Project: Integration tests need Data and Core projects
-            dotnet add "$ProjectName.IntegrationTests" reference "$ProjectName.Core" "$ProjectName.Data" | Out-Null
+            # Multi-Project: Integration tests need Infrastructure and Domain projects
+            dotnet add "$ProjectName.IntegrationTests" reference "$ProjectName.Domain" "$ProjectName.Infrastructure" | Out-Null
         }
 
         # Add database package to integration tests (with correct version)
@@ -1986,9 +2018,9 @@ $(if ($ProjectStructure -eq "Single") {
 } else {
 "**Multi-Project** - Separate assemblies for each layer:
 - $ProjectName.UI (WinForms)
-- $ProjectName.Core (Models, Interfaces)
-- $ProjectName.Business (Services)
-$(if ($Database -ne 'None') { "- $ProjectName.Data (Repositories, DbContext)" })
+- $ProjectName.Domain (Models, Interfaces)
+- $ProjectName.Application (Services)
+$(if ($Database -ne 'None') { "- $ProjectName.Infrastructure (Repositories, DbContext)" })
 - Compiler-enforced architecture
 - Best for large apps (20+ forms), code reuse
 - See: [$($standardsPath.Replace('\', '/'))/docs/architecture/multi-project-structure.md]($($standardsPath.Replace('\', '/'))/docs/architecture/multi-project-structure.md)"
@@ -2045,23 +2077,24 @@ $(if ($Pattern -eq "MVP") { "|   |-- /Views`n|   |-- /Presenters" } elseif ($Pat
 │   ├── /Factories
 │   └── Program.cs
 │
-├── $ProjectName.Core/          # Domain & Interfaces
+├── $ProjectName.Domain/          # Domain & Interfaces
 │   ├── /Models
 │   ├── /Interfaces
 │   ├── /Enums
 │   └── /Exceptions
 │
-├── $ProjectName.Business/      # Business Logic
+├── $ProjectName.Application/      # Business Logic
 │   ├── /Services
 │   └── /Validators
 │
 $(if ($Database -ne 'None') {
 @"
-└── $ProjectName.Data/          # Data Access
-    ├── /Repositories
-    ├── /Context
-    ├── /Configurations
-    └── /UnitOfWork
+└── $ProjectName.Infrastructure/            # Infrastructure Layer
+    └── /Persistence/                      # Database
+        ├── /Repositories
+        ├── /Context
+        ├── /Configurations
+        └── /UnitOfWork
 "@
 })
 ``````
