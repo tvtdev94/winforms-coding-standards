@@ -289,10 +289,14 @@ else {
 
     # Add project references
     Write-Host "  Adding project references..." -NoNewline
-    dotnet add "$ProjectName.UI" reference "$ProjectName.Core" "$ProjectName.Business" | Out-Null
-    dotnet add "$ProjectName.Business" reference "$ProjectName.Core" | Out-Null
     if ($Database -ne "None") {
+        dotnet add "$ProjectName.UI" reference "$ProjectName.Core" "$ProjectName.Business" "$ProjectName.Data" | Out-Null
+        dotnet add "$ProjectName.Business" reference "$ProjectName.Core" | Out-Null
         dotnet add "$ProjectName.Data" reference "$ProjectName.Core" | Out-Null
+    }
+    else {
+        dotnet add "$ProjectName.UI" reference "$ProjectName.Core" "$ProjectName.Business" | Out-Null
+        dotnet add "$ProjectName.Business" reference "$ProjectName.Core" | Out-Null
     }
     Write-Host " [OK]" -ForegroundColor Green
 }
@@ -591,13 +595,24 @@ else {
 }
 
 # Add README.md files to .csproj so they show in Rider/VS
-$csprojPath = "$ProjectName/$ProjectName.csproj"
+if ($ProjectStructure -eq "Single") {
+    $csprojPath = "$ProjectName/$ProjectName.csproj"
+    $projectRootPath = $ProjectName
+}
+else {
+    $csprojPath = "$ProjectName.UI/$ProjectName.UI.csproj"
+    $projectRootPath = $ProjectName
+}
+
 $csprojContent = Get-Content $csprojPath -Raw
 
 # Add ItemGroup for README files if not already present
 if (-not $csprojContent.Contains("<None Include=")) {
-    $readmeFiles = Get-ChildItem -Path "$ProjectName" -Recurse -Filter "README.md" | ForEach-Object {
-        $relativePath = $_.FullName.Replace("$((Get-Location).Path)\$ProjectName\", "").Replace("\", "/")
+    $searchPath = if ($ProjectStructure -eq "Single") { $ProjectName } else { "$ProjectName.UI" }
+    $basePathForReplace = "$((Get-Location).Path)\$searchPath\"
+
+    $readmeFiles = Get-ChildItem -Path $searchPath -Recurse -Filter "README.md" | ForEach-Object {
+        $relativePath = $_.FullName.Replace($basePathForReplace, "").Replace("\", "/")
         "    <None Include=`"$relativePath`" />"
     }
 
@@ -640,10 +655,16 @@ if ($Database -ne "None") {
     }
 }
 
-$appsettingsHash | ConvertTo-Json -Depth 10 | Out-File -FilePath "$ProjectName/appsettings.json" -Encoding UTF8
+$appsettingsPath = if ($ProjectStructure -eq "Single") { "$ProjectName/appsettings.json" } else { "$ProjectName.UI/appsettings.json" }
+$appsettingsHash | ConvertTo-Json -Depth 10 | Out-File -FilePath $appsettingsPath -Encoding UTF8
 
 # Update .csproj to copy appsettings.json
-$csprojPath = "$ProjectName/$ProjectName.csproj"
+if ($ProjectStructure -eq "Single") {
+    $csprojPath = "$ProjectName/$ProjectName.csproj"
+}
+else {
+    $csprojPath = "$ProjectName.UI/$ProjectName.UI.csproj"
+}
 $csprojContent = Get-Content $csprojPath -Raw
 $itemGroupXml = @'
   <ItemGroup>
@@ -720,15 +741,18 @@ $dbContextCode = if ($Database -ne "None") {
     "            // No database configured"
 }
 
+$programNamespace = if ($ProjectStructure -eq "Single") { $ProjectName } else { "$ProjectName.UI" }
+$programFormsUsing = if ($ProjectStructure -eq "Single") { "$ProjectName.Forms" } else { "$ProjectName.UI.Forms" }
+
 $programCs = @"
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using $ProjectName.Forms;
+using $programFormsUsing;
 $usingStatements
 
-namespace $ProjectName
+namespace $programNamespace
 {
     internal static class Program
     {
@@ -803,7 +827,8 @@ $dbContextCode
 }
 "@
 
-$programCs | Out-File -FilePath "$ProjectName/Program.cs" -Encoding UTF8 -Force
+$programCsPath = if ($ProjectStructure -eq "Single") { "$ProjectName/Program.cs" } else { "$ProjectName.UI/Program.cs" }
+$programCs | Out-File -FilePath $programCsPath -Encoding UTF8 -Force
 
 Write-Host "  [OK] Program.cs created with DI" -ForegroundColor Green
 
@@ -846,7 +871,8 @@ namespace $ProjectName.Data
 }
 "@
 
-    $appDbContextCs | Out-File -FilePath "$ProjectName/Data/AppDbContext.cs" -Encoding UTF8 -Force
+    $dbContextPath = if ($ProjectStructure -eq "Single") { "$ProjectName/Data/AppDbContext.cs" } else { "$ProjectName.Data/Context/AppDbContext.cs" }
+    $appDbContextCs | Out-File -FilePath $dbContextPath -Encoding UTF8 -Force
     Write-Host "  [OK] AppDbContext.cs created" -ForegroundColor Green
 }
 
@@ -964,6 +990,9 @@ $tasksJson | Out-File -FilePath ".vscode/tasks.json" -Encoding UTF8 -Force
 Write-Host "  [OK] .vscode/tasks.json created" -ForegroundColor Green
 
 # Create launch.json
+$launchProjectName = if ($ProjectStructure -eq "Single") { $ProjectName } else { "$ProjectName.UI" }
+$launchDllName = if ($ProjectStructure -eq "Single") { $ProjectName } else { "$ProjectName.UI" }
+
 $launchJson = @"
 {
   "version": "0.2.0",
@@ -973,9 +1002,9 @@ $launchJson = @"
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "`${workspaceFolder}/$ProjectName/bin/Debug/$Framework-windows/$ProjectName.dll",
+      "program": "`${workspaceFolder}/$launchProjectName/bin/Debug/$Framework-windows/$launchDllName.dll",
       "args": [],
-      "cwd": "`${workspaceFolder}/$ProjectName",
+      "cwd": "`${workspaceFolder}/$launchProjectName",
       "console": "internalConsole",
       "stopAtEntry": false
     }
@@ -1408,7 +1437,7 @@ $additionalFolders
 ├── $ProjectName.UI/            # Presentation Layer
 │   ├── /Forms
 │   ├── /Controls
-$(if ($Pattern -eq "MVP") { "│   ├── /Views`n│   ├── /Presenters" } elseif ($Pattern -eq "MVVM") { "│   ├── /ViewModels" })
+$(if ($Pattern -eq "MVP") { "|   |-- /Views`n|   |-- /Presenters" } elseif ($Pattern -eq "MVVM") { "|   |-- /ViewModels" })
 │   ├── /Factories
 │   └── Program.cs
 │
