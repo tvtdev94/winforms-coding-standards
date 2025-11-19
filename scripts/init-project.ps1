@@ -884,10 +884,15 @@ if ($IncludeTests) {
     Write-Host "[7] Creating test projects..." -ForegroundColor Cyan
 
     # Unit tests
-    # Test projects need same target framework as main project (including -windows suffix)
-    $testFramework = "$Framework-windows"
-    dotnet new xunit -n "$ProjectName.Tests" -f $testFramework
+    # Create test project with base framework first (xunit template doesn't support -windows suffix)
+    dotnet new xunit -n "$ProjectName.Tests" -f $Framework
     dotnet sln add "$ProjectName.Tests/$ProjectName.Tests.csproj"
+
+    # Update test project to use -windows framework for WinForms compatibility
+    $testCsprojPath = "$ProjectName.Tests/$ProjectName.Tests.csproj"
+    $testCsprojContent = Get-Content $testCsprojPath -Raw
+    $testCsprojContent = $testCsprojContent -replace "<TargetFramework>$Framework</TargetFramework>", "<TargetFramework>$Framework-windows</TargetFramework>"
+    $testCsprojContent | Out-File -FilePath $testCsprojPath -Encoding UTF8 -Force
 
     # Add references based on structure
     if ($ProjectStructure -eq "Single") {
@@ -908,8 +913,14 @@ if ($IncludeTests) {
 
     # Integration tests (only if database is selected)
     if ($Database -ne "None") {
-        dotnet new xunit -n "$ProjectName.IntegrationTests" -f $testFramework
+        dotnet new xunit -n "$ProjectName.IntegrationTests" -f $Framework
         dotnet sln add "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
+
+        # Update integration test project to use -windows framework
+        $integrationTestCsprojPath = "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
+        $integrationTestCsprojContent = Get-Content $integrationTestCsprojPath -Raw
+        $integrationTestCsprojContent = $integrationTestCsprojContent -replace "<TargetFramework>$Framework</TargetFramework>", "<TargetFramework>$Framework-windows</TargetFramework>"
+        $integrationTestCsprojContent | Out-File -FilePath $integrationTestCsprojPath -Encoding UTF8 -Force
 
         # Add references based on structure
         if ($ProjectStructure -eq "Single") {
