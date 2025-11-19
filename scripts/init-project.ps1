@@ -311,28 +311,50 @@ if ($ProjectStructure -eq "Single") {
     # Single Project: Create folders inside main project
     $projectPath = $ProjectName
 
-    $folders = @(
-        @{Name="Models"; Template="// Place your data models here`n// Example: Customer.cs, Order.cs`n"},
-        @{Name="Services"; Template="// Place your business logic services here`n// Example: CustomerService.cs, OrderService.cs`n"},
-        @{Name="Repositories"; Template="// Place your data access repositories here`n// Example: CustomerRepository.cs, OrderRepository.cs`n"},
-        @{Name="Forms"; Template=$null},  # MainForm will be moved here
-        @{Name="Utils"; Template="// Place your utility classes and extensions here`n// Example: StringExtensions.cs, DateHelper.cs`n"},
-        @{Name="Resources"; Template="// Place your resources here`n// Example: Icons/, Images/, Strings.resx`n"}
-    )
+    # Domain folder (Models, Interfaces, Enums, Exceptions)
+    New-Item -ItemType Directory -Path "$projectPath/Domain/Models" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$projectPath/Domain/Interfaces" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$projectPath/Domain/Enums" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$projectPath/Domain/Exceptions" -Force | Out-Null
+    Write-Host "  [OK] Created Domain/ (Models, Interfaces, Enums, Exceptions)" -ForegroundColor Green
+
+    # Application folder (Services, Validators)
+    New-Item -ItemType Directory -Path "$projectPath/Application/Services" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$projectPath/Application/Validators" -Force | Out-Null
+    Write-Host "  [OK] Created Application/ (Services, Validators)" -ForegroundColor Green
+
+    # Infrastructure folder (only if database selected)
+    if ($Database -ne "None") {
+        New-Item -ItemType Directory -Path "$projectPath/Infrastructure/Persistence/Repositories" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$projectPath/Infrastructure/Persistence/Context" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$projectPath/Infrastructure/Persistence/Configurations" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$projectPath/Infrastructure/Persistence/UnitOfWork" -Force | Out-Null
+        Write-Host "  [OK] Created Infrastructure/Persistence/ (Repositories, Context, Configurations, UnitOfWork)" -ForegroundColor Green
+    }
+
+    # UI folder (Forms, Presenters/Views, Factories)
+    New-Item -ItemType Directory -Path "$projectPath/UI/Forms" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$projectPath/UI/Factories" -Force | Out-Null
 
     # Add pattern-specific folders
     if ($Pattern -eq "MVP") {
-        $folders += @{Name="Views"; Template="// Place your view interfaces here (for MVP pattern)`n// Example: ICustomerView.cs, IOrderView.cs`n"}
-        $folders += @{Name="Presenters"; Template="// Place your presenters here (for MVP pattern)`n// Example: CustomerPresenter.cs, OrderPresenter.cs`n"}
+        New-Item -ItemType Directory -Path "$projectPath/UI/Views" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$projectPath/UI/Presenters" -Force | Out-Null
+        Write-Host "  [OK] Created UI/ (Forms, Views, Presenters, Factories)" -ForegroundColor Green
     }
     elseif ($Pattern -eq "MVVM") {
-        $folders += @{Name="ViewModels"; Template="// Place your view models here (for MVVM pattern)`n// Example: CustomerViewModel.cs, OrderViewModel.cs`n"}
+        New-Item -ItemType Directory -Path "$projectPath/UI/ViewModels" -Force | Out-Null
+        Write-Host "  [OK] Created UI/ (Forms, ViewModels, Factories)" -ForegroundColor Green
+    }
+    else {
+        Write-Host "  [OK] Created UI/ (Forms, Factories)" -ForegroundColor Green
     }
 
-    # Add Data folder if database is selected
-    if ($Database -ne "None") {
-        $folders += @{Name="Data"; Template="// Place your DbContext and configurations here`n// Example: AppDbContext.cs, EntityConfigurations/`n"}
-    }
+    # Additional utility folders
+    $folders = @(
+        @{Name="Utils"; Template="// Place your utility classes and extensions here`n// Example: StringExtensions.cs, DateHelper.cs`n"},
+        @{Name="Resources"; Template="// Place your resources here`n// Example: Icons/, Images/, Strings.resx`n"}
+    )
 
     foreach ($folder in $folders) {
         New-Item -ItemType Directory -Path "$projectPath/$($folder.Name)" -Force | Out-Null
@@ -346,28 +368,28 @@ if ($ProjectStructure -eq "Single") {
         Write-Host "  [OK] Created $($folder.Name)/" -ForegroundColor Green
     }
 
-    # Move Form1 to Forms folder and rename to MainForm
-    Move-Item -Path "$projectPath/Form1.cs" -Destination "$projectPath/Forms/MainForm.cs" -Force
-    Move-Item -Path "$projectPath/Form1.Designer.cs" -Destination "$projectPath/Forms/MainForm.Designer.cs" -Force
+    # Move Form1 to UI/Forms folder and rename to MainForm
+    Move-Item -Path "$projectPath/Form1.cs" -Destination "$projectPath/UI/Forms/MainForm.cs" -Force
+    Move-Item -Path "$projectPath/Form1.Designer.cs" -Destination "$projectPath/UI/Forms/MainForm.Designer.cs" -Force
     if (Test-Path "$projectPath/Form1.resx") {
-        Move-Item -Path "$projectPath/Form1.resx" -Destination "$projectPath/Forms/MainForm.resx" -Force
+        Move-Item -Path "$projectPath/Form1.resx" -Destination "$projectPath/UI/Forms/MainForm.resx" -Force
     }
 
     # Update MainForm.cs namespace
-    $mainFormContent = Get-Content "$projectPath/Forms/MainForm.cs" -Raw
-    $mainFormContent = $mainFormContent -replace "namespace $ProjectName", "namespace $ProjectName.Forms"
+    $mainFormContent = Get-Content "$projectPath/UI/Forms/MainForm.cs" -Raw
+    $mainFormContent = $mainFormContent -replace "namespace $ProjectName", "namespace $ProjectName.UI.Forms"
     $mainFormContent = $mainFormContent -replace "partial class Form1", "partial class MainForm"
     $mainFormContent = $mainFormContent -replace "public Form1\(\)", "public MainForm()"
-    $mainFormContent | Out-File -FilePath "$projectPath/Forms/MainForm.cs" -Encoding UTF8 -Force
+    $mainFormContent | Out-File -FilePath "$projectPath/UI/Forms/MainForm.cs" -Encoding UTF8 -Force
 
     # Update MainForm.Designer.cs
-    $designerContent = Get-Content "$projectPath/Forms/MainForm.Designer.cs" -Raw
-    $designerContent = $designerContent -replace "namespace $ProjectName", "namespace $ProjectName.Forms"
+    $designerContent = Get-Content "$projectPath/UI/Forms/MainForm.Designer.cs" -Raw
+    $designerContent = $designerContent -replace "namespace $ProjectName", "namespace $ProjectName.UI.Forms"
     $designerContent = $designerContent -replace "partial class Form1", "partial class MainForm"
     $designerContent = $designerContent -replace "Form1", "MainForm"
-    $designerContent | Out-File -FilePath "$projectPath/Forms/MainForm.Designer.cs" -Encoding UTF8 -Force
+    $designerContent | Out-File -FilePath "$projectPath/UI/Forms/MainForm.Designer.cs" -Encoding UTF8 -Force
 
-    Write-Host "  [OK] Moved and renamed Form1 to MainForm in Forms/" -ForegroundColor Green
+    Write-Host "  [OK] Moved and renamed Form1 to MainForm in UI/Forms/" -ForegroundColor Green
 }
 else {
     # Multi-Project: Create folders in appropriate projects
@@ -500,18 +522,18 @@ Contains the domain model and core business interfaces. This is the **innermost 
 ## Example Structure
 \`\`\`
 $ProjectName.Domain/
-├── Models/
-│   ├── Customer.cs
-│   ├── Order.cs
-│   └── Product.cs
-├── Interfaces/
-│   ├── ICustomerRepository.cs
-│   ├── ICustomerService.cs
-│   └── IUnitOfWork.cs
-├── Enums/
-│   └── OrderStatus.cs
-└── Exceptions/
-    └── ValidationException.cs
+|-- Models/
+|   |-- Customer.cs
+|   |-- Order.cs
+|   \-- Product.cs
+|-- Interfaces/
+|   |-- ICustomerRepository.cs
+|   |-- ICustomerService.cs
+|   \-- IUnitOfWork.cs
+|-- Enums/
+|   \-- OrderStatus.cs
+\-- Exceptions/
+    \-- ValidationException.cs
 \`\`\`
 
 ## Notes
@@ -610,13 +632,13 @@ public class CustomerService : ICustomerService
 ## Example Structure
 \`\`\`
 $ProjectName.Application/
-├── Services/
-│   ├── CustomerService.cs
-│   ├── OrderService.cs
-│   └── ProductService.cs
-└── Validators/
-    ├── CustomerValidator.cs
-    └── OrderValidator.cs
+|-- Services/
+|   |-- CustomerService.cs
+|   |-- OrderService.cs
+|   \-- ProductService.cs
+\-- Validators/
+    |-- CustomerValidator.cs
+    \-- OrderValidator.cs
 \`\`\`
 
 ## Notes
@@ -766,17 +788,17 @@ public class UnitOfWork : IUnitOfWork
 ## Example Structure
 \`\`\`
 $ProjectName.Infrastructure/
-└── Persistence/              # Database layer
-    ├── Context/
-    │   └── AppDbContext.cs
-    ├── Repositories/
-    │   ├── CustomerRepository.cs
-    │   └── OrderRepository.cs
-    ├── UnitOfWork/
-    │   └── UnitOfWork.cs
-    └── Configurations/
-        ├── CustomerConfiguration.cs
-        └── OrderConfiguration.cs
+\-- Persistence/              # Database layer
+    |-- Context/
+    |   \-- AppDbContext.cs
+    |-- Repositories/
+    |   |-- CustomerRepository.cs
+    |   \-- OrderRepository.cs
+    |-- UnitOfWork/
+    |   \-- UnitOfWork.cs
+    \-- Configurations/
+        |-- CustomerConfiguration.cs
+        \-- OrderConfiguration.cs
 \`\`\`
 
 ## Migrations
@@ -820,26 +842,16 @@ Windows Forms user interface. This is the **presentation layer** and application
 
 ### ✅ Presenters (MVP Pattern)
 $(if ($Pattern -eq "MVP") {
-@"
-- ``/Presenters/CustomerListPresenter.cs``
-- ``/Presenters/CustomerEditPresenter.cs``
-- Contains UI logic
-- Mediates between View and Service
-"@
+    "- \`\`/Presenters/CustomerListPresenter.cs\`\``n- \`\`/Presenters/CustomerEditPresenter.cs\`\``n- Contains UI logic`n- Mediates between View and Service"
 } else {
-"- Not using MVP pattern in this project"
+    "Not using MVP pattern in this project"
 })
 
 ### ✅ View Interfaces (MVP Pattern)
 $(if ($Pattern -eq "MVP") {
-@"
-- ``/Views/ICustomerListView.cs``
-- ``/Views/ICustomerEditView.cs``
-- Defines what UI can do
-- Forms implement these interfaces
-"@
+    "- \`\`/Views/ICustomerListView.cs\`\``n- \`\`/Views/ICustomerEditView.cs\`\``n- Defines what UI can do`n- Forms implement these interfaces"
 } else {
-"- Not using MVP pattern in this project"
+    "Not using MVP pattern in this project"
 })
 
 ### ✅ Custom Controls
@@ -950,13 +962,9 @@ public class CustomerListPresenter
 - ``Serilog.Extensions.Logging``
 - ``Serilog.Sinks.File``
 $(if ($UIFramework -eq "DevExpress") {
-@"
-- ``DevExpress.WindowsDesktop.Win.Grid``
-- ``DevExpress.WindowsDesktop.Win.Editors``
-- ``DevExpress.WindowsDesktop.Win.Layout``
-"@
+    '- ``DevExpress.WindowsDesktop.Win.Grid``' + "`n" + '- ``DevExpress.WindowsDesktop.Win.Editors``' + "`n" + '- ``DevExpress.WindowsDesktop.Win.Layout``'
 } elseif ($UIFramework -eq "ReaLTaiizor") {
-"- ``ReaLTaiizor`` (free, open-source)"
+    '- ``ReaLTaiizor`` (free' + ', ' + 'open-source)'
 })
 
 **Project References**:
@@ -968,42 +976,27 @@ $(if ($Database -ne "None") { "- ``$ProjectName.Infrastructure`` (for Unit of Wo
 
 ### appsettings.json
 $(if ($Database -ne "None") {
-@"
-\`\`\`json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "$connectionString"
-  }
-}
-\`\`\`
-"@
+    '```json' + "`n{`n  " + '"ConnectionStrings": {' + "`n    " + '"DefaultConnection": ' + '"' + $connectionString + '"' + "`n  }`n}`n" + '```'
 } else {
-"- No database configuration"
+    'No database configuration'
 })
 
 ## Example Structure
 \`\`\`
 $ProjectName.UI/
-├── Forms/
-│   ├── MainForm.cs
-│   ├── CustomerListForm.cs
-│   └── CustomerEditForm.cs
+|-- Forms/
+|   |-- MainForm.cs
+|   |-- CustomerListForm.cs
+|   +-- CustomerEditForm.cs
 $(if ($Pattern -eq "MVP") {
-@"
-├── Views/
-│   ├── ICustomerListView.cs
-│   └── ICustomerEditView.cs
-├── Presenters/
-│   ├── CustomerListPresenter.cs
-│   └── CustomerEditPresenter.cs
-"@
+    "|-- Views/`n|   |-- ICustomerListView.cs`n|   +-- ICustomerEditView.cs`n|-- Presenters/`n|   |-- CustomerListPresenter.cs`n|   +-- CustomerEditPresenter.cs"
 })
-├── Controls/
-│   └── (custom controls)
-├── Factories/
-│   └── FormFactory.cs
-├── Program.cs
-└── appsettings.json
+|-- Controls/
+|   +-- (custom controls)
+|-- Factories/
+|   +-- FormFactory.cs
+|-- Program.cs
++-- appsettings.json
 \`\`\`
 
 ## Running the Application
@@ -1060,6 +1053,8 @@ if ($ProjectStructure -eq "Single") {
     # Add ReaLTaiizor package if selected
     if ($UIFramework -eq "ReaLTaiizor") {
         $packages += "ReaLTaiizor"
+        # ReaLTaiizor may have dependencies that require System.Data.SqlClient for backward compatibility
+        $packages += "System.Data.SqlClient:4.8.6"
     }
 
     # Add database-specific packages with version
@@ -1278,26 +1273,14 @@ if ($Database -ne "None") {
 Write-Host ""
 Write-Host "[6] Creating Program.cs with DI..." -ForegroundColor Cyan
 
-# Generate using statements based on database and project structure
+# Generate using statements based on database (both Single and Multi use same namespace now)
 $usingStatements = if ($Database -ne "None") {
-    if ($ProjectStructure -eq "Single") {
-        switch ($Database) {
-            "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
-            "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
-            "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
-            "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure;" }
-            default { "" }
-        }
-    }
-    else {
-        # Multi-Project: Use Infrastructure.Persistence namespace
-        switch ($Database) {
-            "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
-            "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
-            "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
-            "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
-            default { "" }
-        }
+    switch ($Database) {
+        "SQLite" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+        "SQLServer" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+        "PostgreSQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+        "MySQL" { "using Microsoft.EntityFrameworkCore;`nusing $ProjectName.Infrastructure.Persistence;" }
+        default { "" }
     }
 } else {
     ""
@@ -1341,8 +1324,9 @@ $dbContextCode = if ($Database -ne "None") {
     "            // No database configured"
 }
 
-$programNamespace = if ($ProjectStructure -eq "Single") { $ProjectName } else { "$ProjectName.UI" }
-$programFormsUsing = if ($ProjectStructure -eq "Single") { "$ProjectName.Forms" } else { "$ProjectName.UI.Forms" }
+# Both Single and Multi use UI.Forms namespace now
+$programNamespace = $ProjectName
+$programFormsUsing = "$ProjectName.UI.Forms"
 
 $programCs = @"
 using Microsoft.Extensions.Configuration;
@@ -1385,7 +1369,7 @@ namespace $programNamespace
 
                 // Run application
                 var mainForm = serviceProvider.GetRequiredService<MainForm>();
-                Application.Run(mainForm);
+                System.Windows.Forms.Application.Run(mainForm);
             }
             catch (Exception ex)
             {
@@ -1439,8 +1423,8 @@ if ($Database -ne "None") {
     Write-Host ""
     Write-Host "[6.5] Creating AppDbContext..." -ForegroundColor Cyan
 
-    # Determine namespace based on project structure
-    $dbContextNamespace = if ($ProjectStructure -eq "Single") { "$ProjectName.Infrastructure" } else { "$ProjectName.Infrastructure.Persistence" }
+    # Both Single and Multi now use same namespace structure
+    $dbContextNamespace = "$ProjectName.Infrastructure.Persistence"
 
     $appDbContextCs = @"
 using Microsoft.EntityFrameworkCore;
@@ -1474,7 +1458,7 @@ namespace $dbContextNamespace
 }
 "@
 
-    $dbContextPath = if ($ProjectStructure -eq "Single") { "$ProjectName/Data/AppDbContext.cs" } else { "$ProjectName.Infrastructure/Persistence/Context/AppDbContext.cs" }
+    $dbContextPath = if ($ProjectStructure -eq "Single") { "$ProjectName/Infrastructure/Persistence/Context/AppDbContext.cs" } else { "$ProjectName.Infrastructure/Persistence/Context/AppDbContext.cs" }
     $appDbContextCs | Out-File -FilePath $dbContextPath -Encoding UTF8 -Force
     Write-Host "  [OK] AppDbContext.cs created" -ForegroundColor Green
 }
@@ -1696,10 +1680,25 @@ if ($IntegrateStandards) {
 
             if ($isAdmin) {
                 try {
-                    # Create symlink for .claude directory
+                    # Create real .claude directory (for project-context.md)
+                    if (-not (Test-Path ".claude")) {
+                        New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
+                    }
+
+                    # Create symlinks for .claude subdirectories
                     if (Test-Path ".standards\.claude") {
-                        New-Item -ItemType SymbolicLink -Path ".claude" -Target ".standards\.claude" -Force -ErrorAction Stop | Out-Null
-                        Write-Host "  [OK] Created symlink: .claude -> .standards\.claude" -ForegroundColor Green
+                        $claudeSubdirs = @("agents", "commands", "guides", "workflows")
+                        foreach ($subdir in $claudeSubdirs) {
+                            if (Test-Path ".standards\.claude\$subdir") {
+                                $targetPath = ".standards\.claude\$subdir"
+                                $linkPath = ".claude\$subdir"
+                                if (Test-Path $linkPath) {
+                                    Remove-Item $linkPath -Force -Recurse
+                                }
+                                New-Item -ItemType SymbolicLink -Path $linkPath -Target $targetPath -Force -ErrorAction Stop | Out-Null
+                                Write-Host "  [OK] Created symlink: .claude\$subdir -> .standards\.claude\$subdir" -ForegroundColor Green
+                            }
+                        }
                     }
 
                     # Create symlink for templates directory
@@ -1720,10 +1719,19 @@ if ($IntegrateStandards) {
                     Write-Host "  [WARN] Could not create symlinks: $($_.Exception.Message)" -ForegroundColor Yellow
                     Write-Host "  [INFO] Falling back to copying files..." -ForegroundColor Cyan
 
-                    # Fallback: Copy instead of symlink
+                    # Fallback: Copy instead of symlink (create real .claude folder first)
+                    if (-not (Test-Path ".claude")) {
+                        New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
+                    }
                     if (Test-Path ".standards\.claude") {
-                        Copy-Item -Recurse ".standards\.claude" -Destination ".claude" -Force
-                        Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
+                        # Copy subdirectories only (agents, commands, guides, workflows)
+                        $claudeSubdirs = @("agents", "commands", "guides", "workflows")
+                        foreach ($subdir in $claudeSubdirs) {
+                            if (Test-Path ".standards\.claude\$subdir") {
+                                Copy-Item -Recurse ".standards\.claude\$subdir" -Destination ".claude\$subdir" -Force
+                            }
+                        }
+                        Write-Host "  [OK] Copied .claude subdirectories" -ForegroundColor Green
                     }
                     if (Test-Path ".standards\templates") {
                         Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
@@ -1739,8 +1747,18 @@ if ($IntegrateStandards) {
                 Write-Host "  [WARN] Not running as Administrator - cannot create symlinks" -ForegroundColor Yellow
                 Write-Host "  [INFO] Copying files instead (will not auto-update with standards)" -ForegroundColor Cyan
 
+                # Create real .claude folder first
+                if (-not (Test-Path ".claude")) {
+                    New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
+                }
                 if (Test-Path ".standards\.claude") {
-                    Copy-Item -Recurse ".standards\.claude" -Destination ".claude" -Force
+                    # Copy subdirectories only (agents, commands, guides, workflows)
+                    $claudeSubdirs = @("agents", "commands", "guides", "workflows")
+                    foreach ($subdir in $claudeSubdirs) {
+                        if (Test-Path ".standards\.claude\$subdir") {
+                            Copy-Item -Recurse ".standards\.claude\$subdir" -Destination ".claude\$subdir" -Force
+                        }
+                    }
                     Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
                 }
                 if (Test-Path ".standards\templates") {
@@ -1788,9 +1806,9 @@ Write-Host "[12] Creating project context for AI assistants..." -ForegroundColor
 $standardsPath = if ($IntegrateStandards -and (Test-Path ".standards")) { ".standards" } else { $repoRoot }
 $templatePath = Join-Path $standardsPath ".claude/project-context-template.md"
 
-# Project-specific context should NOT go in submodule
-# Create .context/ for project-specific files (hidden folder)
-$contextPath = ".context"
+# Project-specific context should go in .claude/ (real folder, not symlink)
+# .claude/ folder should already exist from integration step
+$contextPath = ".claude"
 if (-not (Test-Path $contextPath)) {
     New-Item -ItemType Directory -Path $contextPath -Force | Out-Null
 }
@@ -2055,46 +2073,62 @@ $templateList
 $(if ($ProjectStructure -eq "Single") {
 @"
 ``````
-/$ProjectName (Single Project)
-|-- /Forms              # UI Layer (minimal logic)
+/$ProjectName (Single Project - Clean Architecture)
+|-- /Domain/                   # Domain Layer
+|   |-- /Models                # Entities
+|   |-- /Interfaces            # Contracts
+|   |-- /Enums                 # Enumerations
+|   \-- /Exceptions            # Custom exceptions
+|-- /Application/              # Application Layer
+|   |-- /Services              # Business logic
+|   \-- /Validators            # Validation rules
+$(if ($Database -ne 'None') {
+@"
+|-- /Infrastructure/           # Infrastructure Layer
+|   \-- /Persistence/          # Database
+|       |-- /Repositories      # Data access
+|       |-- /Context           # DbContext
+|       |-- /Configurations    # Entity configs
+|       \-- /UnitOfWork        # Transaction coordinator
+"@
+})
+|-- /UI/                       # Presentation Layer
+|   |-- /Forms                 # WinForms
 $additionalFolders
-|-- /Services           # Business logic
-|-- /Repositories       # Data access layer
-|-- /Data               # DbContext, Unit of Work
-|-- /Models             # Domain models
-|-- /Utils              # Helpers, extensions
-+-- Program.cs          # Entry point with DI
+|   \-- /Factories             # Form factories
+|-- /Utils                     # Helpers, extensions
+\-- Program.cs                 # Entry point with DI
 ``````
 "@
 } else {
 @"
 ``````
 /$ProjectName.sln (Multi-Project Solution)
-├── $ProjectName.UI/            # Presentation Layer
-│   ├── /Forms
-│   ├── /Controls
+|-- $ProjectName.UI/            # Presentation Layer
+|   |-- /Forms
+|   |-- /Controls
 $(if ($Pattern -eq "MVP") { "|   |-- /Views`n|   |-- /Presenters" } elseif ($Pattern -eq "MVVM") { "|   |-- /ViewModels" })
-│   ├── /Factories
-│   └── Program.cs
-│
-├── $ProjectName.Domain/          # Domain & Interfaces
-│   ├── /Models
-│   ├── /Interfaces
-│   ├── /Enums
-│   └── /Exceptions
-│
-├── $ProjectName.Application/      # Business Logic
-│   ├── /Services
-│   └── /Validators
-│
+|   |-- /Factories
+|   \-- Program.cs
+|
+|-- $ProjectName.Domain/          # Domain & Interfaces
+|   |-- /Models
+|   |-- /Interfaces
+|   |-- /Enums
+|   \-- /Exceptions
+|
+|-- $ProjectName.Application/      # Business Logic
+|   |-- /Services
+|   \-- /Validators
+|
 $(if ($Database -ne 'None') {
 @"
-└── $ProjectName.Infrastructure/            # Infrastructure Layer
-    └── /Persistence/                      # Database
-        ├── /Repositories
-        ├── /Context
-        ├── /Configurations
-        └── /UnitOfWork
+\-- $ProjectName.Infrastructure/            # Infrastructure Layer
+    \-- /Persistence/                      # Database
+        |-- /Repositories
+        |-- /Context
+        |-- /Configurations
+        \-- /UnitOfWork
 "@
 })
 ``````
@@ -2123,66 +2157,30 @@ $nugetPackages
 **Generated by**: ``init-project.ps1`` v2.0
 "@
 
-# Write to both locations initially
+# Write project-context.md to .claude/ (always a real folder now)
 $projectContextContent | Out-File -FilePath $outputPath -Encoding UTF8 -Force
-Write-Host "  [OK] Created .context/project-context.md" -ForegroundColor Green
+Write-Host "  [OK] Created .claude/project-context.md" -ForegroundColor Green
 
-# Also write to .claude/ directory (if it exists and is writable)
-$claudeDest = ".claude/project-context.md"
-$projectContextContent | Out-File -FilePath $claudeDest -Encoding UTF8 -Force -ErrorAction SilentlyContinue
-if (Test-Path $claudeDest) {
-    Write-Host "  [OK] Created .claude/project-context.md (for AI access)" -ForegroundColor Green
+# Note: .claude/ is now always a real folder with symlinked subdirectories
+Write-Host "  [INFO] .claude/ structure:" -ForegroundColor Cyan
+Write-Host "        - project-context.md (real file, project-specific)" -ForegroundColor Gray
+Write-Host "        - agents/ (symlink -> .standards/.claude/agents/)" -ForegroundColor Gray
+Write-Host "        - commands/ (symlink -> .standards/.claude/commands/)" -ForegroundColor Gray
+Write-Host "        - guides/ (symlink -> .standards/.claude/guides/)" -ForegroundColor Gray
+Write-Host "        - workflows/ (symlink -> .standards/.claude/workflows/)" -ForegroundColor Gray
+
+# Cleanup old .context/ folder if exists
+if (Test-Path ".context") {
+    Write-Host "  [INFO] Removing old .context/ folder..." -ForegroundColor Cyan
+    Remove-Item ".context" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "  [OK] Removed .context/ (deprecated)" -ForegroundColor Green
 }
 
-# Cleanup: Decide which file to keep based on whether .claude is a symlink
-Write-Host ""
-Write-Host "  [INFO] Checking .claude directory type..." -ForegroundColor Cyan
+# Add project-context.md to git
+git -c core.autocrlf=false add .claude/project-context.md 2>&1 | Out-Null
+git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
+Write-Host "  [OK] Project context committed to git" -ForegroundColor Green
 
-# Check if .claude is a symbolic link
-$claudeIsSymlink = $false
-if (Test-Path ".claude") {
-    $claudeItem = Get-Item ".claude" -Force -ErrorAction SilentlyContinue
-    if ($claudeItem -and $claudeItem.LinkType -eq "SymbolicLink") {
-        $claudeIsSymlink = $true
-        Write-Host "  [INFO] .claude is a symlink (points to submodule)" -ForegroundColor Cyan
-    }
-}
-
-if ($claudeIsSymlink) {
-    # .claude is symlink → Keep .context/project-context.md, remove .claude/project-context.md
-    Write-Host "  [INFO] Keeping .context/project-context.md (cannot track files in symlinked directory)" -ForegroundColor Cyan
-    if (Test-Path $claudeDest) {
-        Remove-Item $claudeDest -Force -ErrorAction SilentlyContinue
-        Write-Host "  [OK] Removed .claude/project-context.md (symlink to submodule)" -ForegroundColor Green
-    }
-    # Add .context/project-context.md to git
-    git -c core.autocrlf=false add .context/project-context.md 2>&1 | Out-Null
-    git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
-    Write-Host "  [OK] Project context committed to git (.context/project-context.md)" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "  [TIP] AI assistants will find project-context.md in:" -ForegroundColor Yellow
-    Write-Host "        - .context/project-context.md (project-specific)" -ForegroundColor Gray
-    Write-Host "        - .claude/ (from standards submodule via symlink)" -ForegroundColor Gray
-} else {
-    # .claude is NOT symlink → Keep .claude/project-context.md, remove .context/project-context.md
-    if (Test-Path $claudeDest) {
-        Write-Host "  [INFO] Keeping .claude/project-context.md (AI can access directly)" -ForegroundColor Cyan
-        if (Test-Path $outputPath) {
-            Remove-Item $outputPath -Force
-            Write-Host "  [OK] Removed .context/project-context.md (keeping only .claude version)" -ForegroundColor Green
-        }
-        # Add .claude/project-context.md to git
-        git -c core.autocrlf=false add .claude/project-context.md 2>&1 | Out-Null
-        git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
-        Write-Host "  [OK] Project context committed to git (.claude/project-context.md)" -ForegroundColor Green
-    } else {
-        Write-Host "  [WARN] .claude/project-context.md not found, keeping .context/project-context.md" -ForegroundColor Yellow
-        # Add .context/project-context.md to git as fallback
-        git -c core.autocrlf=false add .context/project-context.md 2>&1 | Out-Null
-        git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
-        Write-Host "  [OK] Project context committed to git (.context/project-context.md)" -ForegroundColor Green
-    }
-}
 
 # ============================================================================
 # Summary

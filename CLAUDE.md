@@ -60,18 +60,30 @@
 #### **Option 1: Single Project (Monolith)** ✅ Recommended for most WinForms apps
 ```
 /ProjectName (Single Project)
-├── /Forms              # UI Layer (minimal logic)
-├── /Presenters         # MVP Presenters
-├── /Services           # Business logic
-├── /Repositories       # Data access layer
-├── /Data               # DbContext, Unit of Work
-├── /Models             # Domain models
-├── /Factories          # Form factories
+├── /Domain/                   # Domain Layer
+│   ├── /Models                # Entities
+│   ├── /Interfaces            # Contracts
+│   ├── /Enums                 # Enumerations
+│   └── /Exceptions            # Custom exceptions
+├── /Application/              # Application Layer
+│   ├── /Services              # Business logic
+│   └── /Validators            # Validation rules
+├── /Infrastructure/           # Infrastructure Layer
+│   └── /Persistence/          # Database
+│       ├── /Repositories      # Data access
+│       ├── /Context           # DbContext
+│       ├── /Configurations    # Entity configs
+│       └── /UnitOfWork        # Transaction coordinator
+├── /UI/                       # Presentation Layer
+│   ├── /Forms                 # WinForms
+│   ├── /Presenters            # MVP Presenters
+│   ├── /Views                 # View interfaces
+│   └── /Factories             # Form factories
 └── Program.cs
 ```
 - ✅ **When to use**: Small/medium apps (< 20 forms), 1-3 developers
-- ✅ **Benefits**: Simple, fast build, easy to manage
-- ✅ **Architecture**: Folder-based separation (convention-enforced)
+- ✅ **Benefits**: Simple, fast build, easy to manage, **same structure as Multi-Project**
+- ✅ **Architecture**: Folder-based Clean Architecture (convention-enforced)
 
 #### **Option 2: Multi-Project** ⚡ For large/enterprise apps
 ```
