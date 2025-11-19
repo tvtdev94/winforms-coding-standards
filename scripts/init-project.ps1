@@ -884,7 +884,9 @@ if ($IncludeTests) {
     Write-Host "[7] Creating test projects..." -ForegroundColor Cyan
 
     # Unit tests
-    dotnet new xunit -n "$ProjectName.Tests" -f $Framework
+    # Test projects need same target framework as main project (including -windows suffix)
+    $testFramework = "$Framework-windows"
+    dotnet new xunit -n "$ProjectName.Tests" -f $testFramework
     dotnet sln add "$ProjectName.Tests/$ProjectName.Tests.csproj"
 
     # Add references based on structure
@@ -906,7 +908,7 @@ if ($IncludeTests) {
 
     # Integration tests (only if database is selected)
     if ($Database -ne "None") {
-        dotnet new xunit -n "$ProjectName.IntegrationTests" -f $Framework
+        dotnet new xunit -n "$ProjectName.IntegrationTests" -f $testFramework
         dotnet sln add "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
 
         # Add references based on structure
