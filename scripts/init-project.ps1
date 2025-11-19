@@ -886,7 +886,19 @@ if ($IncludeTests) {
     # Unit tests
     dotnet new xunit -n "$ProjectName.Tests" -f $Framework
     dotnet sln add "$ProjectName.Tests/$ProjectName.Tests.csproj"
-    dotnet add "$ProjectName.Tests" reference $ProjectName
+
+    # Add references based on structure
+    if ($ProjectStructure -eq "Single") {
+        dotnet add "$ProjectName.Tests" reference $ProjectName
+    }
+    else {
+        # Multi-Project: Reference all projects for comprehensive testing
+        dotnet add "$ProjectName.Tests" reference "$ProjectName.Core" "$ProjectName.Business" | Out-Null
+        if ($Database -ne "None") {
+            dotnet add "$ProjectName.Tests" reference "$ProjectName.Data" | Out-Null
+        }
+    }
+
     dotnet add "$ProjectName.Tests" package Moq --no-restore
     dotnet add "$ProjectName.Tests" package FluentAssertions --no-restore
 
@@ -896,7 +908,15 @@ if ($IncludeTests) {
     if ($Database -ne "None") {
         dotnet new xunit -n "$ProjectName.IntegrationTests" -f $Framework
         dotnet sln add "$ProjectName.IntegrationTests/$ProjectName.IntegrationTests.csproj"
-        dotnet add "$ProjectName.IntegrationTests" reference $ProjectName
+
+        # Add references based on structure
+        if ($ProjectStructure -eq "Single") {
+            dotnet add "$ProjectName.IntegrationTests" reference $ProjectName
+        }
+        else {
+            # Multi-Project: Integration tests need Data and Core projects
+            dotnet add "$ProjectName.IntegrationTests" reference "$ProjectName.Core" "$ProjectName.Data" | Out-Null
+        }
 
         # Add database package to integration tests (with correct version)
         if ($Database -eq "SQLite") {
