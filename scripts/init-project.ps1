@@ -434,6 +434,577 @@ else {
     $designerContent | Out-File -FilePath "$uiPath/Forms/MainForm.Designer.cs" -Encoding UTF8 -Force
 
     Write-Host "  [OK] Moved and renamed Form1 to MainForm in UI/Forms/" -ForegroundColor Green
+
+    # ========================================================================
+    # Create README.md for each project in Multi-Project structure
+    # ========================================================================
+    Write-Host "  Creating README.md files for each project..." -ForegroundColor Cyan
+
+    # Core Project README
+    $coreReadme = @"
+# $ProjectName.Core
+
+> **Layer**: Domain Layer (Core/Innermost Layer)
+> **Dependencies**: None (should not reference other projects)
+
+## Purpose
+Contains the domain model and core business interfaces. This is the **innermost layer** in Clean Architecture.
+
+## What Goes Here
+
+### ✅ Models (Domain Entities)
+- ``/Models/Customer.cs``
+- ``/Models/Order.cs``
+- ``/Models/Product.cs``
+- Pure C# classes representing business entities
+- No framework dependencies
+- Should have validation attributes
+
+### ✅ Interfaces
+- ``/Interfaces/IRepository.cs``
+- ``/Interfaces/IUnitOfWork.cs``
+- ``/Interfaces/ICustomerService.cs``
+- Contracts that other layers implement
+
+### ✅ Enums
+- ``/Enums/OrderStatus.cs``
+- ``/Enums/CustomerType.cs``
+
+### ✅ Custom Exceptions
+- ``/Exceptions/ValidationException.cs``
+- ``/Exceptions/NotFoundException.cs``
+
+## Key Rules
+
+### ❌ DO NOT Put Here:
+- Database code (belongs in Data project)
+- Business logic implementation (belongs in Business project)
+- UI code (belongs in UI project)
+- External framework dependencies
+
+### ✅ DO Put Here:
+- Domain models (entities)
+- Interface definitions
+- Enums
+- Custom exceptions
+- Value objects
+
+## Dependencies
+**NuGet Packages**:
+- ``System.ComponentModel.Annotations`` (for validation attributes)
+
+**Project References**:
+- None (Core should be dependency-free!)
+
+## Example Structure
+\`\`\`
+$ProjectName.Core/
+├── Models/
+│   ├── Customer.cs
+│   ├── Order.cs
+│   └── Product.cs
+├── Interfaces/
+│   ├── ICustomerRepository.cs
+│   ├── ICustomerService.cs
+│   └── IUnitOfWork.cs
+├── Enums/
+│   └── OrderStatus.cs
+└── Exceptions/
+    └── ValidationException.cs
+\`\`\`
+
+## Notes
+- This project defines **WHAT** the system does (domain model)
+- Other projects define **HOW** it does it (implementation)
+- Keep this layer clean and framework-independent
+"@
+
+    $coreReadme | Out-File -FilePath "$ProjectName.Core/README.md" -Encoding UTF8 -Force
+
+    # Business Project README
+    $businessReadme = @"
+# $ProjectName.Business
+
+> **Layer**: Business Logic Layer (Application Layer)
+> **Dependencies**: Core
+
+## Purpose
+Contains business logic, validation rules, and service implementations. This is where the **application behavior** lives.
+
+## What Goes Here
+
+### ✅ Services (Business Logic)
+- ``/Services/CustomerService.cs``
+- ``/Services/OrderService.cs``
+- Implements business rules and workflows
+- Uses repositories via Unit of Work
+- Contains complex business operations
+
+### ✅ Validators
+- ``/Validators/CustomerValidator.cs``
+- Input validation logic
+- Business rule validation
+
+## Key Rules
+
+### ❌ DO NOT Put Here:
+- Database code (use IRepository from Core, implemented in Data)
+- UI code (belongs in UI project)
+- Direct EF Core DbContext usage (use IUnitOfWork)
+- Domain models (belong in Core)
+
+### ✅ DO Put Here:
+- Service implementations (ICustomerService → CustomerService)
+- Business logic and workflows
+- Validation logic
+- Business rules
+- Complex calculations
+
+## Service Pattern Example
+
+\`\`\`csharp
+public class CustomerService : ICustomerService
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<CustomerService> _logger;
+
+    public CustomerService(
+        IUnitOfWork unitOfWork,
+        ILogger<CustomerService> logger)
+    {
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    public async Task<Customer> CreateCustomerAsync(Customer customer)
+    {
+        // 1. Validate
+        if (string.IsNullOrWhiteSpace(customer.Name))
+            throw new ValidationException("Customer name is required");
+
+        // 2. Business logic
+        customer.CreatedDate = DateTime.UtcNow;
+        customer.IsActive = true;
+
+        // 3. Repository operation
+        await _unitOfWork.Customers.AddAsync(customer);
+
+        // 4. Save via Unit of Work
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation("Customer created: {Id}", customer.Id);
+        return customer;
+    }
+}
+\`\`\`
+
+## Dependencies
+
+**NuGet Packages**:
+- ``Microsoft.Extensions.Logging.Abstractions``
+
+**Project References**:
+- ``$ProjectName.Core`` (for models and interfaces)
+
+## Example Structure
+\`\`\`
+$ProjectName.Business/
+├── Services/
+│   ├── CustomerService.cs
+│   ├── OrderService.cs
+│   └── ProductService.cs
+└── Validators/
+    ├── CustomerValidator.cs
+    └── OrderValidator.cs
+\`\`\`
+
+## Notes
+- Services implement interfaces defined in Core
+- Use constructor injection for dependencies
+- Always inject IUnitOfWork, NOT IRepository directly
+- Let Unit of Work manage SaveChanges()
+"@
+
+    $businessReadme | Out-File -FilePath "$ProjectName.Business/README.md" -Encoding UTF8 -Force
+
+    # Data Project README (only if database selected)
+    if ($Database -ne "None") {
+        $dataReadme = @"
+# $ProjectName.Data
+
+> **Layer**: Data Access Layer (Infrastructure Layer)
+> **Dependencies**: Core
+
+## Purpose
+Handles all database operations using Entity Framework Core. This is the **infrastructure layer**.
+
+## What Goes Here
+
+### ✅ DbContext
+- ``/Context/AppDbContext.cs``
+- Entity Framework DbContext
+- DbSet definitions
+- Model configuration
+
+### ✅ Repositories (Data Access)
+- ``/Repositories/CustomerRepository.cs``
+- ``/Repositories/OrderRepository.cs``
+- Implements IRepository interfaces from Core
+- **NEVER** call SaveChangesAsync in repositories!
+
+### ✅ Unit of Work
+- ``/UnitOfWork/UnitOfWork.cs``
+- Manages transactions
+- Coordinates multiple repositories
+- **ONLY** place to call SaveChangesAsync
+
+### ✅ Entity Configurations
+- ``/Configurations/CustomerConfiguration.cs``
+- Fluent API configuration
+- Table mappings, relationships, indexes
+
+## Key Rules
+
+### ❌ DO NOT:
+- Call SaveChangesAsync() in repositories
+- Put business logic here
+- Expose DbContext outside this project
+- Reference UI or Business projects
+
+### ✅ DO:
+- Implement repository interfaces from Core
+- Call SaveChangesAsync() ONLY in Unit of Work
+- Use Fluent API for entity configuration
+- Keep repositories simple (CRUD only)
+- Inject IUnitOfWork in services, NOT IRepository
+
+## Repository Pattern Example
+
+\`\`\`csharp
+public class CustomerRepository : ICustomerRepository
+{
+    private readonly AppDbContext _context;
+
+    public CustomerRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Customer?> GetByIdAsync(int id)
+    {
+        return await _context.Customers
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task AddAsync(Customer customer)
+    {
+        await _context.Customers.AddAsync(customer);
+        // ❌ NO SaveChangesAsync here!
+        // ✅ Unit of Work will handle it
+    }
+}
+\`\`\`
+
+## Unit of Work Pattern Example
+
+\`\`\`csharp
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly AppDbContext _context;
+    private ICustomerRepository? _customers;
+
+    public UnitOfWork(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public ICustomerRepository Customers =>
+        _customers ??= new CustomerRepository(_context);
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await _context.SaveChangesAsync();
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+}
+\`\`\`
+
+## Dependencies
+
+**NuGet Packages**:
+- ``Microsoft.EntityFrameworkCore`` (v$efCoreVersion)
+- ``Microsoft.EntityFrameworkCore.$Database`` (v$efCoreVersion)
+- ``Microsoft.EntityFrameworkCore.Design`` (v$efCoreVersion)
+
+**Project References**:
+- ``$ProjectName.Core`` (for models and interfaces)
+
+## Database Configuration
+- **Provider**: $Database
+- **Connection String**: See appsettings.json in UI project
+
+## Example Structure
+\`\`\`
+$ProjectName.Data/
+├── Context/
+│   └── AppDbContext.cs
+├── Repositories/
+│   ├── CustomerRepository.cs
+│   └── OrderRepository.cs
+├── UnitOfWork/
+│   └── UnitOfWork.cs
+└── Configurations/
+    ├── CustomerConfiguration.cs
+    └── OrderConfiguration.cs
+\`\`\`
+
+## Migrations
+
+\`\`\`bash
+# Add migration
+dotnet ef migrations add InitialCreate --project $ProjectName.Data --startup-project $ProjectName.UI
+
+# Update database
+dotnet ef database update --project $ProjectName.Data --startup-project $ProjectName.UI
+\`\`\`
+
+## Notes
+- Repositories = simple CRUD operations
+- Unit of Work = transaction coordinator
+- NEVER expose DbContext to other layers
+- Use async/await for all database operations
+"@
+
+        $dataReadme | Out-File -FilePath "$ProjectName.Data/README.md" -Encoding UTF8 -Force
+    }
+
+    # UI Project README
+    $uiReadme = @"
+# $ProjectName.UI
+
+> **Layer**: Presentation Layer (UI Layer)
+> **Dependencies**: Core, Business$(if ($Database -ne "None") { ", Data" })
+
+## Purpose
+Windows Forms user interface. This is the **presentation layer** and application entry point.
+
+## What Goes Here
+
+### ✅ Forms (UI)
+- ``/Forms/MainForm.cs``
+- ``/Forms/CustomerListForm.cs``
+- ``/Forms/CustomerEditForm.cs``
+- Windows Forms UI
+- **Minimal logic** - delegate to Presenters/Services
+
+### ✅ Presenters (MVP Pattern)
+$(if ($Pattern -eq "MVP") {
+@"
+- ``/Presenters/CustomerListPresenter.cs``
+- ``/Presenters/CustomerEditPresenter.cs``
+- Contains UI logic
+- Mediates between View and Service
+"@
+} else {
+"- Not using MVP pattern in this project"
+})
+
+### ✅ View Interfaces (MVP Pattern)
+$(if ($Pattern -eq "MVP") {
+@"
+- ``/Views/ICustomerListView.cs``
+- ``/Views/ICustomerEditView.cs``
+- Defines what UI can do
+- Forms implement these interfaces
+"@
+} else {
+"- Not using MVP pattern in this project"
+})
+
+### ✅ Custom Controls
+- ``/Controls/CustomButton.cs``
+- ``/Controls/SearchBox.cs``
+- Reusable UI components
+
+### ✅ Factories
+- ``/Factories/FormFactory.cs``
+- Creates forms via DI
+- **Use IFormFactory, NOT IServiceProvider!**
+
+### ✅ Program.cs
+- Application entry point
+- DI container setup
+- Configuration loading
+
+## Key Rules
+
+### ❌ DO NOT:
+- Put business logic in Forms
+- Directly access database/DbContext
+- Inject IServiceProvider (use IFormFactory)
+- Create forms with ``new`` keyword (use factory)
+
+### ✅ DO:
+- Keep Forms thin (minimal logic)
+- Use Presenters/Services for logic
+- Inject IFormFactory for creating child forms
+- Use async/await for I/O operations
+- Handle exceptions and show user-friendly messages
+
+## MVP Pattern Example
+
+\`\`\`csharp
+// 1. View Interface
+public interface ICustomerListView
+{
+    void DisplayCustomers(List<Customer> customers);
+    void ShowError(string message);
+}
+
+// 2. Form (implements ICustomerListView)
+public partial class CustomerListForm : Form, ICustomerListView
+{
+    private readonly CustomerListPresenter _presenter;
+
+    public CustomerListForm(CustomerListPresenter presenter)
+    {
+        InitializeComponent();
+        _presenter = presenter;
+        _presenter.SetView(this);
+    }
+
+    public void DisplayCustomers(List<Customer> customers)
+    {
+        dgvCustomers.DataSource = customers;
+    }
+
+    public void ShowError(string message)
+    {
+        MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+
+    private async void CustomerListForm_Load(object sender, EventArgs e)
+    {
+        await _presenter.LoadCustomersAsync();
+    }
+}
+
+// 3. Presenter
+public class CustomerListPresenter
+{
+    private readonly ICustomerService _customerService;
+    private ICustomerListView? _view;
+
+    public CustomerListPresenter(ICustomerService customerService)
+    {
+        _customerService = customerService;
+    }
+
+    public void SetView(ICustomerListView view)
+    {
+        _view = view;
+    }
+
+    public async Task LoadCustomersAsync()
+    {
+        try
+        {
+            var customers = await _customerService.GetAllAsync();
+            _view?.DisplayCustomers(customers);
+        }
+        catch (Exception ex)
+        {
+            _view?.ShowError(ex.Message);
+        }
+    }
+}
+\`\`\`
+
+## Dependencies
+
+**NuGet Packages**:
+- ``Microsoft.Extensions.DependencyInjection``
+- ``Microsoft.Extensions.Configuration.Json``
+- ``Microsoft.Extensions.Logging``
+- ``Serilog.Extensions.Logging``
+- ``Serilog.Sinks.File``
+$(if ($UIFramework -eq "DevExpress") {
+@"
+- ``DevExpress.WindowsDesktop.Win.Grid``
+- ``DevExpress.WindowsDesktop.Win.Editors``
+- ``DevExpress.WindowsDesktop.Win.Layout``
+"@
+} elseif ($UIFramework -eq "ReaLTaiizor") {
+"- ``ReaLTaiizor`` (free, open-source)"
+})
+
+**Project References**:
+- ``$ProjectName.Core`` (for models and interfaces)
+- ``$ProjectName.Business`` (for services)
+$(if ($Database -ne "None") { "- ``$ProjectName.Data`` (for Unit of Work, repositories)" })
+
+## Configuration
+
+### appsettings.json
+$(if ($Database -ne "None") {
+@"
+\`\`\`json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "$connectionString"
+  }
+}
+\`\`\`
+"@
+} else {
+"- No database configuration"
+})
+
+## Example Structure
+\`\`\`
+$ProjectName.UI/
+├── Forms/
+│   ├── MainForm.cs
+│   ├── CustomerListForm.cs
+│   └── CustomerEditForm.cs
+$(if ($Pattern -eq "MVP") {
+@"
+├── Views/
+│   ├── ICustomerListView.cs
+│   └── ICustomerEditView.cs
+├── Presenters/
+│   ├── CustomerListPresenter.cs
+│   └── CustomerEditPresenter.cs
+"@
+})
+├── Controls/
+│   └── (custom controls)
+├── Factories/
+│   └── FormFactory.cs
+├── Program.cs
+└── appsettings.json
+\`\`\`
+
+## Running the Application
+
+\`\`\`bash
+dotnet run --project $ProjectName.UI
+\`\`\`
+
+## Notes
+- This is the **startup project**
+- Contains DI container setup in Program.cs
+- Forms should be thin - delegate to Presenters/Services
+- Use IFormFactory to create child forms
+"@
+
+    $uiReadme | Out-File -FilePath "$ProjectName.UI/README.md" -Encoding UTF8 -Force
+
+    Write-Host "  [OK] Created README.md files for all projects" -ForegroundColor Green
 }
 
 # ============================================================================
