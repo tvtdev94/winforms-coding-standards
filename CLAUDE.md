@@ -53,17 +53,49 @@
 
 ## 🏗️ Quick Reference
 
-### Project Structure
+### Project Structure Options
+
+**Two structure options available** (selected during `init-project.ps1`):
+
+#### **Option 1: Single Project (Monolith)** ✅ Recommended for most WinForms apps
 ```
-/ProjectName
+/ProjectName (Single Project)
 ├── /Forms              # UI Layer (minimal logic)
 ├── /Presenters         # MVP Presenters
 ├── /Services           # Business logic
 ├── /Repositories       # Data access layer
 ├── /Data               # DbContext, Unit of Work
+├── /Models             # Domain models
 ├── /Factories          # Form factories
 └── Program.cs
 ```
+- ✅ **When to use**: Small/medium apps (< 20 forms), 1-3 developers
+- ✅ **Benefits**: Simple, fast build, easy to manage
+- ✅ **Architecture**: Folder-based separation (convention-enforced)
+
+#### **Option 2: Multi-Project** ⚡ For large/enterprise apps
+```
+/ProjectName.sln (Multi-Project Solution)
+├── ProjectName.UI/             # Presentation Layer (WinForms)
+│   ├── /Forms
+│   ├── /Presenters
+│   └── Program.cs
+├── ProjectName.Core/           # Domain & Interfaces
+│   ├── /Models
+│   └── /Interfaces
+├── ProjectName.Business/       # Business Logic
+│   └── /Services
+└── ProjectName.Data/           # Data Access
+    ├── /Repositories
+    └── /Context
+```
+- ✅ **When to use**: Large apps (20+ forms), 3+ developers, code reuse needed
+- ✅ **Benefits**: Compiler-enforced architecture, better separation, reusable layers
+- ✅ **Architecture**: Project-based separation (compiler-enforced)
+
+📖 **Full docs**:
+- [Single Project Structure](docs/architecture/project-structure.md)
+- [Multi-Project Structure](docs/architecture/multi-project-structure.md)
 
 ### Architecture Patterns
 - **MVP Pattern** ⭐ (recommended) - View + Presenter + Service
@@ -204,6 +236,8 @@ When AI (Claude Code) starts working on a task, it should **load the appropriate
 | **Creating Services** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + [Architecture Guide](.claude/guides/architecture-guide.md) | Unit of Work pattern, validation, error handling |
 | **Creating Repositories** | [Code Generation Guide](.claude/guides/code-generation-guide.md) | Repository pattern (NO SaveChanges!) |
 | **Understanding Architecture** | [Architecture Guide](.claude/guides/architecture-guide.md) | MVP, MVVM, DI, Factory, Unit of Work |
+| **Single Project Structure** | [Project Structure](docs/architecture/project-structure.md) | ⭐ Folder organization for monolith projects |
+| **Multi-Project Structure** | [Multi-Project Structure](docs/architecture/multi-project-structure.md) | ⭐ Separate assemblies for large apps |
 | **Writing Tests** | [Testing Guide](.claude/guides/testing-guide.md) + `templates/test-template.cs` | Unit tests, integration tests, Moq |
 | **Coding Standards** | [Coding Standards Guide](.claude/guides/coding-standards.md) | Naming, style, formatting |
 | **Code Review** | [Code Review Checklist](.claude/workflows/code-review-checklist.md) | Pre-commit checks |

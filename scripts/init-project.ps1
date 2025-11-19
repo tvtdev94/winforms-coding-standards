@@ -158,22 +158,60 @@ $Pattern = switch ($patternChoice) {
 Write-Host "   Selected: $Pattern" -ForegroundColor Green
 Write-Host ""
 
-# Question 6: Include Tests
-Write-Host "6. Unit & Integration Tests" -ForegroundColor Yellow
+# Question 6: Project Structure
+Write-Host "6. Project Structure" -ForegroundColor Yellow
+Write-Host ""
+
+# Smart recommendation based on previous choices
+$recommendedStructure = "Single"  # Default for most apps
+$structureRecommendation = ""
+
+# Recommend Multi-Project for large apps or when reuse is likely
+if ($Database -ne "None" -and $Pattern -eq "MVP") {
+    $recommendedStructure = "Single"
+    $structureRecommendation = "Recommended: Single (best for most WinForms apps)"
+}
+
+Write-Host "   [1] Single Project (Monolith)" -ForegroundColor $(if ($recommendedStructure -eq "Single") { "Green" } else { "Gray" })
+Write-Host "       - All code in one project (.UI, Services, Repos in folders)" -ForegroundColor DarkGray
+Write-Host "       - Simple, fast to build, easy to manage" -ForegroundColor DarkGray
+Write-Host "       - Best for: Small/medium apps, 1-3 developers" -ForegroundColor DarkGray
+Write-Host ""
+
+Write-Host "   [2] Multi-Project (Separate Assemblies)" -ForegroundColor $(if ($recommendedStructure -eq "Multi") { "Green" } else { "Gray" })
+Write-Host "       - Separate projects: UI, Core, Business, Data" -ForegroundColor DarkGray
+Write-Host "       - Strict separation, compiler-enforced architecture" -ForegroundColor DarkGray
+Write-Host "       - Best for: Large apps (20+ forms), 3+ developers, code reuse" -ForegroundColor DarkGray
+Write-Host ""
+
+Write-Host "   $structureRecommendation" -ForegroundColor Cyan
+Write-Host ""
+
+$structureChoice = Read-Host "   Select structure (1-2)"
+$ProjectStructure = switch ($structureChoice) {
+    "1" { "Single" }
+    "2" { "Multi" }
+    default { $recommendedStructure }
+}
+Write-Host "   Selected: $ProjectStructure" -ForegroundColor Green
+Write-Host ""
+
+# Question 7: Include Tests
+Write-Host "7. Unit & Integration Tests" -ForegroundColor Yellow
 $includeTestsInput = Read-Host "   Include test projects? (Y/n)"
 $IncludeTests = $includeTestsInput -ne "n" -and $includeTestsInput -ne "N"
 Write-Host "   Tests: $(if ($IncludeTests) { 'Yes' } else { 'No' })" -ForegroundColor Green
 Write-Host ""
 
-# Question 7: Include Example Code
-Write-Host "7. Example Code" -ForegroundColor Yellow
+# Question 8: Include Example Code
+Write-Host "8. Example Code" -ForegroundColor Yellow
 $includeExampleInput = Read-Host "   Include example code? (y/N)"
 $IncludeExampleCode = $includeExampleInput -eq "y" -or $includeExampleInput -eq "Y"
 Write-Host "   Example code: $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })" -ForegroundColor Green
 Write-Host ""
 
-# Question 8: Integrate Standards
-Write-Host "8. Coding Standards Integration" -ForegroundColor Yellow
+# Question 9: Integrate Standards
+Write-Host "9. Coding Standards Integration" -ForegroundColor Yellow
 $integrateStandardsInput = Read-Host "   Integrate coding standards? (Y/n)"
 $IntegrateStandards = $integrateStandardsInput -ne "n" -and $integrateStandardsInput -ne "N"
 Write-Host "   Standards: $(if ($IntegrateStandards) { 'Yes' } else { 'No' })" -ForegroundColor Green
@@ -190,6 +228,7 @@ Write-Host "Framework       : $Framework"
 Write-Host "Database        : $Database"
 Write-Host "UI Framework    : $UIFramework"
 Write-Host "Pattern         : $Pattern"
+Write-Host "Structure       : $ProjectStructure"
 Write-Host "Tests           : $(if ($IncludeTests) { 'Yes' } else { 'No' })"
 Write-Host "Example Code    : $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })"
 Write-Host "Standards       : $(if ($IntegrateStandards) { 'Yes' } else { 'No' })"
@@ -212,15 +251,51 @@ Set-Location $ProjectName
 Write-Host "  [OK] Solution created" -ForegroundColor Green
 
 # ============================================================================
-# Step 2: Create Main Project
+# Step 2: Create Projects
 # ============================================================================
 Write-Host ""
-Write-Host "[2] Creating WinForms project..." -ForegroundColor Cyan
+if ($ProjectStructure -eq "Single") {
+    Write-Host "[2] Creating WinForms project (Single Project)..." -ForegroundColor Cyan
 
-dotnet new winforms -n $ProjectName -f $Framework
-dotnet sln add "$ProjectName/$ProjectName.csproj"
+    dotnet new winforms -n $ProjectName -f $Framework
+    dotnet sln add "$ProjectName/$ProjectName.csproj"
 
-Write-Host "  [OK] WinForms project created" -ForegroundColor Green
+    Write-Host "  [OK] WinForms project created" -ForegroundColor Green
+}
+else {
+    Write-Host "[2] Creating multi-project structure..." -ForegroundColor Cyan
+
+    # Create UI project (WinForms)
+    dotnet new winforms -n "$ProjectName.UI" -f $Framework
+    dotnet sln add "$ProjectName.UI/$ProjectName.UI.csproj"
+    Write-Host "  [OK] $ProjectName.UI (WinForms) created" -ForegroundColor Green
+
+    # Create Core project (Models, Interfaces)
+    dotnet new classlib -n "$ProjectName.Core" -f $Framework
+    dotnet sln add "$ProjectName.Core/$ProjectName.Core.csproj"
+    Write-Host "  [OK] $ProjectName.Core (Models, Interfaces) created" -ForegroundColor Green
+
+    # Create Business project (Services)
+    dotnet new classlib -n "$ProjectName.Business" -f $Framework
+    dotnet sln add "$ProjectName.Business/$ProjectName.Business.csproj"
+    Write-Host "  [OK] $ProjectName.Business (Services) created" -ForegroundColor Green
+
+    # Create Data project (Repositories, DbContext) - only if database is selected
+    if ($Database -ne "None") {
+        dotnet new classlib -n "$ProjectName.Data" -f $Framework
+        dotnet sln add "$ProjectName.Data/$ProjectName.Data.csproj"
+        Write-Host "  [OK] $ProjectName.Data (Repositories, DbContext) created" -ForegroundColor Green
+    }
+
+    # Add project references
+    Write-Host "  Adding project references..." -NoNewline
+    dotnet add "$ProjectName.UI" reference "$ProjectName.Core" "$ProjectName.Business" | Out-Null
+    dotnet add "$ProjectName.Business" reference "$ProjectName.Core" | Out-Null
+    if ($Database -ne "None") {
+        dotnet add "$ProjectName.Data" reference "$ProjectName.Core" | Out-Null
+    }
+    Write-Host " [OK]" -ForegroundColor Green
+}
 
 # ============================================================================
 # Step 3: Create Folder Structure
@@ -228,91 +303,140 @@ Write-Host "  [OK] WinForms project created" -ForegroundColor Green
 Write-Host ""
 Write-Host "[3] Creating folder structure..." -ForegroundColor Cyan
 
-$folders = @(
-    @{Name="Models"; Template="// Place your data models here`n// Example: Customer.cs, Order.cs`n"},
-    @{Name="Services"; Template="// Place your business logic services here`n// Example: CustomerService.cs, OrderService.cs`n"},
-    @{Name="Repositories"; Template="// Place your data access repositories here`n// Example: CustomerRepository.cs, OrderRepository.cs`n"},
-    @{Name="Forms"; Template=$null},  # MainForm will be moved here
-    @{Name="Utils"; Template="// Place your utility classes and extensions here`n// Example: StringExtensions.cs, DateHelper.cs`n"},
-    @{Name="Resources"; Template="// Place your resources here`n// Example: Icons/, Images/, Strings.resx`n"}
-)
+if ($ProjectStructure -eq "Single") {
+    # Single Project: Create folders inside main project
+    $projectPath = $ProjectName
 
-# Add pattern-specific folders
-if ($Pattern -eq "MVP") {
-    $folders += @{Name="Views"; Template="// Place your view interfaces here (for MVP pattern)`n// Example: ICustomerView.cs, IOrderView.cs`n"}
-    $folders += @{Name="Presenters"; Template="// Place your presenters here (for MVP pattern)`n// Example: CustomerPresenter.cs, OrderPresenter.cs`n"}
-}
-elseif ($Pattern -eq "MVVM") {
-    $folders += @{Name="ViewModels"; Template="// Place your view models here (for MVVM pattern)`n// Example: CustomerViewModel.cs, OrderViewModel.cs`n"}
-}
+    $folders = @(
+        @{Name="Models"; Template="// Place your data models here`n// Example: Customer.cs, Order.cs`n"},
+        @{Name="Services"; Template="// Place your business logic services here`n// Example: CustomerService.cs, OrderService.cs`n"},
+        @{Name="Repositories"; Template="// Place your data access repositories here`n// Example: CustomerRepository.cs, OrderRepository.cs`n"},
+        @{Name="Forms"; Template=$null},  # MainForm will be moved here
+        @{Name="Utils"; Template="// Place your utility classes and extensions here`n// Example: StringExtensions.cs, DateHelper.cs`n"},
+        @{Name="Resources"; Template="// Place your resources here`n// Example: Icons/, Images/, Strings.resx`n"}
+    )
 
-# Add Data folder if database is selected
-if ($Database -ne "None") {
-    $folders += @{Name="Data"; Template="// Place your DbContext and configurations here`n// Example: AppDbContext.cs, EntityConfigurations/`n"}
-}
-
-foreach ($folder in $folders) {
-    New-Item -ItemType Directory -Path "$ProjectName/$($folder.Name)" -Force | Out-Null
-
-    # Add README.md to help Rider/VS show the folder
-    if ($folder.Template) {
-        $readmeContent = "# $($folder.Name)`n`n$($folder.Template)"
-        $readmeContent | Out-File -FilePath "$ProjectName/$($folder.Name)/README.md" -Encoding UTF8 -Force
+    # Add pattern-specific folders
+    if ($Pattern -eq "MVP") {
+        $folders += @{Name="Views"; Template="// Place your view interfaces here (for MVP pattern)`n// Example: ICustomerView.cs, IOrderView.cs`n"}
+        $folders += @{Name="Presenters"; Template="// Place your presenters here (for MVP pattern)`n// Example: CustomerPresenter.cs, OrderPresenter.cs`n"}
+    }
+    elseif ($Pattern -eq "MVVM") {
+        $folders += @{Name="ViewModels"; Template="// Place your view models here (for MVVM pattern)`n// Example: CustomerViewModel.cs, OrderViewModel.cs`n"}
     }
 
-    Write-Host "  [OK] Created $($folder.Name)/" -ForegroundColor Green
+    # Add Data folder if database is selected
+    if ($Database -ne "None") {
+        $folders += @{Name="Data"; Template="// Place your DbContext and configurations here`n// Example: AppDbContext.cs, EntityConfigurations/`n"}
+    }
+
+    foreach ($folder in $folders) {
+        New-Item -ItemType Directory -Path "$projectPath/$($folder.Name)" -Force | Out-Null
+
+        # Add README.md to help Rider/VS show the folder
+        if ($folder.Template) {
+            $readmeContent = "# $($folder.Name)`n`n$($folder.Template)"
+            $readmeContent | Out-File -FilePath "$projectPath/$($folder.Name)/README.md" -Encoding UTF8 -Force
+        }
+
+        Write-Host "  [OK] Created $($folder.Name)/" -ForegroundColor Green
+    }
+
+    # Move Form1 to Forms folder and rename to MainForm
+    Move-Item -Path "$projectPath/Form1.cs" -Destination "$projectPath/Forms/MainForm.cs" -Force
+    Move-Item -Path "$projectPath/Form1.Designer.cs" -Destination "$projectPath/Forms/MainForm.Designer.cs" -Force
+    if (Test-Path "$projectPath/Form1.resx") {
+        Move-Item -Path "$projectPath/Form1.resx" -Destination "$projectPath/Forms/MainForm.resx" -Force
+    }
+
+    # Update MainForm.cs namespace
+    $mainFormContent = Get-Content "$projectPath/Forms/MainForm.cs" -Raw
+    $mainFormContent = $mainFormContent -replace "namespace $ProjectName", "namespace $ProjectName.Forms"
+    $mainFormContent = $mainFormContent -replace "partial class Form1", "partial class MainForm"
+    $mainFormContent = $mainFormContent -replace "public Form1\(\)", "public MainForm()"
+    $mainFormContent | Out-File -FilePath "$projectPath/Forms/MainForm.cs" -Encoding UTF8 -Force
+
+    # Update MainForm.Designer.cs
+    $designerContent = Get-Content "$projectPath/Forms/MainForm.Designer.cs" -Raw
+    $designerContent = $designerContent -replace "namespace $ProjectName", "namespace $ProjectName.Forms"
+    $designerContent = $designerContent -replace "partial class Form1", "partial class MainForm"
+    $designerContent = $designerContent -replace "Form1", "MainForm"
+    $designerContent | Out-File -FilePath "$projectPath/Forms/MainForm.Designer.cs" -Encoding UTF8 -Force
+
+    Write-Host "  [OK] Moved and renamed Form1 to MainForm in Forms/" -ForegroundColor Green
 }
+else {
+    # Multi-Project: Create folders in appropriate projects
 
-# Move Form1 to Forms folder and rename to MainForm
-Move-Item -Path "$ProjectName/Form1.cs" -Destination "$ProjectName/Forms/MainForm.cs" -Force
-Move-Item -Path "$ProjectName/Form1.Designer.cs" -Destination "$ProjectName/Forms/MainForm.Designer.cs" -Force
-if (Test-Path "$ProjectName/Form1.resx") {
-    Move-Item -Path "$ProjectName/Form1.resx" -Destination "$ProjectName/Forms/MainForm.resx" -Force
+    # Core project folders
+    New-Item -ItemType Directory -Path "$ProjectName.Core/Models" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Core/Interfaces" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Core/Enums" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Core/Exceptions" -Force | Out-Null
+    Write-Host "  [OK] Created Core project folders (Models, Interfaces, Enums, Exceptions)" -ForegroundColor Green
+
+    # Business project folders
+    New-Item -ItemType Directory -Path "$ProjectName.Business/Services" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$ProjectName.Business/Validators" -Force | Out-Null
+    Write-Host "  [OK] Created Business project folders (Services, Validators)" -ForegroundColor Green
+
+    # Data project folders (only if database is selected)
+    if ($Database -ne "None") {
+        New-Item -ItemType Directory -Path "$ProjectName.Data/Repositories" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Data/Context" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Data/Configurations" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$ProjectName.Data/UnitOfWork" -Force | Out-Null
+        Write-Host "  [OK] Created Data project folders (Repositories, Context, Configurations, UnitOfWork)" -ForegroundColor Green
+    }
+
+    # UI project folders
+    $uiPath = "$ProjectName.UI"
+    New-Item -ItemType Directory -Path "$uiPath/Forms" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$uiPath/Controls" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$uiPath/Factories" -Force | Out-Null
+
+    if ($Pattern -eq "MVP") {
+        New-Item -ItemType Directory -Path "$uiPath/Views" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$uiPath/Presenters" -Force | Out-Null
+        Write-Host "  [OK] Created UI project folders (Forms, Controls, Views, Presenters, Factories)" -ForegroundColor Green
+    }
+    elseif ($Pattern -eq "MVVM") {
+        New-Item -ItemType Directory -Path "$uiPath/ViewModels" -Force | Out-Null
+        Write-Host "  [OK] Created UI project folders (Forms, Controls, ViewModels, Factories)" -ForegroundColor Green
+    }
+    else {
+        Write-Host "  [OK] Created UI project folders (Forms, Controls, Factories)" -ForegroundColor Green
+    }
+
+    # Move Form1 to Forms folder and rename to MainForm
+    Move-Item -Path "$uiPath/Form1.cs" -Destination "$uiPath/Forms/MainForm.cs" -Force
+    Move-Item -Path "$uiPath/Form1.Designer.cs" -Destination "$uiPath/Forms/MainForm.Designer.cs" -Force
+    if (Test-Path "$uiPath/Form1.resx") {
+        Move-Item -Path "$uiPath/Form1.resx" -Destination "$uiPath/Forms/MainForm.resx" -Force
+    }
+
+    # Update MainForm.cs namespace
+    $mainFormContent = Get-Content "$uiPath/Forms/MainForm.cs" -Raw
+    $mainFormContent = $mainFormContent -replace "namespace $ProjectName\.UI", "namespace $ProjectName.UI.Forms"
+    $mainFormContent = $mainFormContent -replace "partial class Form1", "partial class MainForm"
+    $mainFormContent = $mainFormContent -replace "public Form1\(\)", "public MainForm()"
+    $mainFormContent | Out-File -FilePath "$uiPath/Forms/MainForm.cs" -Encoding UTF8 -Force
+
+    # Update MainForm.Designer.cs
+    $designerContent = Get-Content "$uiPath/Forms/MainForm.Designer.cs" -Raw
+    $designerContent = $designerContent -replace "namespace $ProjectName\.UI", "namespace $ProjectName.UI.Forms"
+    $designerContent = $designerContent -replace "partial class Form1", "partial class MainForm"
+    $designerContent = $designerContent -replace "Form1", "MainForm"
+    $designerContent | Out-File -FilePath "$uiPath/Forms/MainForm.Designer.cs" -Encoding UTF8 -Force
+
+    Write-Host "  [OK] Moved and renamed Form1 to MainForm in UI/Forms/" -ForegroundColor Green
 }
-
-# Update MainForm.cs namespace
-$mainFormContent = Get-Content "$ProjectName/Forms/MainForm.cs" -Raw
-$mainFormContent = $mainFormContent -replace "namespace $ProjectName", "namespace $ProjectName.Forms"
-$mainFormContent = $mainFormContent -replace "partial class Form1", "partial class MainForm"
-$mainFormContent = $mainFormContent -replace "public Form1\(\)", "public MainForm()"
-$mainFormContent | Out-File -FilePath "$ProjectName/Forms/MainForm.cs" -Encoding UTF8 -Force
-
-# Update MainForm.Designer.cs
-$designerContent = Get-Content "$ProjectName/Forms/MainForm.Designer.cs" -Raw
-$designerContent = $designerContent -replace "namespace $ProjectName", "namespace $ProjectName.Forms"
-$designerContent = $designerContent -replace "partial class Form1", "partial class MainForm"
-$designerContent = $designerContent -replace "Form1", "MainForm"
-$designerContent | Out-File -FilePath "$ProjectName/Forms/MainForm.Designer.cs" -Encoding UTF8 -Force
-
-Write-Host "  [OK] Moved and renamed Form1 to MainForm in Forms/" -ForegroundColor Green
 
 # ============================================================================
 # Step 4: Add NuGet Packages
 # ============================================================================
 Write-Host ""
 Write-Host "[4] Adding NuGet packages..." -ForegroundColor Cyan
-
-$packages = @(
-    "Microsoft.Extensions.DependencyInjection",
-    "Microsoft.Extensions.Configuration.Json",
-    "Microsoft.Extensions.Logging",
-    "Serilog.Extensions.Logging",
-    "Serilog.Sinks.File"
-)
-
-# Add DevExpress packages if selected
-if ($UIFramework -eq "DevExpress") {
-    $packages += "DevExpress.WindowsDesktop.Win.Grid"
-    $packages += "DevExpress.WindowsDesktop.Win.Editors"
-    $packages += "DevExpress.WindowsDesktop.Win.Layout"
-    $packages += "DevExpress.WindowsDesktop.Win.Navigation"
-    $packages += "DevExpress.WindowsDesktop.Win.Reporting"
-}
-
-# Add ReaLTaiizor package if selected
-if ($UIFramework -eq "ReaLTaiizor") {
-    $packages += "ReaLTaiizor"
-}
 
 # Determine EF Core version based on .NET version
 $efCoreVersion = switch ($Framework) {
@@ -322,50 +446,149 @@ $efCoreVersion = switch ($Framework) {
     default  { "8.0.11" }
 }
 
-# Add database-specific packages with version
-if ($Database -eq "SQLite") {
-    $packages += "Microsoft.EntityFrameworkCore.Sqlite:$efCoreVersion"
-    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
-}
-elseif ($Database -eq "SQLServer") {
-    $packages += "Microsoft.EntityFrameworkCore.SqlServer:$efCoreVersion"
-    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
-}
-elseif ($Database -eq "PostgreSQL") {
-    # Npgsql follows EF Core versioning
-    $packages += "Npgsql.EntityFrameworkCore.PostgreSQL:$efCoreVersion"
-    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
-}
-elseif ($Database -eq "MySQL") {
-    # Pomelo.EntityFrameworkCore.MySql versioning
-    $mySqlVersion = switch ($Framework) {
-        "net8.0" { "8.0.0" }
-        "net6.0" { "6.0.2" }
-        "net48"  { "6.0.2" }
-        default  { "8.0.0" }
-    }
-    $packages += "Pomelo.EntityFrameworkCore.MySql:$mySqlVersion"
-    $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
-}
+if ($ProjectStructure -eq "Single") {
+    # Single Project: Add all packages to main project
+    $packages = @(
+        "Microsoft.Extensions.DependencyInjection",
+        "Microsoft.Extensions.Configuration.Json",
+        "Microsoft.Extensions.Logging",
+        "Serilog.Extensions.Logging",
+        "Serilog.Sinks.File"
+    )
 
-foreach ($package in $packages) {
-    # Split package name and version
-    $packageParts = $package -split ":"
-    $packageName = $packageParts[0]
-    $packageVersion = if ($packageParts.Length -gt 1) { $packageParts[1] } else { $null }
-
-    Write-Host "  Adding $packageName..." -NoNewline
-    if ($packageVersion) {
-        dotnet add $ProjectName package $packageName --version $packageVersion --no-restore | Out-Null
-    } else {
-        dotnet add $ProjectName package $packageName --no-restore | Out-Null
+    # Add DevExpress packages if selected
+    if ($UIFramework -eq "DevExpress") {
+        $packages += "DevExpress.WindowsDesktop.Win.Grid"
+        $packages += "DevExpress.WindowsDesktop.Win.Editors"
+        $packages += "DevExpress.WindowsDesktop.Win.Layout"
+        $packages += "DevExpress.WindowsDesktop.Win.Navigation"
+        $packages += "DevExpress.WindowsDesktop.Win.Reporting"
     }
+
+    # Add ReaLTaiizor package if selected
+    if ($UIFramework -eq "ReaLTaiizor") {
+        $packages += "ReaLTaiizor"
+    }
+
+    # Add database-specific packages with version
+    if ($Database -eq "SQLite") {
+        $packages += "Microsoft.EntityFrameworkCore.Sqlite:$efCoreVersion"
+        $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
+    }
+    elseif ($Database -eq "SQLServer") {
+        $packages += "Microsoft.EntityFrameworkCore.SqlServer:$efCoreVersion"
+        $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
+    }
+    elseif ($Database -eq "PostgreSQL") {
+        $packages += "Npgsql.EntityFrameworkCore.PostgreSQL:$efCoreVersion"
+        $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
+    }
+    elseif ($Database -eq "MySQL") {
+        $mySqlVersion = switch ($Framework) {
+            "net8.0" { "8.0.0" }
+            "net6.0" { "6.0.2" }
+            "net48"  { "6.0.2" }
+            default  { "8.0.0" }
+        }
+        $packages += "Pomelo.EntityFrameworkCore.MySql:$mySqlVersion"
+        $packages += "Microsoft.EntityFrameworkCore.Design:$efCoreVersion"
+    }
+
+    foreach ($package in $packages) {
+        $packageParts = $package -split ":"
+        $packageName = $packageParts[0]
+        $packageVersion = if ($packageParts.Length -gt 1) { $packageParts[1] } else { $null }
+
+        Write-Host "  Adding $packageName..." -NoNewline
+        if ($packageVersion) {
+            dotnet add $ProjectName package $packageName --version $packageVersion --no-restore | Out-Null
+        } else {
+            dotnet add $ProjectName package $packageName --no-restore | Out-Null
+        }
+        Write-Host " [OK]" -ForegroundColor Green
+    }
+
+    Write-Host "  Restoring packages..." -NoNewline
+    dotnet restore $ProjectName | Out-Null
     Write-Host " [OK]" -ForegroundColor Green
 }
+else {
+    # Multi-Project: Add packages to specific projects
 
-Write-Host "  Restoring packages..." -NoNewline
-dotnet restore $ProjectName | Out-Null
-Write-Host " [OK]" -ForegroundColor Green
+    # UI Project packages
+    Write-Host "  Adding packages to UI project..." -ForegroundColor Cyan
+    $uiPackages = @(
+        "Microsoft.Extensions.DependencyInjection",
+        "Microsoft.Extensions.Configuration.Json",
+        "Microsoft.Extensions.Logging",
+        "Serilog.Extensions.Logging",
+        "Serilog.Sinks.File"
+    )
+
+    # Add UI framework packages
+    if ($UIFramework -eq "DevExpress") {
+        $uiPackages += "DevExpress.WindowsDesktop.Win.Grid"
+        $uiPackages += "DevExpress.WindowsDesktop.Win.Editors"
+        $uiPackages += "DevExpress.WindowsDesktop.Win.Layout"
+        $uiPackages += "DevExpress.WindowsDesktop.Win.Navigation"
+        $uiPackages += "DevExpress.WindowsDesktop.Win.Reporting"
+    }
+    elseif ($UIFramework -eq "ReaLTaiizor") {
+        $uiPackages += "ReaLTaiizor"
+    }
+
+    foreach ($package in $uiPackages) {
+        Write-Host "    Adding $package..." -NoNewline
+        dotnet add "$ProjectName.UI" package $package --no-restore | Out-Null
+        Write-Host " [OK]" -ForegroundColor Green
+    }
+
+    # Core Project packages (minimal - just annotations)
+    Write-Host "  Adding packages to Core project..." -ForegroundColor Cyan
+    dotnet add "$ProjectName.Core" package "System.ComponentModel.Annotations" --no-restore | Out-Null
+    Write-Host "    Adding System.ComponentModel.Annotations... [OK]" -ForegroundColor Green
+
+    # Business Project packages
+    Write-Host "  Adding packages to Business project..." -ForegroundColor Cyan
+    dotnet add "$ProjectName.Business" package "Microsoft.Extensions.Logging.Abstractions" --no-restore | Out-Null
+    Write-Host "    Adding Microsoft.Extensions.Logging.Abstractions... [OK]" -ForegroundColor Green
+
+    # Data Project packages (only if database is selected)
+    if ($Database -ne "None") {
+        Write-Host "  Adding packages to Data project..." -ForegroundColor Cyan
+
+        if ($Database -eq "SQLite") {
+            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Sqlite" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            Write-Host "    Adding EF Core SQLite... [OK]" -ForegroundColor Green
+        }
+        elseif ($Database -eq "SQLServer") {
+            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.SqlServer" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            Write-Host "    Adding EF Core SQL Server... [OK]" -ForegroundColor Green
+        }
+        elseif ($Database -eq "PostgreSQL") {
+            dotnet add "$ProjectName.Data" package "Npgsql.EntityFrameworkCore.PostgreSQL" --version $efCoreVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            Write-Host "    Adding EF Core PostgreSQL... [OK]" -ForegroundColor Green
+        }
+        elseif ($Database -eq "MySQL") {
+            $mySqlVersion = switch ($Framework) {
+                "net8.0" { "8.0.0" }
+                "net6.0" { "6.0.2" }
+                "net48"  { "6.0.2" }
+                default  { "8.0.0" }
+            }
+            dotnet add "$ProjectName.Data" package "Pomelo.EntityFrameworkCore.MySql" --version $mySqlVersion --no-restore | Out-Null
+            dotnet add "$ProjectName.Data" package "Microsoft.EntityFrameworkCore.Design" --version $efCoreVersion --no-restore | Out-Null
+            Write-Host "    Adding EF Core MySQL... [OK]" -ForegroundColor Green
+        }
+    }
+
+    Write-Host "  Restoring all packages..." -NoNewline
+    dotnet restore | Out-Null
+    Write-Host " [OK]" -ForegroundColor Green
+}
 
 # Add README.md files to .csproj so they show in Rider/VS
 $csprojPath = "$ProjectName/$ProjectName.csproj"
@@ -1070,6 +1293,7 @@ $projectContextContent = @"
 - **Created Date**: ``$(Get-Date -Format "yyyy-MM-dd")``
 - **Framework**: ``$Framework``
 - **Pattern**: ``$Pattern``
+- **Structure**: ``$ProjectStructure`` ($(if ($ProjectStructure -eq "Single") { "Monolith - all code in one project" } else { "Multi-Project - separate assemblies" }))
 
 ---
 
@@ -1114,6 +1338,29 @@ $patternDesc
 $(if ($IncludeTests) { "Unit tests + Integration tests included" } else { "No tests included" })
 ``````
 
+### Project Structure
+``````
+$ProjectStructure
+``````
+
+**What this means**:
+$(if ($ProjectStructure -eq "Single") {
+"**Single Project (Monolith)** - All code in one project with folders for organization:
+- Simpler, faster to build
+- Convention-based separation (folders)
+- Best for small/medium apps (< 20 forms)
+- See: [$($standardsPath.Replace('\', '/'))/docs/architecture/project-structure.md]($($standardsPath.Replace('\', '/'))/docs/architecture/project-structure.md)"
+} else {
+"**Multi-Project** - Separate assemblies for each layer:
+- $ProjectName.UI (WinForms)
+- $ProjectName.Core (Models, Interfaces)
+- $ProjectName.Business (Services)
+$(if ($Database -ne 'None') { "- $ProjectName.Data (Repositories, DbContext)" })
+- Compiler-enforced architecture
+- Best for large apps (20+ forms), code reuse
+- See: [$($standardsPath.Replace('\', '/'))/docs/architecture/multi-project-structure.md]($($standardsPath.Replace('\', '/'))/docs/architecture/multi-project-structure.md)"
+})
+
 ---
 
 ## AI Instructions - READ THIS!
@@ -1138,17 +1385,55 @@ $templateList
 
 ---
 
-## Project Structure
+## Project Structure Diagram
 
+$(if ($ProjectStructure -eq "Single") {
+@"
 ``````
-/$ProjectName
+/$ProjectName (Single Project)
 |-- /Forms              # UI Layer (minimal logic)
 $additionalFolders
 |-- /Services           # Business logic
 |-- /Repositories       # Data access layer
 |-- /Data               # DbContext, Unit of Work
-+-- Program.cs
+|-- /Models             # Domain models
+|-- /Utils              # Helpers, extensions
++-- Program.cs          # Entry point with DI
 ``````
+"@
+} else {
+@"
+``````
+/$ProjectName.sln (Multi-Project Solution)
+├── $ProjectName.UI/            # Presentation Layer
+│   ├── /Forms
+│   ├── /Controls
+$(if ($Pattern -eq "MVP") { "│   ├── /Views`n│   ├── /Presenters" } elseif ($Pattern -eq "MVVM") { "│   ├── /ViewModels" })
+│   ├── /Factories
+│   └── Program.cs
+│
+├── $ProjectName.Core/          # Domain & Interfaces
+│   ├── /Models
+│   ├── /Interfaces
+│   ├── /Enums
+│   └── /Exceptions
+│
+├── $ProjectName.Business/      # Business Logic
+│   ├── /Services
+│   └── /Validators
+│
+$(if ($Database -ne 'None') {
+@"
+└── $ProjectName.Data/          # Data Access
+    ├── /Repositories
+    ├── /Context
+    ├── /Configurations
+    └── /UnitOfWork
+"@
+})
+``````
+"@
+})
 
 ---
 
