@@ -28,6 +28,57 @@
 4. ❌ **Block** anti-patterns with explanations
 5. 📚 **Reference** Microsoft docs and industry standards
 
+### ⚠️ CRITICAL: Production-Level UI Required
+
+**NEVER create student-level/demo UI!** Every UI element MUST meet production standards.
+
+Before creating ANY UI element:
+1. **Read** [Production UI Standards](./production-ui-standards.md)
+2. **Follow** all requirements for the control type
+3. **Verify** against the Production Checklist
+
+**Examples of UNACCEPTABLE UI**:
+- ❌ DataGridView without sorting, filtering, paging
+- ❌ Buttons that blend into background (low contrast)
+- ❌ No loading indicators for async operations
+- ❌ Generic error messages ("An error occurred")
+- ❌ Fixed-size forms that don't resize
+- ❌ Missing validation feedback
+- ❌ No keyboard shortcuts
+- ❌ **Separate Label + TextBox** instead of Floating Label (Material Design)
+
+### 🎯 MANDATORY: Floating Label for All Input Fields
+
+**ALWAYS use Floating Label style for text inputs** - this is the modern, space-efficient approach:
+
+| UI Framework | Control | How to Use |
+|-------------|---------|------------|
+| **ReaLTaiizor** | `MaterialTextBoxEdit` | Set `Hint` property |
+| **DevExpress** | `TextEdit` | Set `NullValuePrompt` property |
+| **Standard WinForms** | Custom `FloatingLabelTextBox` | Implement floating animation |
+
+```csharp
+// ✅ CORRECT - Floating Label (ReaLTaiizor)
+var txtEmail = new MaterialTextBoxEdit
+{
+    Hint = "Email Address",           // This IS the label - floats up on focus
+    ShowAssistiveText = true,
+    HelperText = "Enter your email"
+};
+
+// ❌ WRONG - Separate Label + TextBox (old-school, wastes space)
+var lblEmail = new Label { Text = "Email:" };
+var txtEmail = new TextBox();
+```
+
+**Why Floating Labels are REQUIRED**:
+- ✅ Modern, clean, professional look
+- ✅ Saves vertical space (no separate label row)
+- ✅ Better UX - label stays visible when typing
+- ✅ Industry standard (Google Material Design)
+
+📖 **Required Reading**: [Production UI Standards](./production-ui-standards.md)
+
 ---
 
 ## DO Rules
@@ -190,9 +241,79 @@ private void UpdateProgress(int percent)
 }
 ```
 
+### ✅ Standard Layout Structure (Responsive Forms)
+
+13. **Follow 4-level layout hierarchy** for ALL forms:
+
+| Level | Control | Purpose |
+|-------|---------|---------|
+| **1** | Panel (Full Dock) | Wraps entire form - manages theme, border, padding |
+| **2** | TableLayoutPanel | Divides form into clear rows/columns - main layout |
+| **3** | Panel per cell | Dock = Fill - acts as container for child controls |
+| **4** | Actual UI controls | TextBox, Button, DataGrid, UserControl, etc. |
+
+**Example**:
+```csharp
+// ✅ CORRECT: 4-level layout structure
+public partial class CustomerForm : Form
+{
+    private void InitializeLayout()
+    {
+        // Level 1: Outer panel (Full Dock)
+        var pnlMain = new Panel { Dock = DockStyle.Fill, Padding = new Padding(10) };
+
+        // Level 2: TableLayoutPanel for grid layout
+        var tlpLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 3
+        };
+        tlpLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+        tlpLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
+
+        // Level 3: Panel per cell
+        var pnlNameInput = new Panel { Dock = DockStyle.Fill };
+        var pnlEmailInput = new Panel { Dock = DockStyle.Fill };
+
+        // Level 4: Actual controls
+        var txtName = new MaterialTextBoxEdit { Hint = "Customer Name", Dock = DockStyle.Top };
+        var txtEmail = new MaterialTextBoxEdit { Hint = "Email Address", Dock = DockStyle.Top };
+
+        // Assembly
+        pnlNameInput.Controls.Add(txtName);
+        pnlEmailInput.Controls.Add(txtEmail);
+        tlpLayout.Controls.Add(pnlNameInput, 1, 0);
+        tlpLayout.Controls.Add(pnlEmailInput, 1, 1);
+        pnlMain.Controls.Add(tlpLayout);
+        this.Controls.Add(pnlMain);
+    }
+}
+
+// ❌ WRONG: Flat layout without structure
+public partial class BadForm : Form
+{
+    private void InitializeLayout()
+    {
+        // ❌ Controls directly on form with fixed positions
+        var txtName = new TextBox { Location = new Point(100, 50), Size = new Size(200, 25) };
+        var txtEmail = new TextBox { Location = new Point(100, 90), Size = new Size(200, 25) };
+        this.Controls.Add(txtName);
+        this.Controls.Add(txtEmail);
+    }
+}
+```
+
+**Why this structure is REQUIRED**:
+- ✅ **Responsive** - Form resizes correctly on different screen sizes
+- ✅ **Maintainable** - Easy to add/remove/rearrange controls
+- ✅ **Consistent** - Uniform spacing and alignment
+- ✅ **Theme-friendly** - Outer panel can apply theme styling
+- ✅ **Professional** - Looks good on all DPI settings
+
 ### ✅ Templates
 
-13. **Use templates**: ALWAYS start with templates from `/templates/` folder
+14. **Use templates**: ALWAYS start with templates from `/templates/` folder
 
 **Example**:
 ```csharp

@@ -45,9 +45,13 @@
 
 | Framework | When to Use | Key Benefits |
 |-----------|-------------|--------------|
-| **Standard WinForms** | Simple apps, prototypes, no budget | Free, simple, lightweight |
-| **DevExpress** | Professional apps, enterprise | Advanced controls, responsive design, built-in features ($) |
-| **ReaLTaiizor** | Modern UI, no budget, open-source | Free, 20+ themes, Material/Metro design, MIT license |
+| **ReaLTaiizor Material** ⭐ | **DEFAULT** - Hầu hết apps | Free, modern Material Design, floating labels, MIT license |
+| **DevExpress** | Enterprise apps, có license | Advanced controls, responsive design, built-in features ($) |
+| **Standard WinForms** | Chỉ khi project yêu cầu | Free, simple, lightweight, legacy compatibility |
+
+> **⚠️ RULE**: Luôn dùng **Material Design (ReaLTaiizor)** làm default. Chỉ dùng framework khác khi:
+> - Project đã có `.claude/project-context.md` chỉ định framework khác
+> - User explicitly yêu cầu framework khác
 
 ---
 
@@ -212,6 +216,8 @@ Before writing ANY specification, planning document, or feature documentation, y
 8. **Write tests** - Unit tests for services, integration tests for repositories
 9. **Follow MVP** - Separate UI from business logic
 10. **Dispose resources** - Use `using` statements
+11. **Use responsive layout** - Anchor/Dock (Standard), LayoutControl (DevExpress), TableLayoutPanel
+12. **Follow Production UI Standards** ⭐ - See [production-ui-standards.md](.claude/guides/production-ui-standards.md)
 
 ### ❌ NEVER DO:
 1. ❌ Business logic in Forms
@@ -224,6 +230,28 @@ Before writing ANY specification, planning document, or feature documentation, y
 8. ❌ Create UI from background threads
 9. ❌ Skip validation
 10. ❌ Write code without tests
+11. ❌ Fixed-size forms without responsive layout
+12. ❌ **Student-level UI** - No grid without sort/filter/paging, no low-contrast buttons, no missing loading states
+13. ❌ **Separate Label + TextBox** - ALWAYS use Floating Label (see below)
+
+### 🎯 Input Fields: MUST Use Floating Label
+
+**NEVER create separate Label + TextBox. ALWAYS use Floating Label (Material Design):**
+
+```csharp
+// ✅ CORRECT - Floating Label
+var txtEmail = new MaterialTextBoxEdit { Hint = "Email Address" };
+
+// ❌ WRONG - Separate Label + TextBox (wastes space, old-school)
+var lblEmail = new Label { Text = "Email:" };
+var txtEmail = new TextBox();
+```
+
+| Framework | Control | Property |
+|-----------|---------|----------|
+| ReaLTaiizor | `MaterialTextBoxEdit` | `Hint` |
+| DevExpress | `TextEdit` | `NullValuePrompt` |
+| Standard | Custom `FloatingLabelTextBox` | Implement floating |
 
 📖 **Full rules**: [.claude/guides/ai-instructions.md](.claude/guides/ai-instructions.md)
 
@@ -234,100 +262,27 @@ Before writing ANY specification, planning document, or feature documentation, y
 **⚡ CRITICAL**: This repository is designed to be used as a **Git Submodule** in C# WinForms projects.
 When AI (Claude Code) starts working on a task, it should **load the appropriate guide** based on the task type.
 
-### 🔥 STEP 0: Load Project Context (ALWAYS DO THIS FIRST!)
+📖 **Resource Index**: [.claude/INDEX.md](.claude/INDEX.md) - Quick reference for which resource to read based on task type
 
-| Task | Required Reading | Purpose |
-|------|------------------|---------|
-| **ANY task in a user project** | `.claude/project-context.md` | ⭐ **READ THIS FIRST!** Contains UI framework, database, pattern choices |
+### 🔥 STEP 0: Load Context (ALWAYS DO THIS FIRST!)
+
+**Before ANY task**, you **MUST**:
+
+1. **Check `.claude/project-context.md`** - Project-specific config (UI framework, database, patterns)
+2. **Check `.claude/INDEX.md`** - Find which guides/docs to read for the task
+
+| Step | File | Purpose |
+|------|------|---------|
+| 1 | `.claude/project-context.md` | ⭐ Project config (UI framework, database, pattern choices) |
+| 2 | `.claude/INDEX.md` | ⭐ Find relevant guides/docs/templates for task |
 
 **Workflow**:
-1. Check if `.claude/project-context.md` exists
-2. If YES: Read it **immediately** → use config from file
-3. If NO: This is the standards repo (not a user project) → use defaults
+1. Check if `.claude/project-context.md` exists → Read for project config
+2. **Read `.claude/INDEX.md`** → Find which resources to read for current task
+3. Read only the relevant sections from guides/docs (not entire files)
+4. Use appropriate templates
 
-### When to Read Which Guide
-
-| Task Type | Required Reading | Purpose |
-|-----------|------------------|---------|
-| **Any WinForms task** | [AI Instructions](.claude/guides/ai-instructions.md) | ⭐ Core DO/DON'T rules (READ FIRST!) |
-| **Creating Forms** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + `templates/form-template.cs` OR `templates/dx-form-template.cs` OR `templates/rt-*-template.cs` | MVP pattern, presenters, view interfaces |
-| **Creating Services** | [Code Generation Guide](.claude/guides/code-generation-guide.md) + [Architecture Guide](.claude/guides/architecture-guide.md) | Unit of Work pattern, validation, error handling |
-| **Creating Repositories** | [Code Generation Guide](.claude/guides/code-generation-guide.md) | Repository pattern (NO SaveChanges!) |
-| **Understanding Architecture** | [Architecture Guide](.claude/guides/architecture-guide.md) | MVP, MVVM, DI, Factory, Unit of Work |
-| **Single Project Structure** | [Project Structure](docs/architecture/project-structure.md) | ⭐ Folder organization for monolith projects |
-| **Multi-Project Structure** | [Multi-Project Structure](docs/architecture/multi-project-structure.md) | ⭐ Separate assemblies for large apps |
-| **Writing Tests** | [Testing Guide](.claude/guides/testing-guide.md) + `templates/test-template.cs` | Unit tests, integration tests, Moq |
-| **Coding Standards** | [Coding Standards Guide](.claude/guides/coding-standards.md) | Naming, style, formatting |
-| **Code Review** | [Code Review Checklist](.claude/workflows/code-review-checklist.md) | Pre-commit checks |
-| **Pull Request Review** | [PR Review Workflow](.claude/workflows/pr-review-workflow.md) | Team collaboration |
-| **DevExpress Projects** | [DevExpress Overview](docs/devexpress/devexpress-overview.md) | ⭐ DevExpress setup, controls, patterns |
-| **ReaLTaiizor Projects** | [ReaLTaiizor Overview](docs/realtaiizor/realtaiizor-overview.md) | ⭐ ReaLTaiizor setup, themes, controls |
-
-### How to Use This Repository
-
-**For AI Assistants (Claude Code)**:
-1. **ALWAYS start** by reading [AI Instructions](.claude/guides/ai-instructions.md)
-2. **Load the appropriate guide** based on the task (see table above)
-3. **Use templates** from `/templates/` folder
-4. **Follow the patterns** exactly as documented
-5. **Verify** against the Code Review Checklist before committing
-
-**For Developers**:
-1. Add this repository as a Git Submodule to your project
-2. Point Claude Code to this repository's CLAUDE.md
-3. Claude will automatically load the appropriate documentation
-4. Use slash commands (type `/` in Claude Code) for common tasks
-
----
-
-## 📚 Detailed Guides
-
-### Core Guides
-
-| Guide | Description | When to Read |
-|-------|-------------|--------------|
-| [🤖 AI Instructions](.claude/guides/ai-instructions.md) | ⭐ **START HERE!** Complete DO/DON'T rules for AI | Every task |
-| [🏛️ Architecture Guide](.claude/guides/architecture-guide.md) | MVP, MVVM, DI, Factory, Unit of Work patterns | Understanding architecture |
-| [⚙️ Code Generation Guide](.claude/guides/code-generation-guide.md) | How to generate Forms, Services, Repositories, Tests | Creating code |
-| [✅ Testing Guide](.claude/guides/testing-guide.md) | Unit testing, integration testing, Moq patterns | Writing tests |
-| [📝 Coding Standards](.claude/guides/coding-standards.md) | Naming, style, formatting conventions | Code style questions |
-
-### Workflows
-
-- [Development Workflow](.claude/workflows/winforms-development-workflow.md) - Complete dev process
-- [Testing Workflow](.claude/workflows/testing-workflow.md) - TDD approach
-- [Code Review Checklist](.claude/workflows/code-review-checklist.md) - Pre-commit checks
-- [PR Review Workflow](.claude/workflows/pr-review-workflow.md) - Team collaboration
-- [Expert Behavior Guide](.claude/workflows/expert-behavior-guide.md) - How to evaluate requests
-
-### Templates (Production-Ready!)
-
-#### Standard WinForms Templates
-
-All templates in `/templates/` folder:
-- `form-template.cs` - MVP pattern form with presenter
-- `service-template.cs` - Business logic with Unit of Work
-- `repository-template.cs` - Data access (NO SaveChanges)
-- `unitofwork-template.cs` - Transaction coordinator
-- `factory-template.cs` - Form factory for DI
-- `test-template.cs` - Unit test with Moq
-
-#### DevExpress Templates
-
-DevExpress-specific templates:
-- `dx-form-template.cs` - DevExpress form with MVP + LayoutControl
-- `dx-grid-template.cs` - XtraGrid with CRUD operations
-- `dx-lookup-template.cs` - LookUpEdit patterns
-- `dx-report-template.cs` - XtraReport template
-
-#### ReaLTaiizor Templates
-
-ReaLTaiizor-specific templates:
-- `rt-material-form-template.cs` - Material Design form with MVP
-- `rt-metro-form-template.cs` - Metro form with MetroGrid
-- `rt-controls-patterns.cs` - Common control patterns (ListView, ComboBox, Grid)
-
-**⚠️ CRITICAL**: NEVER generate code from scratch - ALWAYS start with templates!
+**⚠️ CRITICAL**: NEVER generate code from scratch - ALWAYS start with templates from INDEX.md!
 
 ---
 
@@ -349,147 +304,18 @@ dotnet clean && dotnet build
 
 ---
 
-## 🎯 Complete Documentation
+## 📚 Full Resource Index
 
-### Architecture & Patterns
-- [Project Structure](docs/architecture/project-structure.md)
-- [MVP Pattern](docs/architecture/mvp-pattern.md) ⭐
-- [MVVM Pattern](docs/architecture/mvvm-pattern.md)
-- [Dependency Injection](docs/architecture/dependency-injection.md) ⭐
-- [Factory Pattern](docs/architecture/factory-pattern.md) ⭐
+For complete list of all resources (guides, workflows, templates, docs, agents, commands) and task mappings:
 
-### Data Access
-- [Repository Pattern](docs/data-access/repository-pattern.md)
-- [Unit of Work Pattern](docs/data-access/unit-of-work-pattern.md) ⭐
-- [Entity Framework Core](docs/data-access/entity-framework.md)
-- [Connection Management](docs/data-access/connection-management.md)
-
-### Best Practices
-- [Async/Await Pattern](docs/best-practices/async-await.md)
-- [Error Handling & Logging](docs/best-practices/error-handling.md)
-- [Thread Safety](docs/best-practices/thread-safety.md)
-- [Resource Management](docs/best-practices/resource-management.md)
-- [Performance Optimization](docs/best-practices/performance.md)
-- [Security](docs/best-practices/security.md)
-
-### UI & UX
-- [Responsive Design](docs/ui-ux/responsive-design.md)
-- [Data Binding](docs/ui-ux/data-binding.md)
-- [Input Validation](docs/ui-ux/input-validation.md)
-- [Form Communication](docs/ui-ux/form-communication.md)
-
-### DevExpress (Optional - for DevExpress projects)
-- [DevExpress Overview](docs/devexpress/devexpress-overview.md) ⭐ Setup & getting started
-- [DevExpress Controls](docs/devexpress/devexpress-controls.md) - XtraGrid, XtraEditors, etc.
-- [DevExpress Data Binding](docs/devexpress/devexpress-data-binding.md) - Binding patterns
-- [DevExpress Grid Patterns](docs/devexpress/devexpress-grid-patterns.md) - XtraGrid best practices
-- [DevExpress Responsive Design](docs/devexpress/devexpress-responsive-design.md) - LayoutControl
-- [DevExpress Naming Conventions](docs/devexpress/devexpress-naming-conventions.md) - Naming rules
-
-### ReaLTaiizor (Optional - for ReaLTaiizor projects)
-- [ReaLTaiizor Overview](docs/realtaiizor/realtaiizor-overview.md) ⭐ Setup & getting started
-- [ReaLTaiizor Controls](docs/realtaiizor/realtaiizor-controls.md) - Material, Metro, Poison controls
-- [ReaLTaiizor Themes](docs/realtaiizor/realtaiizor-themes.md) - 20+ theme selection
-- [ReaLTaiizor Forms](docs/realtaiizor/realtaiizor-forms.md) - MaterialForm, MetroForm patterns
-- [ReaLTaiizor Data Binding](docs/realtaiizor/realtaiizor-data-binding.md) - ListView and Grid binding
-- [ReaLTaiizor Naming Conventions](docs/realtaiizor/realtaiizor-naming-conventions.md) - Naming rules
-
-### Testing
-- [Testing Overview](docs/testing/testing-overview.md)
-- [Unit Testing](docs/testing/unit-testing.md)
-- [Integration Testing](docs/testing/integration-testing.md)
-- [UI Testing](docs/testing/ui-testing.md)
-
----
-
-## 🔗 Quick Links
-
-- **[📘 USAGE GUIDE](USAGE_GUIDE.md)** - ⭐ **Start here!** Practical step-by-step examples
-- **[🤖 AI Instructions](.claude/guides/ai-instructions.md)** - ⭐ **AI must read!** Core rules
-- **[Full Documentation Index](docs/00-overview.md)** - Complete docs
-- **[Example Project](example-project/)** - Complete working app
-- **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues
-
----
-
-## 🎓 Learning Path
-
-**For AI Assistants**:
-1. ✅ Read [AI Instructions](.claude/guides/ai-instructions.md) - **REQUIRED**
-2. ✅ Load appropriate guide based on task (see Context Loading Map)
-3. ✅ Use templates - NEVER generate from scratch
-4. ✅ Follow patterns exactly
-5. ✅ Verify against Code Review Checklist
-
-**For Developers**:
-1. Read [USAGE_GUIDE.md](USAGE_GUIDE.md)
-2. Understand [MVP Pattern](docs/architecture/mvp-pattern.md)
-3. Explore [Example Project](example-project/)
-4. Practice with templates
-
----
-
-## 🤖 AI Agents
-
-Specialized agents for automating tasks:
-
-- [WinForms Reviewer](.claude/agents/winforms-reviewer.md) - Code quality checks, PR review
-- [Test Generator](.claude/agents/test-generator.md) - Auto-generate tests
-- [Docs Manager](.claude/agents/docs-manager.md) - Keep docs in sync
-- [MVP Validator](.claude/agents/mvp-validator.md) - Validate architecture
-
----
-
-## 📋 Slash Commands
-
-Common commands (type `/` in Claude Code):
-
-**Create**:
-- `/create:form` - Create new form with MVP
-- `/create:service` - Create service class
-- `/create:repository` - Create repository class
-
-**Add Features**:
-- `/add:validation` - Add input validation
-- `/add:data-binding` - Setup data binding
-- `/add:logging` - Setup logging
-
-**Fix Issues**:
-- `/fix:threading` - Fix cross-thread UI issues
-- `/fix:performance` - Optimize performance
-- `/fix:bug` - Smart bug fixing
-
-**Review**:
-- `/review-pr <branch>` - Comprehensive PR review
-- `/review-code <files>` - Detailed file review
+📖 **See**: [.claude/INDEX.md](.claude/INDEX.md)
 
 ---
 
 ## 📞 Need Help?
 
-1. **Quick reference** - This file (you are here!)
+1. **Resource Index** - [.claude/INDEX.md](.claude/INDEX.md) - Find what to read
 2. **Practical examples** - [USAGE_GUIDE.md](USAGE_GUIDE.md)
-3. **Detailed guides** - [.claude/guides/](.claude/guides/)
-4. **Full documentation** - [docs/00-overview.md](docs/00-overview.md)
-5. **Working example** - [example-project/](example-project/)
-6. **Issues?** - [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
----
-
-**Last Updated**: 2025-11-18
-**Version**: 5.5.0 (ReaLTaiizor Integration!)
-
-**Major Changes in 5.5.0**:
-- ✅ **ReaLTaiizor Integration** - Free, open-source UI framework with 20+ themes
-- ✅ **5 ReaLTaiizor Documentation Files** - Complete guides for Material, Metro, Poison
-- ✅ **3 ReaLTaiizor Templates** - MaterialForm, MetroForm, control patterns
-- ✅ **Updated init-project.ps1** - 3 UI Framework choices (Standard/DevExpress/ReaLTaiizor)
-- ✅ **Updated AI Instructions** - ReaLTaiizor-specific DO/DON'T rules
-- ✅ **Context Loading Map** - Added ReaLTaiizor guides
-
-**Previous Versions**:
-- v5.4.0: DevExpress Integration - Commercial UI framework support
-- v5.3.0: Refactored CLAUDE.md into 5 focused guides
-- v5.2.0: Added CRITICAL documentation confirmation rule
-- v5.1.0: Added complete PR review system
-- v5.0.0: Complete repository with 100% documentation coverage
+3. **Full documentation** - [docs/00-overview.md](docs/00-overview.md)
+4. **Working example** - [example-project/](example-project/)
+5. **Issues?** - [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
