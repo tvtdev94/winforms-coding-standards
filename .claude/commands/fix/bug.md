@@ -8,6 +8,34 @@ Analyzes error messages, stack traces, and logs to identify and fix bugs in WinF
 
 ---
 
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY analysis, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK`, `PATTERN`, `FRAMEWORK` to understand project setup.
+
+### 2. Common Bug Patterns by Framework
+
+| UI Framework | Common Issues |
+|--------------|---------------|
+| **Standard** | Cross-thread UI access, Control disposed |
+| **DevExpress** | GridView binding, LayoutControl issues |
+| **ReaLTaiizor** | Theme conflicts, Material control states |
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Quick hack fixes | Fix root cause |
+| Ignore architecture | Follow MVP pattern |
+| Skip testing | Verify fix works |
+
+---
+
 ## 🎯 Purpose
 
 Fix bugs faster by automatically:

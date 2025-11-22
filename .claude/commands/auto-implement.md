@@ -4,6 +4,75 @@ description: Automatically implement a complete feature by orchestrating multipl
 
 You are an **AI orchestrator** that automatically implements complete features by analyzing requirements and executing the appropriate commands in the correct sequence.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**⚠️ CRITICAL: Before ANY analysis or code generation, you MUST load context:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract:
+- `UI_FRAMEWORK` → Standard / DevExpress / ReaLTaiizor
+- `DATABASE` → SQLite / SQL Server / PostgreSQL
+- `PATTERN` → MVP / MVVM
+- `FRAMEWORK` → .NET 8 / .NET Framework 4.8
+
+### 2. Load Templates Based on UI Framework
+
+| UI Framework | Form Template | Grid Template | Additional |
+|--------------|---------------|---------------|------------|
+| **Standard** | `form-template.cs` | N/A | `service-template.cs` |
+| **DevExpress** | `dx-form-template.cs` | `dx-grid-template.cs` | `dx-lookup-template.cs` |
+| **ReaLTaiizor** | `rt-material-form-template.cs` | N/A | `rt-controls-patterns.cs` |
+
+### 3. Load Required Guides (Read these sections)
+
+**Always load:**
+- `docs/patterns/mvp-pattern.md` → MVP implementation rules
+- `docs/architecture/dependency-injection.md` → DI registration
+
+**For forms:**
+- `.claude/guides/production-ui-standards.md` → UI quality rules
+- `docs/ui/responsive-layout.md` → Layout patterns
+
+**For data layer:**
+- `docs/data-access/unit-of-work.md` → UoW pattern
+- `docs/data-access/repository-pattern.md` → Repository rules
+
+### 4. Critical Rules Summary (MUST FOLLOW)
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ 🚫 NEVER DO                     │ ✅ ALWAYS DO          │
+├─────────────────────────────────┼───────────────────────┤
+│ Inject IServiceProvider         │ Use IFormFactory      │
+│ Inject IRepository directly     │ Use IUnitOfWork       │
+│ SaveChanges in Repository       │ SaveChanges in UoW    │
+│ Business logic in Forms         │ Logic in Presenter    │
+│ Separate Label + TextBox        │ Floating Label/Hint   │
+│ Generate code without template  │ Start from template   │
+│ Skip validation                 │ Validate all inputs   │
+│ Ignore async/await              │ Async for all I/O     │
+└─────────────────────────────────┴───────────────────────┘
+```
+
+### 5. Template Loading Checklist
+
+Before generating ANY code, confirm:
+- [ ] Read `project-context.md` ✓
+- [ ] Identified UI Framework ✓
+- [ ] Loaded correct form template ✓
+- [ ] Loaded `service-template.cs` ✓
+- [ ] Loaded `repository-template.cs` ✓
+- [ ] Loaded `unitofwork-template.cs` ✓
+
+**⚠️ If project-context.md doesn't exist**: Ask user for UI framework preference, default to ReaLTaiizor Material.
+
+---
+
 ## What This Command Does
 
 This command acts as a **meta-command** that:

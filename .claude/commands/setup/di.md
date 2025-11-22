@@ -4,6 +4,36 @@ description: Setup Dependency Injection for WinForms application
 
 You are tasked with setting up Dependency Injection (DI) for a WinForms application.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY code generation, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `FRAMEWORK`, `DATABASE`, `PATTERN`
+
+### 2. Load Required Templates
+- `templates/form-factory-template.cs` → FormFactory pattern
+- `templates/unitofwork-template.cs` → UoW registration
+- `docs/architecture/dependency-injection.md` → DI patterns
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Expose IServiceProvider | Use IFormFactory |
+| Skip form registration | Register all forms |
+| Singleton for DbContext | Scoped for DbContext |
+| Skip IUnitOfWork | Register IUnitOfWork |
+
+**⚠️ If project-context.md doesn't exist**: Ask user for framework preferences.
+
+---
+
 ## Workflow
 
 1. **Ask the user**:

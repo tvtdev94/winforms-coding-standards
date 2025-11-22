@@ -2,6 +2,44 @@
 
 You are asked to create a new WinForm following MVP pattern. Follow these steps systematically:
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY code generation, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
+
+### 2. Load Correct Form Template
+
+| UI Framework | Template to Use |
+|--------------|-----------------|
+| **Standard** | `templates/form-template.cs` |
+| **DevExpress** | `templates/dx-form-template.cs` |
+| **ReaLTaiizor** | `templates/rt-material-form-template.cs` |
+
+### 3. Load Required Guides
+- `docs/patterns/mvp-pattern.md` → MVP rules
+- `.claude/guides/production-ui-standards.md` → UI quality
+- `docs/ui/responsive-layout.md` → Layout patterns
+
+### 4. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Inject IServiceProvider | Use IFormFactory |
+| Business logic in Form | Logic in Presenter |
+| Separate Label + TextBox | Floating Label/Hint |
+| Generate without template | Start from template |
+
+**⚠️ If project-context.md doesn't exist**: Default to ReaLTaiizor Material.
+
+---
+
 ## Steps
 
 1. **Check architecture documentation**

@@ -4,6 +4,37 @@ description: Create a new repository class with Entity Framework Core
 
 You are tasked with creating a new repository class following the Repository pattern with Entity Framework Core.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY code generation, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
+
+### 2. Load Required Templates & Guides
+- `templates/repository-template.cs` → Repository structure
+- `templates/unitofwork-template.cs` → UoW integration
+- `docs/data-access/unit-of-work.md` → UoW pattern
+- `docs/data-access/repository-pattern.md` → Repository rules
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| SaveChanges in Repository | SaveChanges in UoW only |
+| Return IQueryable | Return List/concrete types |
+| Skip AsNoTracking | AsNoTracking for reads |
+| Generate without template | Start from template |
+
+**⚠️ If project-context.md doesn't exist**: Ask user for database preference.
+
+---
+
 ## Workflow
 
 1. **Ask for Repository Information**

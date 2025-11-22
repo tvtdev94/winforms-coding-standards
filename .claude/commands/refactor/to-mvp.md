@@ -4,6 +4,34 @@ description: Refactor existing WinForms code to MVP pattern
 
 You are tasked with refactoring existing WinForms code to follow the MVP (Model-View-Presenter) pattern.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY refactoring, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK`, `PATTERN`, `FRAMEWORK`
+
+### 2. Load Required Guides
+- `docs/patterns/mvp-pattern.md` → MVP implementation
+- `templates/form-template.cs` (or dx/rt variant) → Target structure
+- `docs/architecture/dependency-injection.md` → DI setup
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Business logic in Form | Logic in Presenter |
+| Direct data access | Use Services |
+| Inject IServiceProvider | Use IFormFactory |
+| Skip IView interface | Create IView for Form |
+
+---
+
 ## Workflow
 
 1. **Ask the user**:

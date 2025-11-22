@@ -4,6 +4,38 @@ description: Add comprehensive input validation to a WinForms form
 
 You are tasked with adding comprehensive input validation to a WinForms form.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY code generation, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK` to determine validation approach.
+
+### 2. Validation by UI Framework
+
+| UI Framework | Validation Approach |
+|--------------|---------------------|
+| **Standard** | ErrorProvider + Validating events |
+| **DevExpress** | DXErrorProvider or ValidationRules |
+| **ReaLTaiizor** | MaterialTextBoxEdit.ShowAssistiveText |
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Validate in Form code-behind | Validate in Presenter |
+| Silent failures | Show clear error messages |
+| Skip async validation | Async for business rules |
+
+**⚠️ If project-context.md doesn't exist**: Default to Standard ErrorProvider.
+
+---
+
 ## Workflow
 
 1. **Ask the user**:

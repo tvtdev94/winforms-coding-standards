@@ -4,6 +4,37 @@ description: Create a new service class with dependency injection and best pract
 
 You are tasked with creating a new service class following WinForms best practices.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY code generation, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
+
+### 2. Load Required Templates & Guides
+- `templates/service-template.cs` → Service structure
+- `docs/data-access/unit-of-work.md` → UoW pattern
+- `docs/best-practices/async-await.md` → Async patterns
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Inject IRepository directly | Use IUnitOfWork |
+| SaveChanges in Service | SaveChanges via UoW |
+| Synchronous I/O | Async for all I/O |
+| Skip validation | Validate all inputs |
+| Generate without template | Start from template |
+
+**⚠️ If project-context.md doesn't exist**: Ask user for preferences.
+
+---
+
 ## Workflow
 
 1. **Ask for Service Information**

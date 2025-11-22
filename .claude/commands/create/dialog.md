@@ -4,6 +4,38 @@ description: Create a dialog form with proper result handling and validation
 
 You are tasked with creating a dialog form (modal window) for user input or confirmation.
 
+---
+
+## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+
+**Before ANY code generation, you MUST:**
+
+### 1. Read Project Configuration
+```
+READ: .claude/project-context.md
+```
+Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
+
+### 2. Load Correct Form Template
+
+| UI Framework | Template to Use |
+|--------------|-----------------|
+| **Standard** | `templates/form-template.cs` |
+| **DevExpress** | `templates/dx-form-template.cs` |
+| **ReaLTaiizor** | `templates/rt-material-form-template.cs` |
+
+### 3. Critical Rules
+
+| 🚫 NEVER | ✅ ALWAYS |
+|----------|----------|
+| Separate Label + TextBox | Floating Label/Hint |
+| Generate without template | Start from template |
+| Skip validation | Validate required fields |
+
+**⚠️ If project-context.md doesn't exist**: Default to ReaLTaiizor Material.
+
+---
+
 ## Workflow
 
 1. **Ask for Dialog Information**
