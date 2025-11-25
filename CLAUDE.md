@@ -218,6 +218,7 @@ Before writing ANY specification, planning document, or feature documentation, y
 10. **Dispose resources** - Use `using` statements
 11. **Use responsive layout** - Anchor/Dock (Standard), LayoutControl (DevExpress), TableLayoutPanel
 12. **Follow Production UI Standards** ⭐ - See [production-ui-standards.md](.claude/guides/production-ui-standards.md)
+13. **Write Designer-compatible code** ⭐ - All UI initialization code MUST be in `InitializeComponent()` method, NO helper methods, fully inlined for Visual Studio Designer compatibility
 
 ### ❌ NEVER DO:
 1. ❌ Business logic in Forms
@@ -233,6 +234,7 @@ Before writing ANY specification, planning document, or feature documentation, y
 11. ❌ Fixed-size forms without responsive layout
 12. ❌ **Student-level UI** - No grid without sort/filter/paging, no low-contrast buttons, no missing loading states
 13. ❌ **Separate Label + TextBox** - ALWAYS use Floating Label (see below)
+14. ❌ **Helper methods in InitializeComponent()** - Designer cannot parse helper methods like `CreateLabel()`, `CreateButton()`. Must inline ALL code
 
 ### 🎯 Input Fields: MUST Use Floating Label
 
@@ -254,6 +256,170 @@ var txtEmail = new TextBox();
 | Standard | Custom `FloatingLabelTextBox` | Implement floating |
 
 📖 **Full rules**: [.claude/guides/ai-instructions.md](.claude/guides/ai-instructions.md)
+
+---
+
+## 🎨 Visual Studio Designer Compatibility
+
+**⚠️ CRITICAL RULE**: All WinForms UI code MUST be written to support Visual Studio Designer view.
+
+### Why This Matters
+
+Visual Studio Designer only parses code inside `InitializeComponent()` method:
+- ✅ Designer CAN read: Direct property assignments, `new` statements, control initialization
+- ❌ Designer CANNOT read: Helper methods, code in other methods, dynamic code in constructor
+
+### The Problem
+
+```csharp
+// ❌ WRONG - Designer cannot display this
+private void InitializeComponent()
+{
+    this.Controls.Add(pnlFilter);
+}
+
+private void InitializeControls()  // ← Designer never reads this!
+{
+    pnlFilter = new Panel { Dock = DockStyle.Top };
+    // ... 100 lines of UI code
+}
+```
+
+**Result**: Designer shows empty form, developer cannot visually edit UI
+
+### The Solution
+
+```csharp
+// ✅ CORRECT - Designer can display this
+private void InitializeComponent()
+{
+    this.pnlFilter = new System.Windows.Forms.Panel();
+    this.pnlFilter.SuspendLayout();
+    this.SuspendLayout();
+
+    // pnlFilter
+    this.pnlFilter.BackColor = System.Drawing.Color.White;
+    this.pnlFilter.Dock = System.Windows.Forms.DockStyle.Top;
+    this.pnlFilter.Location = new System.Drawing.Point(0, 0);
+    this.pnlFilter.Name = "pnlFilter";
+    this.pnlFilter.Size = new System.Drawing.Size(900, 220);
+    this.pnlFilter.TabIndex = 0;
+
+    this.Controls.Add(this.pnlFilter);
+    this.pnlFilter.ResumeLayout(false);
+    this.ResumeLayout(false);
+}
+```
+
+**Result**: Designer shows form correctly, developer can click and edit controls visually
+
+### Rules for Designer Compatibility
+
+1. **ALL controls must be initialized in `InitializeComponent()`**
+   - No `InitializeControls()`, `CreateUI()`, or similar methods
+   - No helper methods like `CreateLabel()`, `CreateButton()`
+
+2. **Inline ALL property assignments**
+   ```csharp
+   // ❌ WRONG
+   var lbl = CreateLabel("Name:");  // Helper method
+
+   // ✅ CORRECT
+   this.lblName = new System.Windows.Forms.Label();
+   this.lblName.Text = "Name:";
+   this.lblName.Font = new System.Drawing.Font("Segoe UI", 9F);
+   this.lblName.Location = new System.Drawing.Point(10, 10);
+   ```
+
+3. **Use fully qualified type names**
+   ```csharp
+   // ❌ WRONG
+   pnlFilter = new Panel();
+
+   // ✅ CORRECT
+   this.pnlFilter = new System.Windows.Forms.Panel();
+   ```
+
+4. **Follow Designer pattern structure**
+   ```csharp
+   private void InitializeComponent()
+   {
+       // 1. Declare all controls first
+       this.pnlFilter = new System.Windows.Forms.Panel();
+       this.lblName = new System.Windows.Forms.Label();
+
+       // 2. SuspendLayout
+       this.pnlFilter.SuspendLayout();
+       this.SuspendLayout();
+
+       // 3. Configure each control (grouped with comments)
+       // pnlFilter
+       this.pnlFilter.BackColor = ...;
+       this.pnlFilter.Dock = ...;
+
+       // lblName
+       this.lblName.Text = ...;
+       this.lblName.Font = ...;
+
+       // 4. Add controls to containers
+       this.pnlFilter.Controls.Add(this.lblName);
+       this.Controls.Add(this.pnlFilter);
+
+       // 5. ResumeLayout
+       this.pnlFilter.ResumeLayout(false);
+       this.ResumeLayout(false);
+   }
+   ```
+
+5. **Dynamic logic goes in event handlers**
+   ```csharp
+   // ✅ CORRECT - Initialization in InitializeComponent
+   private void InitializeComponent()
+   {
+       this.cboCategory = new System.Windows.Forms.ComboBox();
+       this.cboCategory.Items.AddRange(new object[] {
+           "Option 1", "Option 2", "Option 3"
+       });
+       this.Load += new System.EventHandler(this.ProductForm_Load);
+   }
+
+   // ✅ CORRECT - Dynamic logic in Load event
+   private void ProductForm_Load(object sender, EventArgs e)
+   {
+       this.cboCategory.SelectedIndex = 0;
+       LoadDataAsync();
+   }
+   ```
+
+### Trade-offs
+
+| Aspect | Helper Methods | Designer-Compatible |
+|--------|---------------|---------------------|
+| **Code Length** | Short (~200 lines) | Long (~500+ lines) |
+| **Maintainability** | High (DRY) | Medium (repetitive) |
+| **Designer Support** | ❌ None | ✅ Full visual editing |
+| **Flexibility** | ✅ Very flexible | ⚠️ More rigid |
+| **Best For** | Code-only projects | Team projects with designers |
+
+### When to Use Each Approach
+
+**Use Designer-Compatible (InitializeComponent only):**
+- ✅ Working in a team with UI designers
+- ✅ Need to visually edit forms in Designer
+- ✅ Building enterprise apps with many developers
+- ✅ Client requires visual form editing capability
+
+**Use Helper Methods (Dynamic code):**
+- ✅ Solo developer, code-first approach
+- ✅ Complex, programmatic UI generation
+- ✅ Rapid prototyping
+- ❌ But understand you lose Designer support!
+
+### Default Recommendation
+
+**⭐ DEFAULT**: Always use Designer-compatible code unless project explicitly requires dynamic UI generation.
+
+📖 **See example**: [ProductForm.cs](d:\WORKSPACES\DemoApp\DemoApp\UI\Forms\ProductForm.cs) - Full Designer-compatible implementation
 
 ---
 
