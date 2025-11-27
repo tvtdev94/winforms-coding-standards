@@ -1713,6 +1713,12 @@ if ($IntegrateStandards) {
                         Write-Host "  [OK] Created symlink: CLAUDE.md -> .standards\CLAUDE.md" -ForegroundColor Green
                     }
 
+                    # Create symlink for INDEX.md (CRITICAL - Resource map for AI)
+                    if (Test-Path ".standards\.claude\INDEX.md") {
+                        New-Item -ItemType SymbolicLink -Path ".claude\INDEX.md" -Target ".standards\.claude\INDEX.md" -Force -ErrorAction Stop | Out-Null
+                        Write-Host "  [OK] Created symlink: .claude\INDEX.md -> .standards\.claude\INDEX.md" -ForegroundColor Green
+                    }
+
                     Write-Host "  [OK] Symlinks created successfully" -ForegroundColor Green
                     Write-Host "  [INFO] Claude Code will now see all slash commands!" -ForegroundColor Cyan
                 } catch {
@@ -1741,6 +1747,10 @@ if ($IntegrateStandards) {
                         Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
                         Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
                     }
+                    if (Test-Path ".standards\.claude\INDEX.md") {
+                        Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
+                        Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
+                    }
                 }
             } else {
                 # Not running as Admin - copy instead
@@ -1768,6 +1778,10 @@ if ($IntegrateStandards) {
                 if (Test-Path ".standards\CLAUDE.md") {
                     Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
                     Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
+                }
+                if (Test-Path ".standards\.claude\INDEX.md") {
+                    Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
+                    Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
                 }
 
                 Write-Host ""

@@ -18,7 +18,6 @@
 | Create Buttons | production-ui-standards.md | Section 4 (Buttons) + Section 14 |
 
 **⚠️ CRITICAL Rules from production-ui-standards.md:**
-- ✅ **Default UI Framework**: Material Design (ReaLTaiizor)
 - ✅ **Grid must use Dock.Fill** - No empty gap below grid
 - ✅ **Form starts Maximized** - WindowState = Maximized
 - ✅ **NEVER mix UI libraries** - Use only one framework
