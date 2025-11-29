@@ -1,20 +1,21 @@
 {
-  "version": "5.0.0",
+  "version": "5.6.0",
   "name": "WinForms Coding Standards",
-  "description": "C# WinForms coding standards, documentation, and project templates for building maintainable, scalable applications",
+  "description": "C# WinForms coding standards, documentation, and project templates for building maintainable, scalable applications with AI-powered development workflow",
   "type": "coding-standards-kit",
-  "lastUpdated": "2025-11-08",
-  "phase": "Enhancement Complete - All Core Phases Implemented",
+  "lastUpdated": "2025-11-29",
+  "phase": "Enhancement Complete - ClaudeKit Integration",
   "stats": {
-    "documentationFiles": 38,
-    "codeTemplates": 4,
-    "slashCommands": 18,
-    "workflows": 4,
-    "agents": 4,
-    "planTemplates": 6,
+    "documentationFiles": 53,
+    "guides": 6,
+    "codeTemplates": 13,
+    "slashCommands": 32,
+    "workflows": 7,
+    "agents": 10,
+    "planTemplates": 7,
     "skills": 0,
     "exampleProjects": 1,
-    "totalLines": 42000,
+    "totalLines": 85000,
     "completionStatus": "100%"
   },
   "repository": {
@@ -53,15 +54,35 @@
     },
     "phase4": {
       "name": "Enhance init-project.ps1",
-      "status": "Documented (Optional)",
-      "documentedDate": "2025-11-08",
-      "note": "Implementation guide created. Git Submodule provides similar functionality."
+      "status": "Complete",
+      "completedDate": "2025-11-18",
+      "note": "Git Submodule integration with symlinks for auto-updating standards."
     },
     "phase5": {
-      "name": "Skills & Auto-Documentation",
-      "status": "Documented (Optional)",
-      "documentedDate": "2025-11-08",
-      "note": "Implementation guide created. Can be implemented when needed."
+      "name": "ReaLTaiizor Integration",
+      "status": "Complete",
+      "completedDate": "2025-11-18",
+      "note": "Added Material, Metro, Poison theme support with 5 docs and 4 templates."
+    },
+    "phase6": {
+      "name": "ClaudeKit Integration",
+      "status": "Complete",
+      "completedDate": "2025-11-29",
+      "note": "Added /cook, /plan, /debug, /test, /watzup commands. 6 new agents (planner, researcher, tester, debugger, code-reviewer, git-manager). Orchestration workflows."
+    }
+  },
+  "features": {
+    "uiFrameworks": ["Standard WinForms", "DevExpress", "ReaLTaiizor"],
+    "patterns": ["MVP", "Factory", "Unit of Work", "Repository"],
+    "commands": {
+      "orchestration": ["/cook", "/plan", "/plan:two"],
+      "development": ["/create:*", "/add:*", "/fix:*", "/refactor:*"],
+      "quality": ["/test", "/debug", "/watzup"],
+      "setup": ["/setup:di", "/auto-implement"]
+    },
+    "agents": {
+      "winforms": ["winforms-reviewer", "mvp-validator", "test-generator", "docs-manager"],
+      "general": ["planner", "researcher", "tester", "debugger", "code-reviewer", "git-manager"]
     }
   }
 }

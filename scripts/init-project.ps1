@@ -1719,6 +1719,24 @@ if ($IntegrateStandards) {
                         Write-Host "  [OK] Created symlink: .claude\INDEX.md -> .standards\.claude\INDEX.md" -ForegroundColor Green
                     }
 
+                    # Create plans directory structure (for /cook and /plan commands)
+                    if (-not (Test-Path "plans")) {
+                        New-Item -ItemType Directory -Path "plans" -Force | Out-Null
+                    }
+                    # Symlink templates from standards, create empty research/reports folders
+                    if (Test-Path ".standards\plans\templates") {
+                        if (Test-Path "plans\templates") { Remove-Item "plans\templates" -Force -Recurse }
+                        New-Item -ItemType SymbolicLink -Path "plans\templates" -Target ".standards\plans\templates" -Force -ErrorAction Stop | Out-Null
+                        Write-Host "  [OK] Created symlink: plans\templates -> .standards\plans\templates" -ForegroundColor Green
+                    }
+                    if (-not (Test-Path "plans\research")) {
+                        New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
+                    }
+                    if (-not (Test-Path "plans\reports")) {
+                        New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
+                    }
+                    Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
+
                     Write-Host "  [OK] Symlinks created successfully" -ForegroundColor Green
                     Write-Host "  [INFO] Claude Code will now see all slash commands!" -ForegroundColor Cyan
                 } catch {
@@ -1751,6 +1769,21 @@ if ($IntegrateStandards) {
                         Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
                         Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
                     }
+                    # Create plans directory structure (fallback)
+                    if (-not (Test-Path "plans")) {
+                        New-Item -ItemType Directory -Path "plans" -Force | Out-Null
+                    }
+                    if (Test-Path ".standards\plans\templates") {
+                        Copy-Item -Recurse ".standards\plans\templates" -Destination "plans\templates" -Force
+                        Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
+                    }
+                    if (-not (Test-Path "plans\research")) {
+                        New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
+                    }
+                    if (-not (Test-Path "plans\reports")) {
+                        New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
+                    }
+                    Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
                 }
             } else {
                 # Not running as Admin - copy instead
@@ -1784,6 +1817,22 @@ if ($IntegrateStandards) {
                     Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
                 }
 
+                # Create plans directory structure (non-admin copy)
+                if (-not (Test-Path "plans")) {
+                    New-Item -ItemType Directory -Path "plans" -Force | Out-Null
+                }
+                if (Test-Path ".standards\plans\templates") {
+                    Copy-Item -Recurse ".standards\plans\templates" -Destination "plans\templates" -Force
+                    Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
+                }
+                if (-not (Test-Path "plans\research")) {
+                    New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
+                }
+                if (-not (Test-Path "plans\reports")) {
+                    New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
+                }
+                Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
+
                 Write-Host ""
                 Write-Host "  [TIP] To get auto-updating standards, re-run this script as Administrator:" -ForegroundColor Yellow
                 Write-Host "        Right-click PowerShell -> Run as Administrator" -ForegroundColor Gray
@@ -1799,6 +1848,9 @@ if ($IntegrateStandards) {
             }
             if (Test-Path "CLAUDE.md") {
                 git -c core.autocrlf=false add CLAUDE.md 2>&1 | Out-Null
+            }
+            if (Test-Path "plans") {
+                git -c core.autocrlf=false add plans 2>&1 | Out-Null
             }
             git commit -m "Add coding standards as submodule" 2>&1 | Out-Null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
