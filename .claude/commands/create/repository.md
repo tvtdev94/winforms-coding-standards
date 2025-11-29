@@ -19,7 +19,7 @@ Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 ### 2. Load Required Templates & Guides
 - `templates/repository-template.cs` → Repository structure
 - `templates/unitofwork-template.cs` → UoW integration
-- `docs/data-access/unit-of-work.md` → UoW pattern
+- `docs/data-access/unit-of-work-pattern.md` → UoW pattern
 - `docs/data-access/repository-pattern.md` → Repository rules
 
 ### 3. Critical Rules

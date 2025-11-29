@@ -39,7 +39,7 @@ Extract:
 - `docs/ui/responsive-layout.md` → Layout patterns
 
 **For data layer:**
-- `docs/data-access/unit-of-work.md` → UoW pattern
+- `docs/data-access/unit-of-work-pattern.md` → UoW pattern
 - `docs/data-access/repository-pattern.md` → Repository rules
 
 ### 4. Critical Rules Summary (MUST FOLLOW)
@@ -69,7 +69,7 @@ Before generating ANY code, confirm:
 - [ ] Loaded `repository-template.cs` ✓
 - [ ] Loaded `unitofwork-template.cs` ✓
 
-**⚠️ If project-context.md doesn't exist**: Ask user for UI framework preference, default to ReaLTaiizor Material.
+**⚠️ If project-context.md doesn't exist**: Ask user for UI framework preference. Do NOT assume any default.
 
 ---
 

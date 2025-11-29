@@ -226,7 +226,7 @@ public class CustomerEditPresenterTests : IDisposable
             .Returns(new Dictionary<string, string>()); // No validation errors
 
         _mockService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync((Customer c, CancellationToken _) => { c.Id = 1; return c; });
 
         // Act
         _mockView.Raise(v => v.SaveRequested += null, EventArgs.Empty);
@@ -266,7 +266,7 @@ public class CustomerEditPresenterTests : IDisposable
             .Returns(new Dictionary<string, string>());
 
         _mockService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync((Customer c, CancellationToken _) => { c.Id = 1; return c; });
 
         // Act
         _mockView.Raise(v => v.SaveRequested += null, EventArgs.Empty);
@@ -299,7 +299,7 @@ public class CustomerEditPresenterTests : IDisposable
             .Returns(new Dictionary<string, string>());
 
         _mockService.Setup(s => s.CreateCustomerAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync((Customer c, CancellationToken _) => { c.Id = 1; return c; });
 
         // Act
         _mockView.Raise(v => v.SaveRequested += null, EventArgs.Empty);

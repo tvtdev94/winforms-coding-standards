@@ -30,7 +30,7 @@
 | I want to... | Command | Guide |
 |--------------|---------|-------|
 | Debug an error | `/debug "error description"` | [debugger agent](agents/debugger.md) |
-| Fix threading issues | `/fix:threading` | [Threading Guide](guides/threading-guide.md) |
+| Fix threading issues | `/fix:threading` | [Thread Safety](../docs/best-practices/thread-safety.md) |
 | Fix performance | `/fix:performance` | [Performance Guide](../docs/best-practices/) |
 | Refactor to MVP | `/refactor:to-mvp` | [MVP Pattern](../docs/architecture/mvp-pattern.md) |
 
@@ -64,15 +64,15 @@
 | Project Structure | [docs/architecture/project-structure.md](../docs/architecture/project-structure.md) |
 | Dependency Injection | [docs/architecture/dependency-injection.md](../docs/architecture/dependency-injection.md) |
 | Factory Pattern | [docs/architecture/factory-pattern.md](../docs/architecture/factory-pattern.md) |
-| Unit of Work | [docs/data-access/unit-of-work.md](../docs/data-access/unit-of-work.md) |
+| Unit of Work | [docs/data-access/unit-of-work-pattern.md](../docs/data-access/unit-of-work-pattern.md) |
 
 ### UI Framework
 
 | Framework | Getting Started | Controls | Templates |
 |-----------|-----------------|----------|-----------|
-| **ReaLTaiizor** (default) | [Material Theme](../docs/realtaiizor/material-theme.md) | [Controls](../docs/realtaiizor/controls-reference.md) | [rt-material-form-template.cs](../templates/rt-material-form-template.cs) |
-| DevExpress | [Quick Start](../docs/devexpress/dx-quick-start.md) | [Grid](../docs/devexpress/dx-grid-patterns.md) | [dx-form-template.cs](../templates/dx-form-template.cs) |
-| Standard WinForms | [Best Practices](../docs/ui-ux/form-design.md) | [Controls](../docs/ui-ux/) | [form-template.cs](../templates/form-template.cs) |
+| **Standard WinForms** | [Best Practices](../docs/ui-ux/responsive-design.md) | [Controls](../docs/ui-ux/) | [form-template.cs](../templates/form-template.cs) |
+| **ReaLTaiizor** | [Themes Guide](../docs/realtaiizor/realtaiizor-themes.md) | [Controls](../docs/realtaiizor/realtaiizor-controls.md) | [rt-material-form-template.cs](../templates/rt-material-form-template.cs) |
+| **DevExpress** | [Overview](../docs/devexpress/devexpress-overview.md) | [Grid](../docs/devexpress/dx-grid-patterns.md) | [dx-form-template.cs](../templates/dx-form-template.cs) |
 
 ### Best Practices
 
@@ -80,7 +80,7 @@
 |-------|-----------|
 | Coding Standards | [guides/coding-standards.md](guides/coding-standards.md) |
 | Production UI Standards | [guides/production-ui-standards.md](guides/production-ui-standards.md) |
-| Async/Await | [docs/best-practices/async-patterns.md](../docs/best-practices/async-patterns.md) |
+| Async/Await | [docs/best-practices/async-await.md](../docs/best-practices/async-await.md) |
 | Error Handling | [docs/best-practices/error-handling.md](../docs/best-practices/error-handling.md) |
 | Testing | [guides/testing-guide.md](guides/testing-guide.md) |
 

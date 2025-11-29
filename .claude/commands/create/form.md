@@ -36,7 +36,7 @@ Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 | Separate Label + TextBox | Floating Label/Hint |
 | Generate without template | Start from template |
 
-**⚠️ If project-context.md doesn't exist**: Default to ReaLTaiizor Material.
+**⚠️ If project-context.md doesn't exist**: Ask user for UI framework preference.
 
 ---
 

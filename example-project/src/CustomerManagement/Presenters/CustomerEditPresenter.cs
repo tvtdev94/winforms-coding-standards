@@ -132,9 +132,25 @@ public class CustomerEditPresenter
             {
                 _logger.LogWarning("Validation failed for customer");
 
+                // Map model property names to view property names
+                // Model uses: Name, Email, Phone, Address, City, Country
+                // View uses: CustomerName, CustomerEmail, CustomerPhone, etc.
+                var fieldNameMap = new Dictionary<string, string>
+                {
+                    { "Name", nameof(_view.CustomerName) },
+                    { "Email", nameof(_view.CustomerEmail) },
+                    { "Phone", nameof(_view.CustomerPhone) },
+                    { "Address", nameof(_view.CustomerAddress) },
+                    { "City", nameof(_view.CustomerCity) },
+                    { "Country", nameof(_view.CustomerCountry) }
+                };
+
                 foreach (var error in validationErrors)
                 {
-                    _view.SetFieldError(error.Key, error.Value);
+                    var viewFieldName = fieldNameMap.TryGetValue(error.Key, out var mapped)
+                        ? mapped
+                        : error.Key;
+                    _view.SetFieldError(viewFieldName, error.Value);
                 }
 
                 _view.ShowError("Please fix the validation errors.");

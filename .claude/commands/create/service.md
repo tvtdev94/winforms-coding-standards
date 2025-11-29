@@ -18,7 +18,7 @@ Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 
 ### 2. Load Required Templates & Guides
 - `templates/service-template.cs` → Service structure
-- `docs/data-access/unit-of-work.md` → UoW pattern
+- `docs/data-access/unit-of-work-pattern.md` → UoW pattern
 - `docs/best-practices/async-await.md` → Async patterns
 
 ### 3. Critical Rules

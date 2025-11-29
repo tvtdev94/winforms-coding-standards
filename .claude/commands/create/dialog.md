@@ -32,7 +32,7 @@ Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 | Generate without template | Start from template |
 | Skip validation | Validate required fields |
 
-**⚠️ If project-context.md doesn't exist**: Default to ReaLTaiizor Material.
+**⚠️ If project-context.md doesn't exist**: Ask user for UI framework preference.
 
 ---
 

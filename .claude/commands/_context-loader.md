@@ -45,6 +45,6 @@ Extract:
 
 ### 4. If project-context.md doesn't exist
 
-Ask user for UI framework preference, default to **ReaLTaiizor Material**.
+Ask user for UI framework preference. Do NOT assume any default.
 
 ---

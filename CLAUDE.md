@@ -14,8 +14,8 @@
 
 ### What's Complete ✅
 - ✅ **Documentation** (53 docs + 6 guides) - Comprehensive coverage
-- ✅ **Templates** (13) - Standard, DevExpress, ReaLTaiizor templates
-- ✅ **Slash Commands** (32) - Complete command suite with `/cook` orchestrator
+- ✅ **Templates** (15) - Standard, DevExpress, ReaLTaiizor templates (including Presenter & Validator)
+- ✅ **Slash Commands** (33) - Complete command suite with `/cook` orchestrator
 - ✅ **AI Agents** (10) - Full agent suite for development workflow
 - ✅ **Workflows** (7) - Development, Testing, Code Review, Orchestration
 - ✅ **Plan Templates** (7) - Feature planning templates
@@ -39,13 +39,13 @@
 
 | Framework | When to Use | Key Benefits |
 |-----------|-------------|--------------|
-| **ReaLTaiizor Material** ⭐ | **DEFAULT** - Hầu hết apps | Free, modern Material Design, floating labels, MIT license |
-| **DevExpress** | Enterprise apps, có license | Advanced controls, responsive design, built-in features ($) |
-| **Standard WinForms** | Chỉ khi project yêu cầu | Free, simple, lightweight, legacy compatibility |
+| **Standard WinForms** | Default, most apps | Free, simple, lightweight, built-in |
+| **ReaLTaiizor** | Modern UI needed | Free, Material/Metro themes, MIT license |
+| **DevExpress** | Enterprise apps | Advanced controls, responsive design ($) |
 
-> **⚠️ RULE**: Luôn dùng **Material Design (ReaLTaiizor)** làm default. Chỉ dùng framework khác khi:
-> - Project đã có `.claude/project-context.md` chỉ định framework khác
-> - User explicitly yêu cầu framework khác
+> **⚠️ RULE**: UI Framework is configured in `.claude/project-context.md` when creating a project.
+> - Always read `project-context.md` before creating UI
+> - Do NOT assume any framework as default
 
 ---
 
@@ -412,8 +412,6 @@ private void InitializeComponent()
 ### Default Recommendation
 
 **⭐ DEFAULT**: Always use Designer-compatible code unless project explicitly requires dynamic UI generation.
-
-📖 **See example**: [ProductForm.cs](d:\WORKSPACES\DemoApp\DemoApp\UI\Forms\ProductForm.cs) - Full Designer-compatible implementation
 
 ---
 

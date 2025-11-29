@@ -83,7 +83,7 @@ Complex task?
 
 | Category | Commands | Purpose |
 |----------|----------|---------|
-| `/create:*` | form, service, repository, dialog, custom-control | Create new components |
+| `/create:*` | form, service, repository, dialog, custom-control, **presenter** | Create new components |
 | `/add:*` | validation, data-binding, logging, settings, error-handling | Add features |
 | `/fix:*` | threading, performance, bug | Fix common issues |
 | `/refactor:*` | to-mvp | Refactor existing code |
@@ -111,7 +111,7 @@ Complex task?
 
 | Category | Files | Purpose |
 |----------|-------|---------|
-| Standard | form, service, repository, unitofwork, factory, test | Standard WinForms |
+| Standard | form, service, repository, unitofwork, factory, test, **presenter**, **validator** | Standard WinForms |
 | DevExpress | dx-form, dx-grid, dx-lookup, dx-report | DevExpress controls |
 | ReaLTaiizor | rt-material-form, rt-metro-form, rt-controls | ReaLTaiizor themes |
 
@@ -166,9 +166,11 @@ Complete working Customer Management app demonstrating:
 | Task | Guide | Docs | Template |
 |------|-------|------|----------|
 | Create Form | code-generation-guide.md | [mvp-pattern.md](../docs/architecture/mvp-pattern.md) | form-template.cs |
+| Create Presenter | code-generation-guide.md | [mvp-pattern.md](../docs/architecture/mvp-pattern.md) | presenter-template.cs |
 | Create Service | code-generation-guide.md | - | service-template.cs |
 | Create Repository | code-generation-guide.md | [repository-pattern.md](../docs/data-access/repository-pattern.md) | repository-template.cs |
 | Create Unit of Work | code-generation-guide.md | [unit-of-work-pattern.md](../docs/data-access/unit-of-work-pattern.md) | unitofwork-template.cs |
+| Create Validator | code-generation-guide.md | [input-validation.md](../docs/ui-ux/input-validation.md) | validator-template.cs |
 | Create Tests | testing-guide.md | [unit-testing.md](../docs/testing/unit-testing.md) | test-template.cs |
 
 ### UI Development
@@ -188,7 +190,7 @@ Complete working Customer Management app demonstrating:
 | Form communication | - | [form-communication.md](../docs/ui-ux/form-communication.md) |
 | **Final check** | production-ui-standards.md → **Section 14 Checklist** (~50 lines) | - |
 
-**⚠️ NOTE**: Chỉ đọc section cần thiết trong production-ui-standards.md, KHÔNG đọc toàn bộ file!
+**⚠️ NOTE**: Only read the relevant section in production-ui-standards.md, do NOT read the entire file!
 
 ### Architecture & Patterns
 
