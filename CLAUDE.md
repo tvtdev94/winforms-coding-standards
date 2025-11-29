@@ -21,9 +21,9 @@
 ### What's Complete ✅
 - ✅ **Documentation** (70/70 files) - 100% complete! 🎉
 - ✅ **Templates** (14/14) - Standard, DevExpress, ReaLTaiizor templates
-- ✅ **Slash Commands** (19/19) - Complete command suite
-- ✅ **AI Agents** (4/4) - WinForms Reviewer, Test Generator, Docs Manager, MVP Validator
-- ✅ **Workflows** (5/5) - Development, Testing, Code Review, PR Review, Expert Behavior
+- ✅ **Slash Commands** (20/20) - Complete command suite + `/cook` orchestrator
+- ✅ **AI Agents** (10/10) - Full agent suite including planner, researcher, tester, debugger
+- ✅ **Workflows** (7/7) - Development, Testing, Code Review, PR Review, Expert Behavior, Orchestration
 - ✅ **Plan Templates** (6/6) - Feature planning templates
 - ✅ **Example Project** - Complete Customer Management app with tests
 
@@ -467,6 +467,48 @@ dotnet test /p:CollectCoverage=true
 # Clean and rebuild
 dotnet clean && dotnet build
 ```
+
+---
+
+## 🍳 /cook Command - Full Feature Workflow
+
+The `/cook` command orchestrates a complete feature implementation workflow:
+
+```
+/cook "implement customer search functionality"
+```
+
+**Workflow:**
+```
+1. Load Context → Read project-context.md, INDEX.md
+2. Research → researcher agent explores best practices
+3. Explore → find related files in codebase
+4. Plan → planner agent creates implementation plan
+5. Implement → follow plan with templates
+6. Build → dotnet build to verify
+7. Test → tester agent generates and runs tests
+8. Review → code-reviewer validates quality
+9. Document → docs-manager updates if needed
+10. Git → git-manager commits (with approval)
+```
+
+**Available Agents:**
+| Agent | Purpose |
+|-------|---------|
+| `planner` | Create implementation plans |
+| `researcher` | Research technologies and best practices |
+| `tester` | Generate and run tests |
+| `code-reviewer` | Review code quality |
+| `debugger` | Debug issues, find root causes |
+| `git-manager` | Handle git commits |
+| `docs-manager` | Update documentation |
+| `winforms-reviewer` | WinForms-specific review |
+| `mvp-validator` | Validate MVP pattern |
+| `test-generator` | Generate WinForms tests |
+
+**Workflows:**
+- [Orchestration Protocol](.claude/workflows/orchestration-protocol.md) - How agents coordinate
+- [Development Rules](.claude/workflows/development-rules.md) - C# WinForms rules
 
 ---
 

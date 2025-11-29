@@ -1,0 +1,13 @@
+# Plans Directory
+
+This directory contains implementation plans, research reports, and agent-to-agent communication.
+
+## Structure
+- `templates/` - Plan templates
+- `research/` - Research reports from researcher agent
+- `reports/` - Agent-to-agent communication reports
+
+## Naming Convention
+- Plans: `YYMMDD-feature-name-plan.md`
+- Research: `YYMMDD-research-topic.md`
+- Reports: `YYMMDD-from-agent-to-agent-task-report.md`
