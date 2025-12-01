@@ -121,12 +121,7 @@ After script completes:
 
 ```
 [Claude Code Integration]
-  ✅ Slash commands available!
-  Type / in Claude Code to see 19 commands:
-    /create:form, /create:service, /create:repository
-    /add:validation, /add:logging, /add:error-handling
-    /fix:bug, /fix:threading, /fix:performance
-    /auto-implement - Auto-create complete features!
+  [OK] Slash commands available! Type / to see all commands
 ```
 
 ### **5. Project Context (NEW in v2.0!)** 🎉

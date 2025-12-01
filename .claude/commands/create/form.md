@@ -4,37 +4,20 @@ You are asked to create a new WinForm following MVP pattern. Follow these steps 
 
 ---
 
-## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+## 🔥 STEP 0: Load Rules (MANDATORY - ALWAYS FIRST!)
 
-**Before ANY code generation, you MUST:**
+**Use `rules-loader` subagent to load ALL coding rules:**
 
-### 1. Read Project Configuration
 ```
-READ: .claude/project-context.md
+Task(subagent_type="rules-loader", prompt="Load rules for creating a new WinForms form with MVP pattern")
 ```
-Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 
-### 2. Load Correct Form Template
-
-| UI Framework | Template to Use |
-|--------------|-----------------|
-| **Standard** | `templates/form-template.cs` |
-| **DevExpress** | `templates/dx-form-template.cs` |
-| **ReaLTaiizor** | `templates/rt-material-form-template.cs` |
-
-### 3. Load Required Guides
-- `docs/patterns/mvp-pattern.md` → MVP rules
-- `.claude/guides/production-ui-standards.md` → UI quality
-- `docs/ui/responsive-layout.md` → Layout patterns
-
-### 4. Critical Rules
-
-| 🚫 NEVER | ✅ ALWAYS |
-|----------|----------|
-| Inject IServiceProvider | Use IFormFactory |
-| Business logic in Form | Logic in Presenter |
-| Separate Label + TextBox | Floating Label/Hint |
-| Generate without template | Start from template |
+**Wait for rules summary before proceeding.** The rules-loader will:
+- Read `.claude/project-context.md` for UI framework, database, pattern
+- Load MVP pattern rules
+- Load UI quality standards
+- Load Designer compatibility rules
+- Identify correct templates to use
 
 **⚠️ If project-context.md doesn't exist**: Ask user for UI framework preference.
 

@@ -1,29 +1,37 @@
 <#
 .SYNOPSIS
-    Update coding standards and sync configuration files
+    Update coding standards in current project
 
 .DESCRIPTION
-    This script updates the .standards submodule and syncs configuration files
-    (.editorconfig, .gitignore) from the standards repository to the current project.
+    This script updates the coding standards files in your project from:
+    - .standards submodule (if exists)
+    - Or a specified standards repository path
 
-    Use this when:
-    - Standards repository has been updated
-    - You want to get the latest slash commands, templates, and documentation
-    - You don't have symlinks (non-Admin) and need to manually sync config files
+    Files updated:
+    - .claude/agents, commands, guides, workflows
+    - .claude/INDEX.md
+    - templates/
+    - plans/templates/
+    - CLAUDE.md
 
-.PARAMETER Force
-    Force update even if there are uncommitted changes
+    Files preserved:
+    - .claude/project-context.md (your project config)
+
+.PARAMETER StandardsPath
+    Path to standards repository. If not specified, will auto-detect.
 
 .EXAMPLE
     .\update-standards.ps1
 
 .EXAMPLE
-    .\update-standards.ps1 -Force
+    .\update-standards.ps1 -StandardsPath "C:\repos\winforms-coding-standards"
 #>
 
 param(
-    [switch]$Force
+    [string]$StandardsPath
 )
+
+$ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
@@ -31,129 +39,228 @@ Write-Host "  Update Coding Standards" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Check if .standards submodule exists
-if (-not (Test-Path ".standards/.git")) {
-    Write-Host "[ERROR] .standards submodule not found" -ForegroundColor Red
-    Write-Host "        This project doesn't have coding standards integrated" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "To integrate standards, run:" -ForegroundColor Yellow
-    Write-Host "  ..\winforms-coding-standards\scripts\setup-standards.ps1" -ForegroundColor White
-    Write-Host ""
+# ============================================================================
+# Check if standards exist in current project
+# ============================================================================
+
+if (-not (Test-Path ".claude")) {
+    Write-Host "[ERROR] .claude folder not found!" -ForegroundColor Red
+    Write-Host "   Run add-standards.ps1 first to add standards to this project." -ForegroundColor Yellow
     exit 1
 }
 
-# Check for uncommitted changes
-$gitStatus = git status --porcelain 2>&1
-if ($gitStatus -and -not $Force) {
-    Write-Host "[WARN] You have uncommitted changes" -ForegroundColor Yellow
-    Write-Host ""
-    git status --short
-    Write-Host ""
-    Write-Host "Commit your changes first, or run with -Force to proceed anyway" -ForegroundColor Yellow
-    Write-Host ""
-    exit 1
-}
-
-# Step 1: Update submodule
-Write-Host "[1] Updating .standards submodule..." -ForegroundColor Cyan
+Write-Host "Current project has standards installed." -ForegroundColor Green
 Write-Host ""
 
-Push-Location .standards
-$beforeHash = git rev-parse HEAD
-Pop-Location
+# ============================================================================
+# Find standards source
+# ============================================================================
 
-git submodule update --remote --merge .standards *>&1 | Out-Null
+Write-Host "Looking for standards source..." -ForegroundColor Cyan
 
-if ($LASTEXITCODE -eq 0) {
-    Push-Location .standards
-    $afterHash = git rev-parse HEAD
+if ($StandardsPath) {
+    # User specified path
+    if (-not (Test-Path $StandardsPath)) {
+        Write-Host "[ERROR] Path not found: $StandardsPath" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  Using: $StandardsPath" -ForegroundColor Green
+}
+elseif (Test-Path ".standards") {
+    # Option 1: .standards submodule exists
+    Write-Host "  Found: .standards (submodule)" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Updating submodule..." -ForegroundColor Cyan
+
+    Push-Location ".standards"
+    git pull origin main 2>&1 | Out-Null
     Pop-Location
 
-    if ($beforeHash -eq $afterHash) {
-        Write-Host "  [OK] Already up to date" -ForegroundColor Green
-    } else {
-        Write-Host "  [OK] Updated from $($beforeHash.Substring(0,7)) to $($afterHash.Substring(0,7))" -ForegroundColor Green
+    $StandardsPath = ".standards"
+    Write-Host "  [OK] Submodule updated" -ForegroundColor Green
+}
+elseif (Test-Path "..\winforms-coding-standards") {
+    $StandardsPath = "..\winforms-coding-standards"
+    Write-Host "  Found: $StandardsPath" -ForegroundColor Green
+}
+elseif (Test-Path "..\..\winforms-coding-standards") {
+    $StandardsPath = "..\..\winforms-coding-standards"
+    Write-Host "  Found: $StandardsPath" -ForegroundColor Green
+}
+else {
+    Write-Host "  Standards source not found automatically." -ForegroundColor Yellow
+    Write-Host ""
+    $StandardsPath = Read-Host "Enter path to standards repository"
+
+    if (-not (Test-Path $StandardsPath)) {
+        Write-Host "[ERROR] Path not found: $StandardsPath" -ForegroundColor Red
+        exit 1
     }
-} else {
-    Write-Host "  [ERROR] Failed to update submodule" -ForegroundColor Red
+}
+
+Write-Host ""
+
+# ============================================================================
+# Verify standards repository
+# ============================================================================
+
+if (-not (Test-Path "$StandardsPath\.claude")) {
+    Write-Host "[ERROR] Invalid standards repository - .claude folder not found!" -ForegroundColor Red
     exit 1
 }
 
+Write-Host "[OK] Standards source validated" -ForegroundColor Green
 Write-Host ""
 
-# Step 2: Check if using symlinks or copies
-Write-Host "[2] Checking configuration files..." -ForegroundColor Cyan
+# ============================================================================
+# Show what will be updated
+# ============================================================================
+
+Write-Host "Files to update:" -ForegroundColor Yellow
+Write-Host "  .claude/agents/"
+Write-Host "  .claude/commands/"
+Write-Host "  .claude/guides/"
+Write-Host "  .claude/workflows/"
+Write-Host "  .claude/INDEX.md"
+Write-Host "  templates/"
+Write-Host "  plans/templates/"
+Write-Host "  CLAUDE.md"
+Write-Host ""
+Write-Host "[NOTE] .claude/project-context.md will NOT be overwritten" -ForegroundColor Cyan
 Write-Host ""
 
-$usingSymlinks = $false
-$configFiles = @(".editorconfig", ".gitignore")
+$confirm = Read-Host "Proceed with update? (Y/n)"
+if ($confirm -eq "n" -or $confirm -eq "N") {
+    Write-Host "Cancelled." -ForegroundColor Yellow
+    exit 0
+}
 
-# Check if files are symlinks
-foreach ($file in $configFiles) {
-    if (Test-Path $file) {
-        $item = Get-Item $file
-        if ($item.LinkType -eq "SymbolicLink") {
-            $usingSymlinks = $true
-            Write-Host "  [OK] $file is symlinked (auto-updates)" -ForegroundColor Green
-        }
+Write-Host ""
+
+# ============================================================================
+# Update files
+# ============================================================================
+
+Write-Host "Updating standards..." -ForegroundColor Cyan
+
+# Backup project-context.md
+$projectContextBackup = $null
+if (Test-Path ".claude\project-context.md") {
+    $projectContextBackup = Get-Content ".claude\project-context.md" -Raw
+}
+
+# Update .claude subdirectories
+$claudeSubdirs = @("agents", "commands", "guides", "workflows")
+foreach ($subdir in $claudeSubdirs) {
+    if (Test-Path ".claude\$subdir") {
+        Remove-Item ".claude\$subdir" -Recurse -Force
+    }
+    if (Test-Path "$StandardsPath\.claude\$subdir") {
+        Copy-Item -Recurse "$StandardsPath\.claude\$subdir" -Destination ".claude\$subdir" -Force
+        Write-Host "  [OK] Updated .claude\$subdir" -ForegroundColor Green
     }
 }
 
-if ($usingSymlinks) {
-    Write-Host ""
-    Write-Host "  Config files are symlinked - they update automatically!" -ForegroundColor Green
-    Write-Host "  No manual sync needed." -ForegroundColor Green
+# Restore project-context.md
+if ($projectContextBackup) {
+    $projectContextBackup | Out-File -FilePath ".claude\project-context.md" -Encoding UTF8 -NoNewline
+    Write-Host "  [OK] Preserved .claude\project-context.md" -ForegroundColor Green
+}
+
+# Update INDEX.md
+if (Test-Path "$StandardsPath\.claude\INDEX.md") {
+    Copy-Item "$StandardsPath\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
+    Write-Host "  [OK] Updated .claude\INDEX.md" -ForegroundColor Green
+}
+
+# Update templates
+if (Test-Path "templates") {
+    Remove-Item "templates" -Recurse -Force
+}
+if (Test-Path "$StandardsPath\templates") {
+    Copy-Item -Recurse "$StandardsPath\templates" -Destination "templates" -Force
+    Write-Host "  [OK] Updated templates" -ForegroundColor Green
+}
+
+# Update CLAUDE.md
+if (Test-Path "$StandardsPath\CLAUDE.md") {
+    Copy-Item "$StandardsPath\CLAUDE.md" -Destination "CLAUDE.md" -Force
+    Write-Host "  [OK] Updated CLAUDE.md" -ForegroundColor Green
+}
+
+# Update plans/templates
+if (-not (Test-Path "plans")) {
+    New-Item -ItemType Directory -Path "plans" -Force | Out-Null
+}
+if (Test-Path "plans\templates") {
+    Remove-Item "plans\templates" -Recurse -Force
+}
+if (Test-Path "$StandardsPath\plans\templates") {
+    Copy-Item -Recurse "$StandardsPath\plans\templates" -Destination "plans\templates" -Force
+    Write-Host "  [OK] Updated plans\templates" -ForegroundColor Green
+}
+
+Write-Host ""
+
+# ============================================================================
+# Update .gitignore (ensure standards are excluded)
+# ============================================================================
+
+Write-Host "Checking .gitignore..." -ForegroundColor Cyan
+
+$gitignoreEntries = @"
+
+# ============================================================================
+# Coding Standards (copied from .standards - do not commit)
+# ============================================================================
+# These files are copied from the standards repository and should not be
+# committed to your project. Run update-standards.ps1 to update them.
+
+# Claude Code standards (copied)
+.claude/agents/
+.claude/commands/
+.claude/guides/
+.claude/workflows/
+.claude/INDEX.md
+CLAUDE.md
+
+# Templates (copied)
+templates/
+
+# Plan templates (copied)
+plans/templates/
+
+# Plan working files (generated)
+plans/research/
+plans/reports/
+
+# Keep project-specific config (NOT ignored):
+# .claude/project-context.md
+"@
+
+if (Test-Path ".gitignore") {
+    $gitignoreContent = Get-Content ".gitignore" -Raw
+    if ($gitignoreContent -notmatch "Coding Standards \(copied") {
+        Add-Content ".gitignore" $gitignoreEntries
+        Write-Host "  [OK] Updated .gitignore with standards exclusions" -ForegroundColor Green
+    } else {
+        Write-Host "  [OK] .gitignore already has standards exclusions" -ForegroundColor Green
+    }
 } else {
-    # Step 3: Sync config files
-    Write-Host ""
-    Write-Host "[3] Syncing configuration files..." -ForegroundColor Cyan
-    Write-Host ""
-
-    $syncedCount = 0
-    foreach ($file in $configFiles) {
-        if (Test-Path ".standards/$file") {
-            Copy-Item ".standards/$file" -Destination "." -Force
-            Write-Host "  [OK] $file synced" -ForegroundColor Green
-            $syncedCount++
-        } else {
-            Write-Host "  [SKIP] $file not found in standards" -ForegroundColor Yellow
-        }
-    }
-
-    if ($syncedCount -gt 0) {
-        Write-Host ""
-        Write-Host "  [TIP] Run as Admin to create symlinks for auto-update:" -ForegroundColor Cyan
-        Write-Host "        ..\winforms-coding-standards\scripts\setup-standards.ps1 -CreateSymlinks" -ForegroundColor White
-    }
+    Write-Host "  [SKIP] No .gitignore found" -ForegroundColor Yellow
 }
 
-# Step 4: Show what's new
-Write-Host ""
-Write-Host "[4] Checking for changes..." -ForegroundColor Cyan
 Write-Host ""
 
-Push-Location .standards
-$changes = git log $beforeHash..$afterHash --oneline 2>&1
-Pop-Location
+# ============================================================================
+# Done
+# ============================================================================
 
-if ($changes) {
-    Write-Host "  Recent updates:" -ForegroundColor Yellow
-    Write-Host ""
-    $changes | ForEach-Object {
-        Write-Host "    $_" -ForegroundColor White
-    }
-} else {
-    Write-Host "  No new updates" -ForegroundColor Green
-}
-
-# Summary
-Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  Update Complete!" -ForegroundColor Green
+Write-Host "  Standards Updated Successfully!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Standards location: .standards/" -ForegroundColor Cyan
-Write-Host "Slash commands: .standards/.claude/commands/" -ForegroundColor Cyan
-Write-Host "Templates: .standards/templates/" -ForegroundColor Cyan
-Write-Host "Documentation: .standards/docs/" -ForegroundColor Cyan
+Write-Host "Updated from: $StandardsPath" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Your project-context.md was preserved." -ForegroundColor Yellow
 Write-Host ""

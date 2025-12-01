@@ -60,12 +60,13 @@ Complex task?
 
 | Agent | Lines | Purpose |
 |-------|-------|---------|
+| [rules-loader.md](agents/rules-loader.md) | 180 | **Phase 0** - Load ALL coding rules before implementation |
 | [winforms-reviewer.md](agents/winforms-reviewer.md) | 585 | Code quality review, PR review |
 | [test-generator.md](agents/test-generator.md) | 443 | Auto-generate unit/integration tests |
 | [mvp-validator.md](agents/mvp-validator.md) | 495 | Validate MVP/MVVM architecture |
 | [docs-manager.md](agents/docs-manager.md) | 382 | Keep docs in sync with code |
 
-**Total**: ~1,905 lines
+**Total**: ~2,085 lines
 
 ### 3. Workflows (`.claude/workflows/`) - Process Guides
 
@@ -245,6 +246,7 @@ Complete working Customer Management app demonstrating:
 
 | Task | Agent | When to Use |
 |------|-------|-------------|
+| **Load rules** | rules-loader.md | **FIRST** - Before any implementation |
 | Code review | winforms-reviewer.md | After completing significant code |
 | Generate tests | test-generator.md | After creating service/repository |
 | Validate architecture | mvp-validator.md | Before PR, architecture questions |

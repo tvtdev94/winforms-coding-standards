@@ -1671,187 +1671,104 @@ if ($IntegrateStandards) {
             git submodule update --init --recursive *>&1 | Out-Null
             Write-Host "  [OK] Standards added as submodule" -ForegroundColor Green
 
-            # Create symlinks for .claude and templates (requires Admin on Windows)
+            # Copy standards files (portable - works on any machine)
             Write-Host ""
-            Write-Host "  Creating symlinks for Claude Code integration..." -ForegroundColor Cyan
+            Write-Host "  Copying standards files..." -ForegroundColor Cyan
 
-            # Check if running as Administrator
-            $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-            if ($isAdmin) {
-                try {
-                    # Create real .claude directory (for project-context.md)
-                    if (-not (Test-Path ".claude")) {
-                        New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
-                    }
-
-                    # Create symlinks for .claude subdirectories
-                    if (Test-Path ".standards\.claude") {
-                        $claudeSubdirs = @("agents", "commands", "guides", "workflows")
-                        foreach ($subdir in $claudeSubdirs) {
-                            if (Test-Path ".standards\.claude\$subdir") {
-                                $targetPath = ".standards\.claude\$subdir"
-                                $linkPath = ".claude\$subdir"
-                                if (Test-Path $linkPath) {
-                                    Remove-Item $linkPath -Force -Recurse
-                                }
-                                New-Item -ItemType SymbolicLink -Path $linkPath -Target $targetPath -Force -ErrorAction Stop | Out-Null
-                                Write-Host "  [OK] Created symlink: .claude\$subdir -> .standards\.claude\$subdir" -ForegroundColor Green
-                            }
-                        }
-                    }
-
-                    # Create symlink for templates directory
-                    if (Test-Path ".standards\templates") {
-                        New-Item -ItemType SymbolicLink -Path "templates" -Target ".standards\templates" -Force -ErrorAction Stop | Out-Null
-                        Write-Host "  [OK] Created symlink: templates -> .standards\templates" -ForegroundColor Green
-                    }
-
-                    # Create symlink for CLAUDE.md (important for Claude Code context)
-                    if (Test-Path ".standards\CLAUDE.md") {
-                        New-Item -ItemType SymbolicLink -Path "CLAUDE.md" -Target ".standards\CLAUDE.md" -Force -ErrorAction Stop | Out-Null
-                        Write-Host "  [OK] Created symlink: CLAUDE.md -> .standards\CLAUDE.md" -ForegroundColor Green
-                    }
-
-                    # Create symlink for INDEX.md (CRITICAL - Resource map for AI)
-                    if (Test-Path ".standards\.claude\INDEX.md") {
-                        New-Item -ItemType SymbolicLink -Path ".claude\INDEX.md" -Target ".standards\.claude\INDEX.md" -Force -ErrorAction Stop | Out-Null
-                        Write-Host "  [OK] Created symlink: .claude\INDEX.md -> .standards\.claude\INDEX.md" -ForegroundColor Green
-                    }
-
-                    # Create plans directory structure (for /cook and /plan commands)
-                    if (-not (Test-Path "plans")) {
-                        New-Item -ItemType Directory -Path "plans" -Force | Out-Null
-                    }
-                    # Symlink templates from standards, create empty research/reports folders
-                    if (Test-Path ".standards\plans\templates") {
-                        if (Test-Path "plans\templates") { Remove-Item "plans\templates" -Force -Recurse }
-                        New-Item -ItemType SymbolicLink -Path "plans\templates" -Target ".standards\plans\templates" -Force -ErrorAction Stop | Out-Null
-                        Write-Host "  [OK] Created symlink: plans\templates -> .standards\plans\templates" -ForegroundColor Green
-                    }
-                    if (-not (Test-Path "plans\research")) {
-                        New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
-                    }
-                    if (-not (Test-Path "plans\reports")) {
-                        New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
-                    }
-                    Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
-
-                    Write-Host "  [OK] Symlinks created successfully" -ForegroundColor Green
-                    Write-Host "  [INFO] Claude Code will now see all slash commands!" -ForegroundColor Cyan
-                } catch {
-                    Write-Host "  [WARN] Could not create symlinks: $($_.Exception.Message)" -ForegroundColor Yellow
-                    Write-Host "  [INFO] Falling back to copying files..." -ForegroundColor Cyan
-
-                    # Fallback: Copy instead of symlink (create real .claude folder first)
-                    if (-not (Test-Path ".claude")) {
-                        New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
-                    }
-                    if (Test-Path ".standards\.claude") {
-                        # Copy subdirectories only (agents, commands, guides, workflows)
-                        $claudeSubdirs = @("agents", "commands", "guides", "workflows")
-                        foreach ($subdir in $claudeSubdirs) {
-                            if (Test-Path ".standards\.claude\$subdir") {
-                                Copy-Item -Recurse ".standards\.claude\$subdir" -Destination ".claude\$subdir" -Force
-                            }
-                        }
-                        Write-Host "  [OK] Copied .claude subdirectories" -ForegroundColor Green
-                    }
-                    if (Test-Path ".standards\templates") {
-                        Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
-                        Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
-                    }
-                    if (Test-Path ".standards\CLAUDE.md") {
-                        Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
-                        Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
-                    }
-                    if (Test-Path ".standards\.claude\INDEX.md") {
-                        Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
-                        Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
-                    }
-                    # Create plans directory structure (fallback)
-                    if (-not (Test-Path "plans")) {
-                        New-Item -ItemType Directory -Path "plans" -Force | Out-Null
-                    }
-                    if (Test-Path ".standards\plans\templates") {
-                        Copy-Item -Recurse ".standards\plans\templates" -Destination "plans\templates" -Force
-                        Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
-                    }
-                    if (-not (Test-Path "plans\research")) {
-                        New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
-                    }
-                    if (-not (Test-Path "plans\reports")) {
-                        New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
-                    }
-                    Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
-                }
-            } else {
-                # Not running as Admin - copy instead
-                Write-Host "  [WARN] Not running as Administrator - cannot create symlinks" -ForegroundColor Yellow
-                Write-Host "  [INFO] Copying files instead (will not auto-update with standards)" -ForegroundColor Cyan
-
-                # Create real .claude folder first
-                if (-not (Test-Path ".claude")) {
-                    New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
-                }
-                if (Test-Path ".standards\.claude") {
-                    # Copy subdirectories only (agents, commands, guides, workflows)
-                    $claudeSubdirs = @("agents", "commands", "guides", "workflows")
-                    foreach ($subdir in $claudeSubdirs) {
-                        if (Test-Path ".standards\.claude\$subdir") {
-                            Copy-Item -Recurse ".standards\.claude\$subdir" -Destination ".claude\$subdir" -Force
-                        }
-                    }
-                    Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
-                }
-                if (Test-Path ".standards\templates") {
-                    Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
-                    Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
-                }
-                if (Test-Path ".standards\CLAUDE.md") {
-                    Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
-                    Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
-                }
-                if (Test-Path ".standards\.claude\INDEX.md") {
-                    Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
-                    Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
-                }
-
-                # Create plans directory structure (non-admin copy)
-                if (-not (Test-Path "plans")) {
-                    New-Item -ItemType Directory -Path "plans" -Force | Out-Null
-                }
-                if (Test-Path ".standards\plans\templates") {
-                    Copy-Item -Recurse ".standards\plans\templates" -Destination "plans\templates" -Force
-                    Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
-                }
-                if (-not (Test-Path "plans\research")) {
-                    New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
-                }
-                if (-not (Test-Path "plans\reports")) {
-                    New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
-                }
-                Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
-
-                Write-Host ""
-                Write-Host "  [TIP] To get auto-updating standards, re-run this script as Administrator:" -ForegroundColor Yellow
-                Write-Host "        Right-click PowerShell -> Run as Administrator" -ForegroundColor Gray
+            # Create .claude folder
+            if (-not (Test-Path ".claude")) {
+                New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
             }
 
-            # Commit submodule and symlinks/copies
-            git -c core.autocrlf=false add .gitmodules .standards 2>&1 | Out-Null
-            if (Test-Path ".claude") {
-                git -c core.autocrlf=false add .claude 2>&1 | Out-Null
+            # Copy .claude subdirectories (agents, commands, guides, workflows)
+            if (Test-Path ".standards\.claude") {
+                $claudeSubdirs = @("agents", "commands", "guides", "workflows")
+                foreach ($subdir in $claudeSubdirs) {
+                    if (Test-Path ".standards\.claude\$subdir") {
+                        Copy-Item -Recurse ".standards\.claude\$subdir" -Destination ".claude\$subdir" -Force
+                    }
+                }
+                Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
             }
-            if (Test-Path "templates") {
-                git -c core.autocrlf=false add templates 2>&1 | Out-Null
+
+            # Copy templates
+            if (Test-Path ".standards\templates") {
+                Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
+                Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
             }
-            if (Test-Path "CLAUDE.md") {
-                git -c core.autocrlf=false add CLAUDE.md 2>&1 | Out-Null
+
+            # Copy CLAUDE.md
+            if (Test-Path ".standards\CLAUDE.md") {
+                Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
+                Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
             }
-            if (Test-Path "plans") {
-                git -c core.autocrlf=false add plans 2>&1 | Out-Null
+
+            # Copy INDEX.md
+            if (Test-Path ".standards\.claude\INDEX.md") {
+                Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
+                Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
             }
+
+            # Create plans directory structure
+            if (-not (Test-Path "plans")) {
+                New-Item -ItemType Directory -Path "plans" -Force | Out-Null
+            }
+            if (Test-Path ".standards\plans\templates") {
+                Copy-Item -Recurse ".standards\plans\templates" -Destination "plans\templates" -Force
+                Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
+            }
+            if (-not (Test-Path "plans\research")) {
+                New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
+            }
+            if (-not (Test-Path "plans\reports")) {
+                New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
+            }
+            Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
+
+            # Update .gitignore to exclude copied standards files
+            Write-Host ""
+            Write-Host "  Updating .gitignore..." -ForegroundColor Cyan
+
+            $gitignoreEntries = @"
+
+# ============================================================================
+# Coding Standards (copied from .standards - do not commit)
+# ============================================================================
+# These files are copied from the standards repository and should not be
+# committed to your project. Run update-standards.ps1 to update them.
+
+# Claude Code standards (copied)
+.claude/agents/
+.claude/commands/
+.claude/guides/
+.claude/workflows/
+.claude/INDEX.md
+CLAUDE.md
+
+# Templates (copied)
+templates/
+
+# Plan templates (copied)
+plans/templates/
+
+# Plan working files (generated)
+plans/research/
+plans/reports/
+
+# Keep project-specific config (NOT ignored):
+# .claude/project-context.md
+"@
+
+            if (Test-Path ".gitignore") {
+                $gitignoreContent = Get-Content ".gitignore" -Raw
+                if ($gitignoreContent -notmatch "Coding Standards \(copied") {
+                    Add-Content ".gitignore" $gitignoreEntries
+                }
+            }
+            Write-Host "  [OK] Updated .gitignore with standards exclusions" -ForegroundColor Green
+
+            # Commit submodule and gitignore only (copied files are excluded)
+            git -c core.autocrlf=false add .gitmodules .standards .gitignore 2>&1 | Out-Null
             git commit -m "Add coding standards as submodule" 2>&1 | Out-Null
             Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
         } else {
@@ -2300,27 +2217,15 @@ if ($IntegrateStandards -and (Test-Path ".standards")) {
     Write-Host ""
     Write-Host "[Claude Code Integration]" -ForegroundColor Yellow
     if (Test-Path ".claude") {
-        Write-Host "  [OK] Slash commands available!" -ForegroundColor Green
-        Write-Host "  Type / in Claude Code to see 19 commands:" -ForegroundColor Cyan
-        Write-Host "    /create:form, /create:service, /create:repository" -ForegroundColor Gray
-        Write-Host "    /add:validation, /add:logging, /add:error-handling" -ForegroundColor Gray
-        Write-Host "    /fix:bug, /fix:threading, /fix:performance" -ForegroundColor Gray
-        Write-Host "    /auto-implement - Auto-create complete features!" -ForegroundColor Gray
+        Write-Host "  [OK] Slash commands available! Type / to see all commands" -ForegroundColor Green
     } else {
-        Write-Host "  [WARN] Slash commands not available" -ForegroundColor Yellow
-        Write-Host "  Run as Administrator to enable symlinks" -ForegroundColor Gray
+        Write-Host "  [WARN] .claude folder not found" -ForegroundColor Yellow
     }
     Write-Host ""
     Write-Host "[Update standards]" -ForegroundColor Yellow
-    Write-Host "  cd .standards && git pull && cd .."
-    if (Test-Path ".claude") {
-        $claudeLinkType = (Get-Item ".claude").LinkType
-        if ($claudeLinkType -eq "SymbolicLink") {
-            Write-Host "  (Symlinks will auto-update slash commands)" -ForegroundColor Gray
-        } else {
-            Write-Host "  (Re-copy .claude after updating: Copy-Item .standards\.claude .claude -Recurse -Force)" -ForegroundColor Gray
-        }
-    }
+    Write-Host "  cd .standards && git pull"
+    Write-Host "  Copy-Item .standards\.claude\* .claude -Recurse -Force" -ForegroundColor Gray
+    Write-Host "  Copy-Item .standards\templates\* templates -Recurse -Force" -ForegroundColor Gray
 }
 Write-Host ""
 Write-Host "Happy coding!" -ForegroundColor Green

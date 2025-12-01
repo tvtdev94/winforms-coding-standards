@@ -8,30 +8,19 @@ You are tasked with creating a new MVP Presenter class following WinForms best p
 
 ---
 
-## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+## 🔥 STEP 0: Load Rules (MANDATORY - ALWAYS FIRST!)
 
-**Before ANY code generation, you MUST:**
+**Use `rules-loader` subagent to load ALL coding rules:**
 
-### 1. Read Project Configuration
 ```
-READ: .claude/project-context.md
+Task(subagent_type="rules-loader", prompt="Load rules for creating a new MVP Presenter class")
 ```
-Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 
-### 2. Load Required Templates & Guides
-- `templates/presenter-template.cs` → Presenter structure
-- `docs/patterns/mvp-pattern.md` → MVP rules
-- `.claude/guides/production-ui-standards.md` → UI quality
-
-### 3. Critical Rules
-
-| 🚫 NEVER | ✅ ALWAYS |
-|----------|----------|
-| Reference Windows.Forms in Presenter | Use IView interface only |
-| Put business logic in Form | Put ALL logic in Presenter |
-| Create UI controls in Presenter | Delegate UI to View |
-| Skip validation | Validate in Presenter before saving |
-| Skip event unsubscription | Unsubscribe in Dispose |
+**Wait for rules summary before proceeding.** The rules-loader will:
+- Read `.claude/project-context.md` for project settings
+- Load MVP pattern rules
+- Load event subscription/unsubscription rules
+- Identify `templates/presenter-template.cs` to use
 
 **⚠️ If project-context.md doesn't exist**: Ask user for preferences.
 

@@ -28,12 +28,29 @@ You operate by the holy trinity of software engineering: **YAGNI** (You Aren't G
 
 ## Workflow
 
+### Phase 0: Load Rules (MANDATORY - ALWAYS FIRST)
+
+Use **`rules-loader` subagent** to:
+- Search and read ALL coding rules in the project
+- Load project-context.md configuration
+- Load rules from CLAUDE.md, guides/, workflows/
+- Load UI framework-specific rules
+- Generate a rules summary for the current task
+
+**Output**: Structured rules summary that will guide all subsequent phases
+
+**Why this is critical**:
+- Rules are scattered across many files (~85,000+ lines of docs)
+- AI must understand rules BEFORE coding, not guess
+- Prevents violations of project-specific conventions
+- Ensures consistency across the codebase
+
 ### Phase 1: Context & Clarification
 
-1. **Load Project Context**:
-   - Read `.claude/project-context.md` for project-specific settings
-   - Read `.claude/INDEX.md` to find relevant templates and guides
-   - Understand UI Framework (Standard/DevExpress/ReaLTaiizor), Database, Architecture
+1. **Review Rules Summary** (from Phase 0):
+   - Confirm understanding of critical rules
+   - Note which templates to use
+   - Note which patterns are required
 
 2. **Clarify Requirements**:
    - Ask clarifying questions if needed (1 question at a time)
@@ -147,6 +164,7 @@ Use **`planner` subagent** to:
 
 | Agent | Purpose |
 |-------|---------|
+| `rules-loader` | **Phase 0** - Load and summarize ALL coding rules |
 | `researcher` | Research technologies and best practices |
 | `Explore` | Search codebase for files and patterns |
 | `planner` | Create implementation plans |

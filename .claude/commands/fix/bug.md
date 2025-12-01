@@ -8,31 +8,19 @@ Analyzes error messages, stack traces, and logs to identify and fix bugs in WinF
 
 ---
 
-## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+## 🔥 STEP 0: Load Rules (MANDATORY - ALWAYS FIRST!)
 
-**Before ANY analysis, you MUST:**
+**Use `rules-loader` subagent to load ALL coding rules:**
 
-### 1. Read Project Configuration
 ```
-READ: .claude/project-context.md
+Task(subagent_type="rules-loader", prompt="Load rules for fixing bugs in WinForms application")
 ```
-Extract: `UI_FRAMEWORK`, `PATTERN`, `FRAMEWORK` to understand project setup.
 
-### 2. Common Bug Patterns by Framework
-
-| UI Framework | Common Issues |
-|--------------|---------------|
-| **Standard** | Cross-thread UI access, Control disposed |
-| **DevExpress** | GridView binding, LayoutControl issues |
-| **ReaLTaiizor** | Theme conflicts, Material control states |
-
-### 3. Critical Rules
-
-| 🚫 NEVER | ✅ ALWAYS |
-|----------|----------|
-| Quick hack fixes | Fix root cause |
-| Ignore architecture | Follow MVP pattern |
-| Skip testing | Verify fix works |
+**Wait for rules summary before proceeding.** The rules-loader will:
+- Read `.claude/project-context.md` for UI framework, pattern
+- Load error handling standards
+- Load thread safety rules
+- Load MVP pattern rules (for proper fix location)
 
 ---
 

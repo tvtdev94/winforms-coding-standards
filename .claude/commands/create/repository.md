@@ -6,30 +6,19 @@ You are tasked with creating a new repository class following the Repository pat
 
 ---
 
-## 🔥 STEP 0: MANDATORY Context Loading (DO THIS FIRST!)
+## 🔥 STEP 0: Load Rules (MANDATORY - ALWAYS FIRST!)
 
-**Before ANY code generation, you MUST:**
+**Use `rules-loader` subagent to load ALL coding rules:**
 
-### 1. Read Project Configuration
 ```
-READ: .claude/project-context.md
+Task(subagent_type="rules-loader", prompt="Load rules for creating a new repository class with Entity Framework Core")
 ```
-Extract: `UI_FRAMEWORK`, `DATABASE`, `PATTERN`, `FRAMEWORK`
 
-### 2. Load Required Templates & Guides
-- `templates/repository-template.cs` → Repository structure
-- `templates/unitofwork-template.cs` → UoW integration
-- `docs/data-access/unit-of-work-pattern.md` → UoW pattern
-- `docs/data-access/repository-pattern.md` → Repository rules
-
-### 3. Critical Rules
-
-| 🚫 NEVER | ✅ ALWAYS |
-|----------|----------|
-| SaveChanges in Repository | SaveChanges in UoW only |
-| Return IQueryable | Return List/concrete types |
-| Skip AsNoTracking | AsNoTracking for reads |
-| Generate without template | Start from template |
+**Wait for rules summary before proceeding.** The rules-loader will:
+- Read `.claude/project-context.md` for database provider
+- Load Repository pattern rules
+- Load Unit of Work pattern rules
+- Identify `templates/repository-template.cs` to use
 
 **⚠️ If project-context.md doesn't exist**: Ask user for database preference.
 

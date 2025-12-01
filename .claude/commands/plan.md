@@ -3,20 +3,28 @@ description: Research, analyze, and create an implementation plan for a feature
 argument-hint: [feature description]
 ---
 
-Use the `planner` subagent to create an implementation plan for this task:
+Create an implementation plan for this task:
 <task>$ARGUMENTS</task>
 
 ## Instructions
 
-1. **Load Context First**:
-   - Read `.claude/project-context.md` for project settings
-   - Read `.claude/INDEX.md` to find relevant templates
+### Step 0: Load Rules (MANDATORY - ALWAYS FIRST!)
 
-2. **Research Phase**:
-   - Use `researcher` subagent to explore best practices
-   - Use `Explore` subagent to find related files in codebase
+**Use `rules-loader` subagent to load ALL coding rules:**
 
-3. **Create Plan**:
+```
+Task(subagent_type="rules-loader", prompt="Load rules for planning: $ARGUMENTS")
+```
+
+**Wait for rules summary before proceeding.**
+
+### Step 1: Research Phase (PARALLEL):
+
+Use parallel subagents:
+- `researcher` subagent → explore best practices
+- `Explore` subagent → find related files in codebase
+
+### Step 2: Create Plan:
    - Save plan to `./plans/YYMMDD-feature-name-plan.md`
    - Use template from `./plans/templates/feature-plan-template.md`
    - Include all files to create/modify
