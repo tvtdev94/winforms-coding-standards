@@ -71,11 +71,16 @@
 
 {{TEST_INSTRUCTIONS}}
 
-### 🎯 Available Templates
+### 🎯 Templates to Use (Lazy Loading)
 
-Based on this project configuration, use these templates:
+**ONLY load these templates for this project:**
 
 {{TEMPLATE_LIST}}
+
+**DO NOT load:**
+{{EXCLUDED_TEMPLATES}}
+
+> This ensures minimal token usage by loading only relevant framework templates.
 
 ---
 

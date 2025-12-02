@@ -1861,30 +1861,63 @@ $patternDesc = switch ($Pattern) {
     default { "Follow standard WinForms patterns" }
 }
 
-# Template list
+# Template list (for lazy loading - only load relevant templates)
 $templateList = switch ($UIFramework) {
     "Standard" { @"
-- Form: [$($standardsPath.Replace('\', '/'))/templates/form-template.cs]($($standardsPath.Replace('\', '/'))/templates/form-template.cs)
-- Service: [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs)
-- Repository: [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs)
-- Test: [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)
+- Form: ``form-template.cs``
+- Presenter: ``presenter-template.cs``
+- Service: ``service-template.cs``
+- Repository: ``repository-template.cs``
+- UnitOfWork: ``unitofwork-template.cs``
+- Validator: ``validator-template.cs``
+- Test: ``test-template.cs``
+- FormFactory: ``form-factory-template.cs``
 "@ }
     "DevExpress" { @"
-- Form: [$($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs)
-- Grid: [$($standardsPath.Replace('\', '/'))/templates/dx-grid-template.cs]($($standardsPath.Replace('\', '/'))/templates/dx-grid-template.cs)
-- Service: [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs)
-- Repository: [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs)
-- Test: [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)
+- Form: ``dx-form-template.cs``
+- Grid: ``dx-grid-template.cs``
+- Lookup: ``dx-lookup-template.cs``
+- Report: ``dx-report-template.cs``
+- Presenter: ``presenter-template.cs``
+- Service: ``service-template.cs``
+- Repository: ``repository-template.cs``
+- UnitOfWork: ``unitofwork-template.cs``
+- Validator: ``validator-template.cs``
+- Test: ``test-template.cs``
 "@ }
     "ReaLTaiizor" { @"
-- Material Form: [$($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs)
-- Metro Form: [$($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs)
-- Controls: [$($standardsPath.Replace('\', '/'))/templates/rt-controls-patterns.cs]($($standardsPath.Replace('\', '/'))/templates/rt-controls-patterns.cs)
-- Service: [$($standardsPath.Replace('\', '/'))/templates/service-template.cs]($($standardsPath.Replace('\', '/'))/templates/service-template.cs)
-- Repository: [$($standardsPath.Replace('\', '/'))/templates/repository-template.cs]($($standardsPath.Replace('\', '/'))/templates/repository-template.cs)
-- Test: [$($standardsPath.Replace('\', '/'))/templates/test-template.cs]($($standardsPath.Replace('\', '/'))/templates/test-template.cs)
+- Material Form: ``rt-material-form-template.cs``
+- Metro Form: ``rt-metro-form-template.cs``
+- Controls: ``rt-controls-patterns.cs``
+- Presenter: ``presenter-template.cs``
+- Service: ``service-template.cs``
+- Repository: ``repository-template.cs``
+- UnitOfWork: ``unitofwork-template.cs``
+- Validator: ``validator-template.cs``
+- Test: ``test-template.cs``
 "@ }
     default { "See /templates/ folder" }
+}
+
+# Excluded templates (DO NOT load these - saves tokens)
+$excludedTemplates = switch ($UIFramework) {
+    "Standard" { @"
+- ``dx-*.cs`` (DevExpress templates)
+- ``rt-*.cs`` (ReaLTaiizor templates)
+- ``docs/devexpress/*`` (DevExpress docs)
+- ``docs/realtaiizor/*`` (ReaLTaiizor docs)
+"@ }
+    "DevExpress" { @"
+- ``form-template.cs`` (Standard form - use dx-form instead)
+- ``rt-*.cs`` (ReaLTaiizor templates)
+- ``docs/realtaiizor/*`` (ReaLTaiizor docs)
+"@ }
+    "ReaLTaiizor" { @"
+- ``form-template.cs`` (Standard form - use rt-* instead)
+- ``dx-*.cs`` (DevExpress templates)
+- ``docs/devexpress/*`` (DevExpress docs)
+"@ }
+    default { "N/A" }
 }
 
 # DO/DON'T lists
@@ -2043,11 +2076,16 @@ $serviceInstructions
 
 $testInstructions
 
-### 🎯 Available Templates
+### 🎯 Templates to Use (Lazy Loading)
 
-Based on this project configuration, use these templates:
+**ONLY load these templates for this project:**
 
 $templateList
+
+**DO NOT load (saves tokens):**
+$excludedTemplates
+
+> This ensures minimal token usage by loading only relevant framework templates.
 
 ---
 

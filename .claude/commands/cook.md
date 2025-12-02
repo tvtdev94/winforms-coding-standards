@@ -120,16 +120,12 @@ Use **`planner` subagent** to:
    - Re-run tests
    - Repeat review
 
-### Phase 7: Documentation
+### Phase 7: Report
 
-1. **Use `docs-manager` subagent** to:
-   - Update relevant documentation if needed
-   - Update `./docs/codebase-summary.md` for significant changes
-
-2. **Report to user**:
-   - Summary of changes
-   - List of files created/modified
-   - Any configuration needed
+**Report to user**:
+- Summary of changes
+- List of files created/modified
+- Any configuration needed
 
 ### Phase 8: Git (if requested)
 
@@ -171,7 +167,6 @@ Use **`planner` subagent** to:
 | `tester` | Generate and run tests |
 | `code-reviewer` | Review code quality |
 | `debugger` | Debug issues and find root causes |
-| `docs-manager` | Update documentation |
 | `git-manager` | Handle git commits |
 | `winforms-reviewer` | WinForms-specific code review |
 | `test-generator` | Generate WinForms tests |
