@@ -1,17 +1,17 @@
 {
-  "version": "5.6.0",
+  "version": "5.8.0",
   "name": "WinForms Coding Standards",
   "description": "C# WinForms coding standards, documentation, and project templates for building maintainable, scalable applications with AI-powered development workflow",
   "type": "coding-standards-kit",
-  "lastUpdated": "2025-11-29",
-  "phase": "Enhancement Complete - ClaudeKit Integration",
+  "lastUpdated": "2025-12-02",
+  "phase": "Optimized - Reduced Token Usage",
   "stats": {
     "documentationFiles": 53,
     "guides": 6,
-    "codeTemplates": 13,
-    "slashCommands": 32,
-    "workflows": 7,
-    "agents": 10,
+    "codeTemplates": 11,
+    "slashCommands": 6,
+    "workflows": 3,
+    "agents": 8,
     "planTemplates": 7,
     "skills": 0,
     "exampleProjects": 1,
@@ -36,53 +36,27 @@
     "diContainer": "Microsoft.Extensions.DependencyInjection",
     "logging": ["Serilog", "NLog"]
   },
-  "roadmap": {
-    "phase1": {
-      "name": "Restructure Project",
-      "status": "Complete",
-      "completedDate": "2025-11-08"
-    },
-    "phase2": {
-      "name": "WinForms-Specific Agents",
-      "status": "Complete",
-      "completedDate": "2025-11-08"
-    },
-    "phase3": {
-      "name": "Plan Templates & Scaffolding",
-      "status": "Complete",
-      "completedDate": "2025-11-08"
-    },
-    "phase4": {
-      "name": "Enhance init-project.ps1",
-      "status": "Complete",
-      "completedDate": "2025-11-18",
-      "note": "Git Submodule integration with symlinks for auto-updating standards."
-    },
-    "phase5": {
-      "name": "ReaLTaiizor Integration",
-      "status": "Complete",
-      "completedDate": "2025-11-18",
-      "note": "Added Material, Metro, Poison theme support with 5 docs and 4 templates."
-    },
-    "phase6": {
-      "name": "ClaudeKit Integration",
-      "status": "Complete",
-      "completedDate": "2025-11-29",
-      "note": "Added /cook, /plan, /debug, /test, /watzup commands. 6 new agents (planner, researcher, tester, debugger, code-reviewer, git-manager). Orchestration workflows."
-    }
-  },
   "features": {
     "uiFrameworks": ["Standard WinForms", "DevExpress", "ReaLTaiizor"],
     "patterns": ["MVP", "Factory", "Unit of Work", "Repository"],
     "commands": {
-      "orchestration": ["/cook", "/plan", "/plan:two"],
-      "development": ["/create:*", "/add:*", "/fix:*", "/refactor:*"],
-      "quality": ["/test", "/debug", "/watzup"],
-      "setup": ["/setup:di", "/auto-implement"]
+      "core": ["/cook", "/plan", "/test", "/debug", "/watzup"]
     },
     "agents": {
-      "winforms": ["winforms-reviewer", "mvp-validator", "test-generator", "docs-manager"],
-      "general": ["planner", "researcher", "tester", "debugger", "code-reviewer", "git-manager"]
+      "winforms": ["reviewer", "tester", "docs-manager"],
+      "general": ["planner", "researcher", "debugger", "git-manager", "rules-loader"]
+    }
+  },
+  "optimization": {
+    "claudeMdLines": 170,
+    "indexMdLines": 258,
+    "coreCommands": 6,
+    "tokenReduction": "~50%",
+    "trimmedFiles": {
+      "ai-instructions.md": "789→249 lines (68% reduction)",
+      "code-generation-guide.md": "815→388 lines (52% reduction)",
+      "presenter-template.cs": "902→432 lines (52% reduction)",
+      "validator-template.cs": "617→238 lines (61% reduction)"
     }
   }
 }

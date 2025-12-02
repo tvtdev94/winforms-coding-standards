@@ -1,7 +1,7 @@
 # C# WinForms Coding Standards - Claude Code Guide
 
 > Quick reference for AI assistants building WinForms applications
-> **Version**: 5.6.1 | **Updated**: 2025-12-02
+> **Version**: 5.8.0 | **Updated**: 2025-12-02
 
 ---
 
@@ -126,24 +126,25 @@ All UI code MUST be in `InitializeComponent()` for Visual Studio Designer:
 
 ## Commands & Agents
 
-### Key Commands
+### Commands (6 Core)
 | Command | Purpose |
 |---------|---------|
 | `/cook [feature]` | Full workflow: plan → implement → test → review |
-| `/plan [feature]` | Create implementation plan |
-| `/create:form` | Create form with MVP |
-| `/create:service` | Create service class |
-| `/fix:bug` | Debug and fix issues |
-| `/test` | Run tests |
+| `/plan [feature]` | Create implementation plan only |
+| `/fix [bug]` | Fix bugs with streamlined workflow |
+| `/test` | Run tests and report results |
+| `/debug [issue]` | Debug issues and find root cause |
+| `/watzup` | Review recent changes and status |
+
+> **Tip**: `/cook` for features, `/fix` for bugs
 
 ### Key Agents
 | Agent | Purpose |
 |-------|---------|
-| `planner` | Create implementation plans |
+| `reviewer` | Code review, MVP validation, WinForms best practices |
 | `tester` | Generate and run tests |
-| `code-reviewer` | Review code quality |
+| `planner` | Create implementation plans |
 | `debugger` | Debug issues |
-| `winforms-reviewer` | WinForms-specific review |
 
 > Full list: [.claude/INDEX.md](.claude/INDEX.md)
 
@@ -165,6 +166,6 @@ dotnet clean && dotnet build  # Clean rebuild
 |------|----------|
 | Find what to read | [.claude/INDEX.md](.claude/INDEX.md) |
 | Architecture guide | [.claude/guides/architecture-guide.md](.claude/guides/architecture-guide.md) |
-| UI standards | [.claude/guides/production-ui-standards.md](.claude/guides/production-ui-standards.md) |
+| UI standards | [.claude/guides/production-ui/](.claude/guides/production-ui/) |
 | Full docs | [docs/00-overview.md](docs/00-overview.md) |
 | Examples | [example-project/](example-project/) |

@@ -1,25 +1,19 @@
 # Shared Context & Rules Loader
 
-> **⚠️ INCLUDE THIS AT THE START OF EVERY COMMAND THAT WRITES CODE**
+> **Include this at the start of commands that write code**
 
 ---
 
-## 🔥 STEP 0: Load Rules (MANDATORY - ALWAYS FIRST!)
+## Step 0: Load Context (MANDATORY)
 
-**Before ANY code generation or modification, spawn `rules-loader` agent:**
+**Before ANY code generation:**
 
-```
-Use Task tool with subagent_type="rules-loader" to:
-- Load .claude/project-context.md
-- Load ALL coding rules from CLAUDE.md, guides/, workflows/
-- Generate rules summary for current task
-```
-
-**Why**: Rules are scattered across ~85,000+ lines. Agent must understand rules BEFORE coding.
+1. **Read `.claude/project-context.md`** - Project config
+2. **Read `.claude/INDEX.md`** - Find relevant resources
 
 ---
 
-## Quick Reference (After rules-loader completes)
+## Quick Reference
 
 ### Project Configuration (from project-context.md)
 
@@ -32,29 +26,24 @@ Use Task tool with subagent_type="rules-loader" to:
 
 ### Templates by UI Framework
 
-| UI Framework | Form Template | Grid Template | Additional |
-|--------------|---------------|---------------|------------|
-| **Standard** | `form-template.cs` | N/A | `service-template.cs` |
-| **DevExpress** | `dx-form-template.cs` | `dx-grid-template.cs` | `dx-lookup-template.cs` |
-| **ReaLTaiizor** | `rt-material-form-template.cs` | N/A | `rt-controls-patterns.cs` |
+| UI Framework | Form Template | Additional |
+|--------------|---------------|------------|
+| **Standard** | `form-template.cs` | `service-template.cs` |
+| **DevExpress** | `dx-form-templates.cs` | `dx-data-templates.cs` |
+| **ReaLTaiizor** | `rt-templates.cs` | - |
 
-### Critical Rules (MUST FOLLOW)
+### Critical Rules
 
-```
-┌─────────────────────────────────────────────────────────┐
-│ 🚫 NEVER DO                     │ ✅ ALWAYS DO          │
-├─────────────────────────────────┼───────────────────────┤
-│ Inject IServiceProvider         │ Use IFormFactory      │
-│ Inject IRepository directly     │ Use IUnitOfWork       │
-│ SaveChanges in Repository       │ SaveChanges in UoW    │
-│ Business logic in Forms         │ Logic in Presenter    │
-│ Separate Label + TextBox        │ Floating Label/Hint   │
-│ Generate code without template  │ Start from template   │
-│ Skip validation                 │ Validate all inputs   │
-│ Ignore async/await              │ Async for all I/O     │
-│ Helper methods in Designer      │ Inline all UI code    │
-└─────────────────────────────────┴───────────────────────┘
-```
+| NEVER | ALWAYS |
+|-------|--------|
+| Inject IServiceProvider | Use IFormFactory |
+| Inject IRepository directly | Use IUnitOfWork |
+| SaveChanges in Repository | SaveChanges in UoW |
+| Business logic in Forms | Logic in Presenter |
+| Separate Label + TextBox | Floating Label/Hint |
+| Generate without template | Start from template |
+| Skip validation | Validate all inputs |
+| Helper methods in Designer | Inline all UI code |
 
 ### If project-context.md doesn't exist
 
@@ -62,36 +51,17 @@ Ask user for UI framework preference. Do NOT assume any default.
 
 ---
 
-## Commands That MUST Load Rules First
+## Commands That Load Context First
 
-| Category | Commands | Reason |
-|----------|----------|--------|
-| **Create** | `/create:form`, `/create:service`, `/create:repository`, `/create:presenter`, `/create:dialog`, `/create:custom-control` | Writing new code |
-| **Add** | `/add:validation`, `/add:data-binding`, `/add:logging`, `/add:settings`, `/add:error-handling` | Modifying code |
-| **Fix** | `/fix:bug`, `/fix:threading`, `/fix:performance` | Need rules to fix correctly |
-| **Refactor** | `/refactor:to-mvp` | Must follow MVP rules |
-| **Setup** | `/setup:di` | DI has specific patterns |
-| **Review** | `/review:code`, `/review:pr` | Need rules to review against |
-| **Plan** | `/plan`, `/plan:two`, `/cook` | Plans must follow rules |
+| Command | Reason |
+|---------|--------|
+| `/cook` | Full workflow - needs all context |
+| `/plan` | Plans must follow rules |
 
-## Commands That DON'T Need Rules
+## Commands That DON'T Need Full Context
 
 | Command | Reason |
 |---------|--------|
 | `/watzup` | Only shows git status |
-| `/debug` | Investigates issues (but benefits from context) |
 | `/test` | Runs existing tests |
-
----
-
-## How to Include in Commands
-
-Add this at the start of any command that writes code:
-
-```markdown
-## Step 0: Load Rules (MANDATORY)
-
-Use **`rules-loader` subagent** to load all coding rules before proceeding.
-
-Wait for rules summary before continuing to next step.
-```
+| `/debug` | Investigates issues |

@@ -109,7 +109,7 @@ Use **`planner` subagent** to:
 
 ### Phase 6: Code Review
 
-1. **Use `code-reviewer` subagent** to:
+1. **Use `reviewer` subagent** to:
    - Review code against C# best practices
    - Check MVP pattern compliance
    - Verify no business logic in Forms
@@ -165,12 +165,10 @@ Use **`planner` subagent** to:
 | `Explore` | Search codebase for files and patterns |
 | `planner` | Create implementation plans |
 | `tester` | Generate and run tests |
-| `code-reviewer` | Review code quality |
+| `reviewer` | Review code quality, MVP validation, WinForms best practices |
 | `debugger` | Debug issues and find root causes |
 | `git-manager` | Handle git commits |
-| `winforms-reviewer` | WinForms-specific code review |
-| `test-generator` | Generate WinForms tests |
-| `mvp-validator` | Validate MVP pattern |
+| `docs-manager` | Update documentation |
 
 ---
 

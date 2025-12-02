@@ -1,6 +1,6 @@
 # Form Layout & Responsive Design
 
-> Part of [Production UI Standards](../production-ui-standards.md)
+> Part of Production UI Standards
 
 ---
 

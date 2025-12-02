@@ -895,10 +895,10 @@ public class CustomerServiceTests
 - [Test Template](templates/test-template.cs)
 
 ### Slash Commands
-- `/refactor:to-mvp` - Refactor form to MVP pattern
-- `/create:service` - Create new service
-- `/create:repository` - Create new repository
-- `/add:test` - Add unit tests
+- `/cook "refactor CustomerForm to MVP"` - Refactor form to MVP pattern
+- `/cook "create OrderService"` - Create new service
+- `/cook "create ProductRepository"` - Create new repository
+- `/cook "add tests for CustomerService"` - Add unit tests
 
 ---
 
@@ -920,7 +920,7 @@ A: Yes, but EF Core is recommended. Repository pattern works with any ORM.
 A: These patterns work with .NET Framework 4.6.1+. Some NuGet packages may differ.
 
 **Q: Is Claude Code helpful for migration?**
-A: Absolutely! Use slash commands like `/refactor:to-mvp` to automate refactoring.
+A: Absolutely! Use `/cook "refactor to MVP"` to automate refactoring.
 
 ---
 

@@ -1822,14 +1822,14 @@ $formInstructions = switch ($UIFramework) {
 - Prefix controls: btn, txt, dgv, lbl, etc.
 "@ }
     "DevExpress" { @"
-- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/dx-form-template.cs)
+- **ALWAYS use** [$($standardsPath.Replace('\', '/'))/templates/dx-form-templates.cs]($($standardsPath.Replace('\', '/'))/templates/dx-form-templates.cs)
 - Use DevExpress controls: SimpleButton, TextEdit, GridControl, LayoutControl
 - Follow MVP pattern with Presenter and View interface
 - Prefix controls: btn, txt, grid, lbl, lookup, etc.
 - **READ FIRST**: [$($standardsPath.Replace('\', '/'))/docs/devexpress/devexpress-overview.md]($($standardsPath.Replace('\', '/'))/docs/devexpress/devexpress-overview.md)
 "@ }
     "ReaLTaiizor" { @"
-- **ALWAYS use**: [$($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-material-form-template.cs) OR [$($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs]($($standardsPath.Replace('\', '/'))/templates/rt-metro-form-template.cs)
+- **ALWAYS use**: [$($standardsPath.Replace('\', '/'))/templates/rt-templates.cs]($($standardsPath.Replace('\', '/'))/templates/rt-templates.cs)
 - Use ReaLTaiizor controls: MaterialButton, MaterialTextBox, MaterialListView, MetroGrid
 - Follow MVP pattern with Presenter and View interface
 - Prefix controls: btn, txt, lst, grid, etc.
@@ -1874,10 +1874,8 @@ $templateList = switch ($UIFramework) {
 - FormFactory: ``form-factory-template.cs``
 "@ }
     "DevExpress" { @"
-- Form: ``dx-form-template.cs``
-- Grid: ``dx-grid-template.cs``
-- Lookup: ``dx-lookup-template.cs``
-- Report: ``dx-report-template.cs``
+- Forms: ``dx-form-templates.cs`` (Edit + List + Grid)
+- Data: ``dx-data-templates.cs`` (LookUpEdit + Reports)
 - Presenter: ``presenter-template.cs``
 - Service: ``service-template.cs``
 - Repository: ``repository-template.cs``
@@ -1886,9 +1884,7 @@ $templateList = switch ($UIFramework) {
 - Test: ``test-template.cs``
 "@ }
     "ReaLTaiizor" { @"
-- Material Form: ``rt-material-form-template.cs``
-- Metro Form: ``rt-metro-form-template.cs``
-- Controls: ``rt-controls-patterns.cs``
+- Templates: ``rt-templates.cs`` (Material + Metro + Patterns)
 - Presenter: ``presenter-template.cs``
 - Service: ``service-template.cs``
 - Repository: ``repository-template.cs``

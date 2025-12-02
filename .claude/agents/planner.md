@@ -119,7 +119,7 @@ Form → Presenter → Service → UnitOfWork → Repository → Database
 | File | Template to Use |
 |------|-----------------|
 | `Domain/Models/Xxx.cs` | `templates/model-template.cs` |
-| `UI/Forms/XxxForm.cs` | `templates/form-template.cs` or `dx-form-template.cs` |
+| `UI/Forms/XxxForm.cs` | `templates/form-template.cs` or `dx-form-templates.cs` |
 | ... | ... |
 
 ## Files to Modify

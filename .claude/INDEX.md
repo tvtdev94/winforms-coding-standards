@@ -2,7 +2,7 @@
 
 > **Purpose**: Help AI decide which resource to read based on task type
 > **Goal**: Minimize context usage while ensuring quality
-> **Version**: 2.0.0 | **Updated**: 2025-12-02
+> **Version**: 2.1.0 | **Updated**: 2025-12-02
 
 ---
 
@@ -16,9 +16,9 @@
 | **Create Form** | + code-generation-guide.md (Form section) + template | Full docs |
 | **Create Service** | + service-template.cs | Guides |
 | **Fix bug** | + relevant docs section | Full guides |
-| **UI work** | + production-ui-standards.md (relevant section) | Full file |
+| **UI work** | + production-ui/ (relevant section) | All sections |
 | **Architecture question** | + architecture-guide.md | Templates |
-| **Code review** | + winforms-reviewer agent | Docs |
+| **Code review** | + reviewer agent | Docs |
 
 ### Framework-Specific Loading
 
@@ -70,10 +70,10 @@ CLAUDE.md
 
 | Task | MUST Read | Section Only |
 |------|-----------|--------------|
-| Any Form | production-ui-standards.md | Section 5 (Layout) + 14 (Checklist) |
-| DataGridView | production-ui-standards.md | Section 2 (Data Display) |
-| Input controls | production-ui-standards.md | Section 3 (Input) |
-| Buttons | production-ui-standards.md | Section 4 (Buttons) |
+| Any Form | production-ui/ | 05-layout-responsive.md + CHECKLIST.md |
+| DataGridView | production-ui/ | 02-data-display.md |
+| Input controls | production-ui/ | 03-input-controls.md |
+| Buttons | production-ui/ | 04-buttons-actions.md |
 
 **Critical UI Rules:**
 - Grid must use `Dock.Fill` - No empty gap
@@ -123,23 +123,33 @@ CLAUDE.md
 
 | Guide | Lines | Use For |
 |-------|-------|---------|
-| ai-instructions.md | 690 | DO/DON'T rules |
+| ai-instructions.md | 249 | DO/DON'T rules |
 | architecture-guide.md | 665 | MVP, DI, Factory, UoW |
-| code-generation-guide.md | 820 | Creating components |
+| code-generation-guide.md | 388 | Creating components |
 | coding-standards.md | 375 | Naming, style |
 | testing-guide.md | 572 | Writing tests |
-| production-ui-standards.md | 1800+ | UI quality (read sections only!) |
+| production-ui/ | modular | UI quality (read sections!) |
 
-### Agents (`.claude/agents/`)
+### Agents (`.claude/agents/`) - 8 Agents
 
 | Agent | Use For |
 |-------|---------|
-| winforms-reviewer | Code review |
-| test-generator | Auto-generate tests |
-| mvp-validator | Validate architecture |
+| reviewer | Code review, MVP validation, WinForms best practices |
+| tester | Generate tests, run tests, coverage |
 | planner | Create implementation plans |
-| tester | Run tests |
 | debugger | Debug issues |
+| researcher | Research technologies |
+| git-manager | Commits, PRs |
+| docs-manager | Documentation sync |
+| rules-loader | Load rules before implementation |
+
+### Workflows (`.claude/workflows/`) - 3 Core Workflows
+
+| Workflow | Use For |
+|----------|---------|
+| review-workflow.md | Code review process, checklists |
+| development-workflow.md | Development rules, orchestration |
+| testing-workflow.md | Testing guidelines |
 
 ### Templates (`templates/`)
 
@@ -154,30 +164,24 @@ CLAUDE.md
 - form-factory-template.cs
 
 **DevExpress (only if project uses DX):**
-- dx-form-template.cs
-- dx-grid-template.cs
-- dx-lookup-template.cs
-- dx-report-template.cs
+- dx-form-templates.cs (Edit Form + List Form + Grid)
+- dx-data-templates.cs (LookUpEdit + Reports)
 
 **ReaLTaiizor (only if project uses RT):**
-- rt-material-form-template.cs
-- rt-metro-form-template.cs
-- rt-controls-patterns.cs
+- rt-templates.cs (Material Form + Metro List + Patterns)
 
-### Commands (`.claude/commands/`)
+### Commands (`.claude/commands/`) - 6 Core Commands
 
 | Command | Purpose |
 |---------|---------|
-| `/cook [feature]` | Full workflow |
-| `/plan [feature]` | Create plan |
-| `/create:form` | Create form + presenter |
-| `/create:service` | Create service |
-| `/create:repository` | Create repository |
-| `/fix:bug` | Debug issues |
-| `/fix:threading` | Fix thread issues |
-| `/add:validation` | Add validation |
-| `/add:logging` | Add logging |
-| `/test` | Run tests |
+| `/cook [feature]` | Full workflow: plan → implement → test → review |
+| `/plan [feature]` | Create implementation plan only |
+| `/fix [bug]` | Fix bugs with streamlined workflow |
+| `/test` | Run tests and report results |
+| `/debug [issue]` | Debug issues and find root cause |
+| `/watzup` | Review recent changes and status |
+
+> `/cook` for features, `/fix` for bugs, `/debug` to analyze only
 
 ### Docs (`docs/`)
 
@@ -201,7 +205,7 @@ CLAUDE.md
 2. Check project-context.md → UI Framework
 3. Load: code-generation-guide.md → "Forms" section (~100 lines)
 4. Load: form-template.cs (or dx-/rt- variant)
-5. After: winforms-reviewer agent
+5. After: reviewer agent
 Total: ~500-800 tokens added
 ```
 
@@ -220,15 +224,6 @@ Total: ~400 tokens added
 Total: ~300-600 tokens added
 ```
 
-### Example 4: "Create DevExpress grid"
-```
-1. CLAUDE.md (already loaded)
-2. Verify: project-context.md confirms DevExpress
-3. Load: dx-grid-template.cs
-4. Load: docs/devexpress/devexpress-grid-patterns.md (if needed)
-Total: ~500-800 tokens added
-```
-
 ---
 
 ## File Structure
@@ -238,9 +233,10 @@ Total: ~500-800 tokens added
 ├── INDEX.md              ← You are here (Smart Router)
 ├── project-context.md    ← Project config (check first!)
 ├── guides/               ← AI rules (load sections)
-├── agents/               ← Specialized tasks
-├── workflows/            ← Process guides
-└── commands/             ← Slash commands
+│   └── production-ui/    ← UI standards (modular)
+├── agents/               ← 6 specialized agents
+├── workflows/            ← 2 core workflows
+└── commands/             ← 6 slash commands
 
 templates/                ← Code templates (load by framework)
 docs/                     ← Detailed docs (load on-demand)

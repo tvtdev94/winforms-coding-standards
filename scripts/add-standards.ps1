@@ -325,7 +325,7 @@ $patternDesc
 
 | Component | Template |
 |-----------|----------|
-| Form | ``templates/$( if ($UIFramework -eq "DevExpress") { "dx-form-template.cs" } elseif ($UIFramework -eq "ReaLTaiizor") { "rt-material-form-template.cs" } else { "form-template.cs" })`` |
+| Form | ``templates/$( if ($UIFramework -eq "DevExpress") { "dx-form-templates.cs" } elseif ($UIFramework -eq "ReaLTaiizor") { "rt-templates.cs" } else { "form-template.cs" })`` |
 | Service | ``templates/service-template.cs`` |
 | Repository | ``templates/repository-template.cs`` |
 | Presenter | ``templates/presenter-template.cs`` |
