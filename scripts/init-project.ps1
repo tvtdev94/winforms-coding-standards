@@ -1682,11 +1682,24 @@ Write-Host "  [OK] .vscode/launch.json created" -ForegroundColor Green
 Write-Host ""
 Write-Host "[10] Initializing git repository..." -ForegroundColor Cyan
 
+# Check if git user is configured
+$gitUserName = git config user.name 2>$null
+$gitUserEmail = git config user.email 2>$null
+$canCommit = $gitUserName -and $gitUserEmail
+
 git init 2>&1 | Out-Null
 git -c core.autocrlf=false add . 2>&1 | Out-Null
-git commit -m "Initial commit: Project structure created by init-project-interactive.ps1" 2>&1 | Out-Null
 
-Write-Host "  [OK] Git repository initialized" -ForegroundColor Green
+if ($canCommit) {
+    git commit -m "Initial commit: Project structure created by init-project.ps1" 2>&1 | Out-Null
+    Write-Host "  [OK] Git repository initialized with initial commit" -ForegroundColor Green
+} else {
+    Write-Host "  [OK] Git repository initialized (files staged)" -ForegroundColor Green
+    Write-Host "  [WARN] Git user not configured. Run these commands to commit:" -ForegroundColor Yellow
+    Write-Host "         git config --global user.name `"Your Name`"" -ForegroundColor Gray
+    Write-Host "         git config --global user.email `"your@email.com`"" -ForegroundColor Gray
+    Write-Host "         git commit -m `"Initial commit`"" -ForegroundColor Gray
+}
 
 # ============================================================================
 # Step 11: Copy Coding Standards (ALWAYS)
@@ -1857,15 +1870,19 @@ if (Test-Path ".gitignore") {
 Write-Host "  [OK] Updated .gitignore (standards files excluded)" -ForegroundColor Green
 
 # ================================================================
-# Step 11d: Commit
+# Step 11d: Commit (if git user configured)
 # ================================================================
 git -c core.autocrlf=false add . 2>&1 | Out-Null
-if ($submoduleAdded) {
-    git commit -m "Add coding standards (with submodule)" 2>&1 | Out-Null
-    Write-Host "  [OK] Standards integration complete (with Submodule)" -ForegroundColor Green
+if ($canCommit) {
+    if ($submoduleAdded) {
+        git commit -m "Add coding standards (with submodule)" 2>&1 | Out-Null
+        Write-Host "  [OK] Standards integration complete (with Submodule)" -ForegroundColor Green
+    } else {
+        git commit -m "Add coding standards" 2>&1 | Out-Null
+        Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
+    }
 } else {
-    git commit -m "Add coding standards" 2>&1 | Out-Null
-    Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
+    Write-Host "  [OK] Standards files staged (commit skipped - git user not configured)" -ForegroundColor Green
 }
 
 # ============================================================================
@@ -2284,8 +2301,12 @@ if (Test-Path ".context") {
 
 # Add project-context.md to git
 git -c core.autocrlf=false add .claude/project-context.md 2>&1 | Out-Null
-git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
-Write-Host "  [OK] Project context committed to git" -ForegroundColor Green
+if ($canCommit) {
+    git commit -m "Add project context for AI assistants" 2>&1 | Out-Null
+    Write-Host "  [OK] Project context committed to git" -ForegroundColor Green
+} else {
+    Write-Host "  [OK] Project context staged (commit skipped - git user not configured)" -ForegroundColor Green
+}
 
 
 # ============================================================================
