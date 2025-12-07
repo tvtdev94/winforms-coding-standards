@@ -210,11 +210,14 @@ $IncludeExampleCode = $includeExampleInput -eq "y" -or $includeExampleInput -eq 
 Write-Host "   Example code: $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })" -ForegroundColor Green
 Write-Host ""
 
-# Question 9: Integrate Standards
-Write-Host "9. Coding Standards Integration" -ForegroundColor Yellow
-$integrateStandardsInput = Read-Host "   Integrate coding standards? (Y/n)"
-$IntegrateStandards = $integrateStandardsInput -ne "n" -and $integrateStandardsInput -ne "N"
-Write-Host "   Standards: $(if ($IntegrateStandards) { 'Yes' } else { 'No' })" -ForegroundColor Green
+# Question 9: Add Standards as Git Submodule
+Write-Host "9. Link Standards Repository (Git Submodule)" -ForegroundColor Yellow
+Write-Host "   - Standards files will ALWAYS be copied to your project" -ForegroundColor DarkGray
+Write-Host "   - Submodule allows auto-update via 'git pull'" -ForegroundColor DarkGray
+Write-Host "   - Skip if target machine has no access to standards repo" -ForegroundColor DarkGray
+$addSubmoduleInput = Read-Host "   Add as git submodule? (y/N)"
+$AddSubmodule = $addSubmoduleInput -eq "y" -or $addSubmoduleInput -eq "Y"
+Write-Host "   Submodule: $(if ($AddSubmodule) { 'Yes' } else { 'No' })" -ForegroundColor Green
 Write-Host ""
 
 # ============================================================================
@@ -231,7 +234,8 @@ Write-Host "Pattern         : $Pattern"
 Write-Host "Structure       : $ProjectStructure"
 Write-Host "Tests           : $(if ($IncludeTests) { 'Yes' } else { 'No' })"
 Write-Host "Example Code    : $(if ($IncludeExampleCode) { 'Yes' } else { 'No' })"
-Write-Host "Standards       : $(if ($IntegrateStandards) { 'Yes' } else { 'No' })"
+Write-Host "Standards       : Yes (always copied)"
+Write-Host "Submodule       : $(if ($AddSubmodule) { 'Yes' } else { 'No' })"
 Write-Host ""
 $confirm = Read-Host "Proceed with these settings? (Y/n)"
 if ($confirm -eq "n" -or $confirm -eq "N") {
@@ -1324,6 +1328,39 @@ $dbContextCode = if ($Database -ne "None") {
     "            // No database configured"
 }
 
+# Generate InitializeDatabase method code
+$initDbCode = if ($Database -ne "None") {
+@"
+
+        private static void InitializeDatabase(IServiceProvider serviceProvider)
+        {
+            try
+            {
+                using var scope = serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                // Create database if it doesn't exist
+                context.Database.EnsureCreated();
+
+                Log.Information("Database initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to initialize database");
+                throw;
+            }
+        }
+"@
+} else {
+@"
+
+        private static void InitializeDatabase(IServiceProvider serviceProvider)
+        {
+            // No database configured
+        }
+"@
+}
+
 # Both Single and Multi use UI.Forms namespace now
 $programNamespace = $ProjectName
 $programFormsUsing = "$ProjectName.UI.Forms"
@@ -1367,6 +1404,9 @@ namespace $programNamespace
                 ConfigureServices(services, configuration);
                 var serviceProvider = services.BuildServiceProvider();
 
+                // Ensure database is created
+                InitializeDatabase(serviceProvider);
+
                 // Run application
                 var mainForm = serviceProvider.GetRequiredService<MainForm>();
                 System.Windows.Forms.Application.Run(mainForm);
@@ -1407,6 +1447,7 @@ $dbContextCode
             // Forms
             services.AddTransient<MainForm>();
         }
+$initDbCode
     }
 }
 "@
@@ -1648,96 +1689,127 @@ git commit -m "Initial commit: Project structure created by init-project-interac
 Write-Host "  [OK] Git repository initialized" -ForegroundColor Green
 
 # ============================================================================
-# Step 11: Integrate Coding Standards (if requested)
+# Step 11: Copy Coding Standards (ALWAYS)
 # ============================================================================
-if ($IntegrateStandards) {
-    Write-Host ""
-    Write-Host "[11] Integrating coding standards..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "[11] Copying coding standards..." -ForegroundColor Cyan
+
+# Helper function to copy standards files
+function Copy-StandardsFiles {
+    param([string]$SourcePath)
+
+    Write-Host "  Copying standards files from: $SourcePath" -ForegroundColor Cyan
+
+    # Create .claude folder
+    if (-not (Test-Path ".claude")) {
+        New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
+    }
+
+    # Copy .claude subdirectories (agents, commands, guides, workflows)
+    if (Test-Path "$SourcePath\.claude") {
+        $claudeSubdirs = @("agents", "commands", "guides", "workflows")
+        foreach ($subdir in $claudeSubdirs) {
+            if (Test-Path "$SourcePath\.claude\$subdir") {
+                Copy-Item -Recurse "$SourcePath\.claude\$subdir" -Destination ".claude\$subdir" -Force
+            }
+        }
+        Write-Host "  [OK] Copied .claude directory (agents, commands, guides, workflows)" -ForegroundColor Green
+    }
+
+    # Copy templates
+    if (Test-Path "$SourcePath\templates") {
+        Copy-Item -Recurse "$SourcePath\templates" -Destination "templates" -Force
+        Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
+    }
+
+    # Copy CLAUDE.md
+    if (Test-Path "$SourcePath\CLAUDE.md") {
+        Copy-Item "$SourcePath\CLAUDE.md" -Destination "CLAUDE.md" -Force
+        Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
+    }
+
+    # Copy INDEX.md
+    if (Test-Path "$SourcePath\.claude\INDEX.md") {
+        Copy-Item "$SourcePath\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
+        Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
+    }
+
+    # Copy docs folder
+    if (Test-Path "$SourcePath\docs") {
+        Copy-Item -Recurse "$SourcePath\docs" -Destination "docs" -Force
+        Write-Host "  [OK] Copied docs directory" -ForegroundColor Green
+    }
+
+    # Create plans directory structure
+    if (-not (Test-Path "plans")) {
+        New-Item -ItemType Directory -Path "plans" -Force | Out-Null
+    }
+    if (Test-Path "$SourcePath\plans\templates") {
+        Copy-Item -Recurse "$SourcePath\plans\templates" -Destination "plans\templates" -Force
+        Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
+    }
+    if (-not (Test-Path "plans\research")) {
+        New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
+    }
+    if (-not (Test-Path "plans\reports")) {
+        New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
+    }
+    Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
+}
+
+# ================================================================
+# Step 11a: Add Submodule (if requested)
+# ================================================================
+$submoduleAdded = $false
+if ($AddSubmodule) {
+    Write-Host "  Adding git submodule..." -ForegroundColor Cyan
 
     # Auto-detect standards repo URL
-    $StandardsRepo = ""
+    $StandardsRepoUrl = ""
     Push-Location $repoRoot
-    $StandardsRepo = git remote get-url origin 2>$null
+    $StandardsRepoUrl = git remote get-url origin 2>$null
     Pop-Location
 
-    if ($StandardsRepo) {
-        Write-Host "  Using standards repo: $StandardsRepo"
+    if ($StandardsRepoUrl) {
+        Write-Host "  Standards repo: $StandardsRepoUrl"
 
         # Add as submodule
-        Start-Process git -ArgumentList "submodule","add",$StandardsRepo,".standards" -NoNewWindow -Wait -RedirectStandardError "$env:TEMP\git_stderr.txt" -RedirectStandardOutput "$env:TEMP\git_stdout.txt"
+        Start-Process git -ArgumentList "submodule","add",$StandardsRepoUrl,".standards" -NoNewWindow -Wait -RedirectStandardError "$env:TEMP\git_stderr.txt" -RedirectStandardOutput "$env:TEMP\git_stdout.txt"
 
         # Check if submodule was actually added
         if (Test-Path ".standards/.git") {
             git submodule update --init --recursive *>&1 | Out-Null
             Write-Host "  [OK] Standards added as submodule" -ForegroundColor Green
+            $submoduleAdded = $true
+        } else {
+            Write-Host "  [WARN] Could not add submodule" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "  [WARN] Standards repo URL not detected" -ForegroundColor Yellow
+    }
+}
 
-            # Copy standards files (portable - works on any machine)
-            Write-Host ""
-            Write-Host "  Copying standards files..." -ForegroundColor Cyan
+# ================================================================
+# Step 11b: Copy Standards Files (ALWAYS)
+# ================================================================
+Write-Host ""
+Copy-StandardsFiles -SourcePath $repoRoot
 
-            # Create .claude folder
-            if (-not (Test-Path ".claude")) {
-                New-Item -ItemType Directory -Path ".claude" -Force | Out-Null
-            }
+# ================================================================
+# Step 11c: Update .gitignore
+# ================================================================
+Write-Host ""
+Write-Host "  Updating .gitignore..." -ForegroundColor Cyan
 
-            # Copy .claude subdirectories (agents, commands, guides, workflows)
-            if (Test-Path ".standards\.claude") {
-                $claudeSubdirs = @("agents", "commands", "guides", "workflows")
-                foreach ($subdir in $claudeSubdirs) {
-                    if (Test-Path ".standards\.claude\$subdir") {
-                        Copy-Item -Recurse ".standards\.claude\$subdir" -Destination ".claude\$subdir" -Force
-                    }
-                }
-                Write-Host "  [OK] Copied .claude directory" -ForegroundColor Green
-            }
-
-            # Copy templates
-            if (Test-Path ".standards\templates") {
-                Copy-Item -Recurse ".standards\templates" -Destination "templates" -Force
-                Write-Host "  [OK] Copied templates directory" -ForegroundColor Green
-            }
-
-            # Copy CLAUDE.md
-            if (Test-Path ".standards\CLAUDE.md") {
-                Copy-Item ".standards\CLAUDE.md" -Destination "CLAUDE.md" -Force
-                Write-Host "  [OK] Copied CLAUDE.md" -ForegroundColor Green
-            }
-
-            # Copy INDEX.md
-            if (Test-Path ".standards\.claude\INDEX.md") {
-                Copy-Item ".standards\.claude\INDEX.md" -Destination ".claude\INDEX.md" -Force
-                Write-Host "  [OK] Copied .claude\INDEX.md" -ForegroundColor Green
-            }
-
-            # Create plans directory structure
-            if (-not (Test-Path "plans")) {
-                New-Item -ItemType Directory -Path "plans" -Force | Out-Null
-            }
-            if (Test-Path ".standards\plans\templates") {
-                Copy-Item -Recurse ".standards\plans\templates" -Destination "plans\templates" -Force
-                Write-Host "  [OK] Copied plans\templates" -ForegroundColor Green
-            }
-            if (-not (Test-Path "plans\research")) {
-                New-Item -ItemType Directory -Path "plans\research" -Force | Out-Null
-            }
-            if (-not (Test-Path "plans\reports")) {
-                New-Item -ItemType Directory -Path "plans\reports" -Force | Out-Null
-            }
-            Write-Host "  [OK] Created plans directory structure" -ForegroundColor Green
-
-            # Update .gitignore to exclude copied standards files
-            Write-Host ""
-            Write-Host "  Updating .gitignore..." -ForegroundColor Cyan
-
-            $gitignoreEntries = @"
+$gitignoreNote = @"
 
 # ============================================================================
-# Coding Standards (copied from .standards - do not commit)
+# Coding Standards (copied from winforms-coding-standards repo)
 # ============================================================================
-# These files are copied from the standards repository and should not be
-# committed to your project. Run update-standards.ps1 to update them.
+# These files are copied and should NOT be committed to your project.
+# To update: re-run init-project.ps1 or manually copy from standards repo.
 
-# Claude Code standards (copied)
+# Claude Code configuration (copied)
 .claude/agents/
 .claude/commands/
 .claude/guides/
@@ -1748,6 +1820,9 @@ CLAUDE.md
 # Templates (copied)
 templates/
 
+# Documentation (copied)
+docs/
+
 # Plan templates (copied)
 plans/templates/
 
@@ -1755,28 +1830,42 @@ plans/templates/
 plans/research/
 plans/reports/
 
-# Keep project-specific config (NOT ignored):
-# .claude/project-context.md
+# ============================================================================
+# Database files (do not commit)
+# ============================================================================
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ============================================================================
+# Log files (generated)
+# ============================================================================
+logs/
+
+# Keep project-specific files (NOT ignored):
+# - .claude/project-context.md (your project config)
 "@
 
-            if (Test-Path ".gitignore") {
-                $gitignoreContent = Get-Content ".gitignore" -Raw
-                if ($gitignoreContent -notmatch "Coding Standards \(copied") {
-                    Add-Content ".gitignore" $gitignoreEntries
-                }
-            }
-            Write-Host "  [OK] Updated .gitignore with standards exclusions" -ForegroundColor Green
-
-            # Commit submodule and gitignore only (copied files are excluded)
-            git -c core.autocrlf=false add .gitmodules .standards .gitignore 2>&1 | Out-Null
-            git commit -m "Add coding standards as submodule" 2>&1 | Out-Null
-            Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
-        } else {
-            Write-Host "  [WARN]  Could not add standards submodule" -ForegroundColor Yellow
-        }
-    } else {
-        Write-Host "  [WARN]  Standards repo URL not detected, skipping" -ForegroundColor Yellow
+if (Test-Path ".gitignore") {
+    $gitignoreContent = Get-Content ".gitignore" -Raw
+    if ($gitignoreContent -notmatch "# Coding Standards") {
+        Add-Content ".gitignore" $gitignoreNote
     }
+}
+Write-Host "  [OK] Updated .gitignore (standards files excluded)" -ForegroundColor Green
+
+# ================================================================
+# Step 11d: Commit
+# ================================================================
+git -c core.autocrlf=false add . 2>&1 | Out-Null
+if ($submoduleAdded) {
+    git commit -m "Add coding standards (with submodule)" 2>&1 | Out-Null
+    Write-Host "  [OK] Standards integration complete (with Submodule)" -ForegroundColor Green
+} else {
+    git commit -m "Add coding standards" 2>&1 | Out-Null
+    Write-Host "  [OK] Standards integration complete" -ForegroundColor Green
 }
 
 # ============================================================================
@@ -1786,7 +1875,7 @@ Write-Host ""
 Write-Host "[12] Creating project context for AI assistants..." -ForegroundColor Cyan
 
 # Determine paths
-$standardsPath = if ($IntegrateStandards -and (Test-Path ".standards")) { ".standards" } else { $repoRoot }
+$standardsPath = $repoRoot
 $templatePath = Join-Path $standardsPath ".claude/project-context-template.md"
 
 # Project-specific context should go in .claude/ (real folder, not symlink)
